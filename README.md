@@ -6,6 +6,8 @@ An AI-assisted digital twin for Bitcoin network technical analysis and simulatio
 
 - [User Interaction and Flow Spec](./specs/user-interaction-flow.md)
 - [Technical Spec](./specs/technical-spec.md)
+- [Data Design](./docs/data-design.md)
+- [Data Source Strategy](./docs/data-sources.md)
 
 ## Product Direction
 
@@ -31,6 +33,25 @@ This project is not focused on:
 - historical playback and comparison
 - bounded network simulations
 - provenance-aware, real-data-driven scene updates
+
+## Local App
+
+The first implementation phase is mock-first and does not require Strategy Mosaic connectivity yet.
+
+### Run
+
+```bash
+npm install
+npm run dev
+```
+
+### Current Scope
+
+- split-screen application shell
+- mocked network snapshots
+- lightweight WebGL scene
+- scenario switching
+- analysis-oriented side panel
 
 ## Notes
 
