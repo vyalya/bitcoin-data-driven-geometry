@@ -6,6 +6,22 @@ export type MiningPoolSnapshot = {
   shareChange30d: number;
 };
 
+export type FeeBucket = {
+  id: string;
+  feeRateLabel: string;
+  txShare: number;
+  intensity: number;
+};
+
+export type RingBand = {
+  id: string;
+  label: string;
+  radius: number;
+  density: number;
+  intensity: number;
+  activeShare: number;
+};
+
 export type NetworkSnapshot = {
   id: string;
   label: string;
@@ -22,5 +38,7 @@ export type NetworkSnapshot = {
   minerConcentrationScore: number;
   networkHealthScore: number;
   miningPools: MiningPoolSnapshot[];
+  feeBuckets: FeeBucket[];
+  ringBands: RingBand[];
   notes: string[];
 };

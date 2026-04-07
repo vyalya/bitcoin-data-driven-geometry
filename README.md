@@ -8,6 +8,9 @@ An AI-assisted digital twin for Bitcoin network technical analysis and simulatio
 - [Technical Spec](./specs/technical-spec.md)
 - [Data Design](./docs/data-design.md)
 - [Data Source Strategy](./docs/data-sources.md)
+- [Visual Direction](./docs/visual-direction.md)
+- [Visual-to-Data Mapping](./docs/visual-data-mapping.md)
+- [Implementation Status](./docs/implementation-status.md)
 
 ## Product Direction
 

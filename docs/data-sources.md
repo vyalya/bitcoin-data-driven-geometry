@@ -55,6 +55,19 @@ Use it for:
 - recent block metadata
 - recent mining pool attribution
 
+Important note:
+
+- mempool.space is excellent for the shape of the product and for current/recent network intelligence
+- for this project, we should treat it as a model for the experience and as a recent-state source, not as the only historical backbone
+
+In practice, the product should use mempool.space-like metrics from a historical perspective by:
+
+- backfilling block-derived history from BigQuery and other historical sources
+- periodically snapshotting mempool-style current fields into Snowflake for future history
+- normalizing those fields into our curated schema so the app can replay them over time
+
+This is an inference from the currently visible mempool.space product and public documentation posture: it presents rich live/recent network information, but for a long-horizon semantic model we should assume we will need to build our own historical archive layer.
+
 ## 2.3 Network-Native Validation and Optional Self-Hosted Source
 
 Recommended first choice:
@@ -108,6 +121,13 @@ If you want the smallest practical path to a real dataset:
 - hourly recent mempool snapshots
 - timeline event markers
 
+This is the phase where the product starts to feel most like a historical version of mempool.space:
+
+- fee recommendation bands over time
+- mempool size and tx count over time
+- block cadence and difficulty regime over time
+- recent mining concentration snapshots over time
+
 ### Phase C
 
 - optional self-hosted Bitcoin Core snapshots
@@ -150,6 +170,12 @@ Best sources:
 - mempool.space
 - Bitcoin Core RPC
 
+Recommended strategy:
+
+- use mempool.space for immediate mock shaping and near-current snapshots
+- persist periodic snapshots into Snowflake so you own the historical replay layer
+- optionally validate or supplement with Bitcoin Core over time
+
 ### 5.4 `CURATED.MINING_POOL_DIM` and `CURATED.MINING_POOL_SNAPSHOT`
 
 Best sources:
@@ -164,8 +190,22 @@ The cleanest initial route is:
 1. Build the schema now
 2. Mock the app against the future semantic model now
 3. Source real historical backbone data from BigQuery first
-4. Source recent mempool/mining snapshots from mempool.space or Bitcoin Core
+4. Source recent mempool/mining snapshots from mempool.space or Bitcoin Core and store them as your own historical snapshot series
 5. Load Snowflake and build Mosaic after the schema is stable
+
+## 6.1 Product-Led Data Direction
+
+If the experience benchmark is "mempool.space, but semantic, historical, and simulation-aware," then the data program should explicitly target these replayable measures:
+
+- mempool tx count
+- mempool memory/vbytes
+- fee recommendation tiers
+- block interval behavior
+- difficulty adjustment state
+- recent block throughput
+- mining pool share snapshots
+
+That gives the application the right visual vocabulary from day one.
 
 ## 7. Source References
 
