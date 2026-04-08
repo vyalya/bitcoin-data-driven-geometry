@@ -173,27 +173,28 @@ function App() {
             </button>
           ))}
         </div>
-        {/* What-If Simulation */}
-        <div className="hud-whatif-section">
-          <div className="hud-whatif-header">
-            <p className="eyebrow">What-If Simulation</p>
-            {hasOverrides && <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>}
-          </div>
-          {WHAT_IF_PARAMS.map((param) => {
-            const baseVal = baseSnapshot[param.snapshotField] as number;
-            const currentVal = overrides[param.key] ?? baseVal;
-            const isOverridden = overrides[param.key] !== null && overrides[param.key] !== undefined;
-            return (
-              <div key={param.key} className={`slider-row ${isOverridden ? "overridden" : ""}`}>
-                <div className="slider-header">
-                  <span className="slider-label">{param.label}</span>
-                  <span className="slider-value">{param.max > 100 ? currentVal.toLocaleString() : currentVal.toFixed(1)}<span className="slider-unit">{param.unit}</span></span>
-                </div>
-                <input type="range" min={param.min} max={param.max} step={param.step} value={currentVal} onChange={(e) => setOverride(param.key, parseFloat(e.target.value))} onDoubleClick={() => setOverride(param.key, null)} />
-              </div>
-            );
-          })}
+      </div>
+
+      {/* Left-center: What-If Simulation */}
+      <div className="hud hud-left-center">
+        <div className="hud-whatif-header">
+          <p className="eyebrow">What-If Simulation</p>
+          {hasOverrides && <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>}
         </div>
+        {WHAT_IF_PARAMS.map((param) => {
+          const baseVal = baseSnapshot[param.snapshotField] as number;
+          const currentVal = overrides[param.key] ?? baseVal;
+          const isOverridden = overrides[param.key] !== null && overrides[param.key] !== undefined;
+          return (
+            <div key={param.key} className={`slider-row ${isOverridden ? "overridden" : ""}`}>
+              <div className="slider-header">
+                <span className="slider-label">{param.label}</span>
+                <span className="slider-value">{param.max > 100 ? currentVal.toLocaleString() : currentVal.toFixed(1)}<span className="slider-unit">{param.unit}</span></span>
+              </div>
+              <input type="range" min={param.min} max={param.max} step={param.step} value={currentVal} onChange={(e) => setOverride(param.key, parseFloat(e.target.value))} onDoubleClick={() => setOverride(param.key, null)} />
+            </div>
+          );
+        })}
       </div>
 
       {/* Bottom-left: KPIs + Legend */}

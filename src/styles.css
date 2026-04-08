@@ -245,7 +245,17 @@ button, input, textarea { font: inherit; }
   flex-shrink: 0;
 }
 
-/* (What-If sliders moved into right panel) */
+/* ─── Left Center: What-If Sliders ─── */
+.hud-left-center {
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 200px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
 
 .hud-toggle-row {
   display: flex;
