@@ -106,7 +106,11 @@ function App() {
     return s;
   }, [baseSnapshot, overrides, hasOverrides]);
 
-  const mode = hasOverrides ? "What-If" : baseSnapshot.mode === "simulation" ? "Simulation" : "Historical";
+  // Interactive selection state — driven by clicking elements in the 3D scene
+  const [selectedLayer, setSelectedLayer] = useState<string | null>(null);
+  const [selectedPool, setSelectedPool] = useState<string | null>(null);
+
+  const clearSelection = () => { setSelectedLayer(null); setSelectedPool(null); };
 
   return (
     <div className="app-shell">
@@ -116,14 +120,12 @@ function App() {
           <p className="subhead">High-fidelity view of Bitcoin network state, stress, resilience, and simulation rooted in real data contracts.</p>
         </div>
         <div className="status-cluster">
-          <div className="status-pill">
-            <span>Mode</span>
-            <strong>{mode}</strong>
-          </div>
-          <div className="status-pill">
-            <span>Time</span>
-            <strong>{baseSnapshot.snapshotTime.slice(0, 16).replace("T", " ")}</strong>
-          </div>
+          {hasOverrides && (
+            <div className="simulation-badge">
+              <span>What-If Active</span>
+              <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -144,13 +146,30 @@ function App() {
             </div>
           </div>
 
-          <div className="scene-intro">
-            <p className="eyebrow">Prime Radiant</p>
-            <h2>Network State Instrument</h2>
-            <p>
-              Settlement spine, fee pressure, mempool density, and miner concentration rendered as a living digital twin.
-            </p>
+          {/* Legend */}
+          <div className="canvas-legend">
+            {RING_LABELS.map((label, i) => (
+              <div key={i} className="legend-item" onClick={() => { setSelectedLayer(String(i)); setSelectedPool(null); }}>
+                <span className="legend-dot" style={{ background: RING_COLORS[i] }} />
+                <span>{label}</span>
+              </div>
+            ))}
+            <div className="legend-item">
+              <span className="legend-dot" style={{ background: "#FF8C3A" }} />
+              <span>Mining Pools</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-dot" style={{ background: "#FFCC00" }} />
+              <span>Halving Epoch</span>
+            </div>
           </div>
+
+          {selectedLayer && (
+            <div className="selection-indicator">
+              <span>{RING_LABELS[parseInt(selectedLayer)] || "Selected"}</span>
+              <button onClick={clearSelection} type="button">x</button>
+            </div>
+          )}
 
           <Canvas
             camera={{ position: [0, 2.2, 14], fov: 34 }}
@@ -159,7 +178,13 @@ function App() {
           >
             <color attach="background" args={["#000000"]} />
             <fog attach="fog" args={["#000000", 25, 55]} />
-            <PrimeRadiantScene snapshot={effectiveSnapshot} />
+            <PrimeRadiantScene
+              snapshot={effectiveSnapshot}
+              selectedLayer={selectedLayer}
+              onSelectLayer={(layer) => { setSelectedLayer(layer); setSelectedPool(null); }}
+              onSelectPool={(pool) => { setSelectedPool(pool); setSelectedLayer(null); }}
+              onDeselect={clearSelection}
+            />
             <EffectComposer>
               <Bloom luminanceThreshold={0.08} luminanceSmoothing={0.6} intensity={2.8} mipmapBlur />
             </EffectComposer>
@@ -168,13 +193,6 @@ function App() {
         </section>
 
         <aside className="sidebar">
-          {hasOverrides && (
-            <div className="simulation-badge">
-              <span>What-If Active</span>
-              <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>
-            </div>
-          )}
-
           {/* Time filter — scenario presets */}
           <section className="panel">
             <p className="eyebrow">Time Period</p>
@@ -183,7 +201,7 @@ function App() {
                 <button
                   key={snapshot.id}
                   className={snapshot.id === baseSnapshot.id ? "scenario-button active" : "scenario-button"}
-                  onClick={() => { setActiveId(snapshot.id); resetOverrides(); }}
+                  onClick={() => { setActiveId(snapshot.id); resetOverrides(); clearSelection(); }}
                   type="button"
                 >
                   <span>{snapshot.label}</span>
@@ -226,7 +244,7 @@ function App() {
             </div>
           </section>
 
-          {/* KPI cards — reactive to what-if */}
+          {/* KPI cards */}
           <section className="metrics-grid">
             <MetricCard label="Fee Pressure" value={effectiveSnapshot.feePressureIndex.toFixed(1)} severity={getSeverity(effectiveSnapshot.feePressureIndex)} />
             <MetricCard label="Congestion" value={effectiveSnapshot.congestionScore.toFixed(1)} severity={getSeverity(effectiveSnapshot.congestionScore)} />
@@ -234,42 +252,7 @@ function App() {
             <MetricCard label="Health" value={effectiveSnapshot.networkHealthScore.toFixed(1)} severity={getSeverity(10 - effectiveSnapshot.networkHealthScore)} />
           </section>
 
-          <section className="panel">
-            <p className="eyebrow">Fee Buckets</p>
-            <div className="bucket-list">
-              {effectiveSnapshot.feeBuckets.map((bucket) => (
-                <div className="bucket-row" key={bucket.id}>
-                  <div>
-                    <strong>{bucket.feeRateLabel}</strong>
-                    <span>Transaction share</span>
-                  </div>
-                  <div>
-                    <strong>{formatPct(bucket.txShare)}</strong>
-                    <span>Intensity {(bucket.intensity * 100).toFixed(0)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="panel">
-            <p className="eyebrow">Mining Pools</p>
-            <div className="pool-list">
-              {effectiveSnapshot.miningPools.map((pool) => (
-                <div className="pool-row" key={pool.id}>
-                  <div>
-                    <strong>{pool.name}</strong>
-                    <span>{pool.hashRateEh.toFixed(0)} EH/s</span>
-                  </div>
-                  <div>
-                    <strong>{formatPct(pool.sharePct)}</strong>
-                    <span>{pool.shareChange30d >= 0 ? "+" : ""}{(pool.shareChange30d * 100).toFixed(1)}% 30d</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
+          {/* Interpretation */}
           <section className="panel">
             <p className="eyebrow">Interpretation</p>
             <ul className="notes-list">
@@ -280,6 +263,35 @@ function App() {
           </section>
         </aside>
       </main>
+
+      {/* Bottom bar — fee buckets + mining pools, filterable from 3D scene clicks */}
+      <footer className="bottom-bar">
+        <div className={`bottom-panel ${selectedLayer !== null && selectedLayer !== "0" && selectedLayer !== "1" ? "dimmed" : ""}`}>
+          <p className="eyebrow">Fee Buckets</p>
+          <div className="bottom-row-list">
+            {effectiveSnapshot.feeBuckets.map((bucket) => (
+              <div className="bottom-item" key={bucket.id}>
+                <strong>{bucket.feeRateLabel}</strong>
+                <span className="bottom-value">{formatPct(bucket.txShare)}</span>
+                <span className="bottom-sub">I: {(bucket.intensity * 100).toFixed(0)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="bottom-divider" />
+        <div className={`bottom-panel ${selectedLayer !== null && selectedLayer !== "3" ? "dimmed" : ""}`}>
+          <p className="eyebrow">Mining Pools</p>
+          <div className="bottom-row-list">
+            {effectiveSnapshot.miningPools.map((pool) => (
+              <div className={`bottom-item ${selectedPool === pool.id ? "highlighted" : ""}`} key={pool.id}>
+                <strong>{pool.name}</strong>
+                <span className="bottom-value">{formatPct(pool.sharePct)}</span>
+                <span className="bottom-sub">{pool.hashRateEh} EH/s</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -297,7 +309,15 @@ function MetricCard({ label, value, severity }: { label: string; value: string; 
    3D SCENE — PRIME RADIANT
    ═══════════════════════════════════════════════════════ */
 
-function PrimeRadiantScene({ snapshot }: { snapshot: NetworkSnapshot }) {
+interface SceneProps {
+  snapshot: NetworkSnapshot;
+  selectedLayer: string | null;
+  onSelectLayer: (layer: string) => void;
+  onSelectPool: (pool: string) => void;
+  onDeselect: () => void;
+}
+
+function PrimeRadiantScene({ snapshot, selectedLayer, onSelectLayer, onSelectPool, onDeselect }: SceneProps) {
   return (
     <group position={[0, -0.15, 0]} scale={0.78}>
       {/* Lighting */}
@@ -308,28 +328,45 @@ function PrimeRadiantScene({ snapshot }: { snapshot: NetworkSnapshot }) {
       <pointLight position={[0, -6, 2]} intensity={3} color="#7A3308" distance={16} decay={2} />
       <pointLight position={[0, 6, 1]} intensity={2} color="#FF6B00" distance={14} decay={2} />
 
+      {/* Click empty space to deselect */}
+      <mesh position={[0, 0, -2]} onClick={onDeselect}>
+        <planeGeometry args={[30, 30]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+
       <ReferenceGrid />
       <RadiantCore healthScore={snapshot.networkHealthScore} />
-      <SettlementSpine snapshot={snapshot} />
+      <BlockSpine snapshot={snapshot} />
 
-      {/* Each ring is visually distinct — different color, sizing, label */}
+      {/* Clickable data rings */}
       {snapshot.ringBands.map((band, i) => (
-        <SegmentedDataRing key={band.id} band={band} index={i} snapshot={snapshot} />
+        <SegmentedDataRing
+          key={band.id}
+          band={band}
+          index={i}
+          snapshot={snapshot}
+          isSelected={selectedLayer === String(i)}
+          isDimmed={selectedLayer !== null && selectedLayer !== String(i)}
+          onSelect={() => onSelectLayer(String(i))}
+        />
       ))}
 
       <FeeOrbitRings feeBuckets={snapshot.feeBuckets} />
       <OuterSweepRings />
       <ParticleNebula snapshot={snapshot} />
-      <MiningConstellation pools={snapshot.miningPools} hashrate={snapshot.networkHashrateEh} />
+      <MiningConstellation
+        pools={snapshot.miningPools}
+        hashrate={snapshot.networkHashrateEh}
+        selectedPool={null}
+        onSelectPool={onSelectPool}
+      />
 
-      {/* Additional complexity layers */}
       <MempoolStrata snapshot={snapshot} />
       <EpochMarkers snapshot={snapshot} />
       <InterRingFilaments snapshot={snapshot} />
       <TransactionDust snapshot={snapshot} />
 
       <DataInscriptions snapshot={snapshot} />
-      <BlockLabels snapshot={snapshot} />
     </group>
   );
 }
@@ -379,72 +416,69 @@ function RadiantCore({ healthScore }: { healthScore: number }) {
   );
 }
 
-/* ─── SETTLEMENT SPINE ─── with hover tooltips */
+/* ─── BLOCK SPINE ─── 144 blocks (one day's production) along the spine.
+   Each block is an octahedron sized by a deterministic data pattern.
+   Blocks near the tip are brighter. Hoverable with block # tooltip.
+*/
 
-function SettlementSpine({ snapshot }: { snapshot: NetworkSnapshot }) {
+function BlockSpine({ snapshot }: { snapshot: NetworkSnapshot }) {
   const healthColor = snapshot.networkHealthScore < 5.5 ? "#FF3D00" : "#FA660F";
+  const blockCount = Math.max(20, Math.min(snapshot.blockHeight > 0 ? 144 : 20, 144));
+
+  // Deterministic size variation per block (seeded from block height)
+  const blocks = useMemo(() => {
+    const rng = (seed: number) => {
+      let s = seed;
+      return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+    };
+    const rand = rng(snapshot.blockHeight);
+
+    const spacing = 8.5 / blockCount;
+    return Array.from({ length: blockCount }).map((_, i) => {
+      const r = rand();
+      return {
+        y: i * spacing - 4.25,
+        scale: 0.025 + r * 0.055, // varied sizes
+        blockHeight: snapshot.blockHeight - (blockCount - 1 - i),
+        brightness: 0.3 + (i / blockCount) * 0.7, // brighter toward tip
+        isTip: i >= blockCount - 3,
+      };
+    });
+  }, [snapshot.blockHeight, blockCount]);
+
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+
   return (
     <group>
+      {/* Central axis */}
       <mesh position={[0, 0, 0.12]}>
-        <cylinderGeometry args={[0.025, 0.025, 10, 24]} />
-        <meshStandardMaterial color="#FF8C3A" emissive="#FA660F" emissiveIntensity={0.8} metalness={0.7} roughness={0.1} />
+        <cylinderGeometry args={[0.012, 0.012, 9, 16]} />
+        <meshStandardMaterial color="#FF8C3A" emissive="#FA660F" emissiveIntensity={0.5} metalness={0.7} roughness={0.15} />
       </mesh>
-      {Array.from({ length: 9 }).map((_, i) => (
-        <SpineBlock
-          key={i}
-          index={i}
-          y={i * 0.78 - 3.1}
-          scale={0.18 + i * 0.008}
-          healthColor={healthColor}
-          isTip={i > 6}
-          blockHeight={snapshot.blockHeight - (8 - i)}
-        />
+
+      {/* 144 blocks */}
+      {blocks.map((b, i) => (
+        <group key={i} position={[0, b.y, 0.14]}>
+          <mesh
+            onPointerOver={(e) => { e.stopPropagation(); setHoveredIdx(i); }}
+            onPointerOut={() => setHoveredIdx(null)}
+          >
+            <octahedronGeometry args={[b.scale, 0]} />
+            <meshStandardMaterial
+              color={b.isTip ? "#FFAA55" : "#FF8C3A"}
+              emissive={healthColor}
+              emissiveIntensity={hoveredIdx === i ? 1.6 : b.brightness}
+              metalness={0.4}
+              roughness={0.08}
+            />
+          </mesh>
+          {hoveredIdx === i && (
+            <Html center style={{ pointerEvents: "none" }}>
+              <div className="scene-tooltip">Block #{b.blockHeight.toLocaleString()}</div>
+            </Html>
+          )}
+        </group>
       ))}
-    </group>
-  );
-}
-
-function SpineBlock({ index, y, scale, healthColor, isTip, blockHeight }: {
-  index: number; y: number; scale: number; healthColor: string; isTip: boolean; blockHeight: number;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const [hovered, setHovered] = useState(false);
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      const t = state.clock.elapsedTime;
-      const wave = Math.sin(t * 0.6 - index * 0.55);
-      const mat = meshRef.current.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = 0.7 + wave * 0.4;
-      meshRef.current.rotation.y = t * 0.05 + index * 0.18;
-    }
-  });
-
-  return (
-    <group position={[0, y, 0.16]}>
-      <mesh
-        ref={meshRef}
-        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
-        onPointerOut={() => setHovered(false)}
-      >
-        <octahedronGeometry args={[scale, 0]} />
-        <meshStandardMaterial
-          color={hovered ? "#FFAA55" : isTip ? "#FFAA55" : "#FF8C3A"}
-          emissive={healthColor}
-          emissiveIntensity={hovered ? 1.4 : 0.8}
-          metalness={0.45}
-          roughness={0.08}
-        />
-      </mesh>
-      <mesh rotation={[0, Math.PI / 4, 0]}>
-        <octahedronGeometry args={[scale * 1.4, 0]} />
-        <meshBasicMaterial color="#FA660F" wireframe transparent opacity={0.04} />
-      </mesh>
-      {hovered && (
-        <Html center style={{ pointerEvents: "none" }}>
-          <div className="scene-tooltip">Block #{blockHeight.toLocaleString()}</div>
-        </Html>
-      )}
     </group>
   );
 }
@@ -457,7 +491,10 @@ function SpineBlock({ index, y, scale, healthColor, isTip, blockHeight }: {
    - Different wave patterns per ring for visual variety
 */
 
-function SegmentedDataRing({ band, index, snapshot }: { band: RingBand; index: number; snapshot: NetworkSnapshot }) {
+function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSelect }: {
+  band: RingBand; index: number; snapshot: NetworkSnapshot;
+  isSelected?: boolean; isDimmed?: boolean; onSelect?: () => void;
+}) {
   const groupRef = useRef<THREE.Group>(null);
 
   // No rotation — static data means static scene
@@ -511,12 +548,14 @@ function SegmentedDataRing({ band, index, snapshot }: { band: RingBand; index: n
     return result;
   }, [segCount, activeCount, band.radius, metricValue, seed, index]);
 
+  const dimFactor = isDimmed ? 0.15 : 1;
+
   return (
-    <group ref={groupRef}>
-      {/* Faint track ring */}
+    <group ref={groupRef} onClick={(e) => { e.stopPropagation(); onSelect?.(); }}>
+      {/* Clickable track ring */}
       <mesh>
         <ringGeometry args={[band.radius - 0.008, band.radius + 0.008, 256]} />
-        <meshBasicMaterial color={color} transparent opacity={0.02} />
+        <meshBasicMaterial color={color} transparent opacity={(isSelected ? 0.06 : 0.02) * dimFactor} />
       </mesh>
 
       {/* Segments */}
@@ -527,26 +566,26 @@ function SegmentedDataRing({ band, index, snapshot }: { band: RingBand; index: n
             <meshStandardMaterial
               color={color}
               emissive={color}
-              emissiveIntensity={seg.emIntensity}
+              emissiveIntensity={seg.emIntensity * dimFactor}
               metalness={0.3}
               roughness={0.3}
               transparent
-              opacity={0.7 + metricValue * 0.25}
+              opacity={(0.7 + metricValue * 0.25) * dimFactor}
             />
           ) : (
-            <meshBasicMaterial color="#0D0800" transparent opacity={0.03} />
+            <meshBasicMaterial color="#0D0800" transparent opacity={0.03 * dimFactor} />
           )}
         </mesh>
       ))}
 
-      {/* Ring label — positioned at the top of each ring */}
+      {/* Ring label */}
       <Text
         position={[0, band.radius + 0.2, 0.1]}
         fontSize={0.06}
         color={color}
         anchorX="center"
         anchorY="bottom"
-        fillOpacity={0.3}
+        fillOpacity={isSelected ? 0.6 : 0.3 * dimFactor}
         font={undefined}
       >
         {label}
@@ -722,17 +761,17 @@ function ParticleNebula({ snapshot }: { snapshot: NetworkSnapshot }) {
 
 /* ─── MINING CONSTELLATION ─── with hover tooltips, dramatic size differences */
 
-function MiningConstellation({ pools, hashrate }: { pools: MiningPoolSnapshot[]; hashrate: number }) {
+function MiningConstellation({ pools, hashrate, selectedPool, onSelectPool }: { pools: MiningPoolSnapshot[]; hashrate: number; selectedPool: string | null; onSelectPool: (id: string) => void }) {
   return (
     <group>
       {pools.map((pool, i) => (
-        <MiningNode key={pool.id} pool={pool} index={i} total={pools.length} networkHashrate={hashrate} />
+        <MiningNode key={pool.id} pool={pool} index={i} total={pools.length} networkHashrate={hashrate} isHighlighted={selectedPool === pool.id} onSelect={() => onSelectPool(pool.id)} />
       ))}
     </group>
   );
 }
 
-function MiningNode({ pool, index, total, networkHashrate }: { pool: MiningPoolSnapshot; index: number; total: number; networkHashrate: number }) {
+function MiningNode({ pool, index, total, networkHashrate, isHighlighted, onSelect }: { pool: MiningPoolSnapshot; index: number; total: number; networkHashrate: number; isHighlighted?: boolean; onSelect?: () => void }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
 
@@ -755,14 +794,15 @@ function MiningNode({ pool, index, total, networkHashrate }: { pool: MiningPoolS
     <group position={[x, y, 0]}>
       <mesh
         ref={meshRef}
+        onClick={(e) => { e.stopPropagation(); onSelect?.(); }}
         onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
         onPointerOut={() => setHovered(false)}
       >
         <octahedronGeometry args={[nodeSize, 0]} />
         <meshStandardMaterial
-          color={hovered ? "#FFCC66" : "#FF8C3A"}
+          color={hovered || isHighlighted ? "#FFCC66" : "#FF8C3A"}
           emissive="#FA660F"
-          emissiveIntensity={hovered ? 1.5 : 0.7 + pool.sharePct * 1.5}
+          emissiveIntensity={hovered || isHighlighted ? 1.5 : 0.7 + pool.sharePct * 1.5}
           metalness={0.4}
           roughness={0.1}
         />
@@ -1093,18 +1133,6 @@ function DataInscriptions({ snapshot }: { snapshot: NetworkSnapshot }) {
   );
 }
 
-/* ─── BLOCK LABELS ─── */
-
-function BlockLabels({ snapshot }: { snapshot: NetworkSnapshot }) {
-  return (
-    <group position={[0, 0, 0.4]}>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Text key={i} position={[0.5, i * 0.78 - 1.56, 0]} fontSize={0.06} color="#FFFFFF" anchorX="left" anchorY="middle" fillOpacity={0.22} font={undefined}>
-          #{(snapshot.blockHeight - (4 - i)).toLocaleString()}
-        </Text>
-      ))}
-    </group>
-  );
-}
+/* BlockLabels removed — block hover tooltips are now inline on BlockSpine */
 
 export default App;
