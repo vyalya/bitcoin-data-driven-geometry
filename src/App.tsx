@@ -145,47 +145,42 @@ function App() {
   const tourSteps: TourStep[] = [
     {
       title: "Welcome",
-      text: "This is a digital twin of the Bitcoin network. Every shape is driven by real blockchain data from Strategy Mosaic. Let's walk through a live analysis.",
+      text: "Every shape, color, and size is driven by real blockchain data from Strategy Mosaic. Colors matter: deep orange = fee pressure, primary orange = settlement health, red-orange = congestion, copper = mining distribution. Brighter = more intense. Let's see it in action.",
       action: () => { setActiveId("current"); resetOverrides(); },
     },
     {
-      title: "Current State — Block #880,547",
-      text: "You're looking at today's network. 876 EH/s hashrate. Health score 8.7/10 — the core is large and bright. Mempool is nearly empty (1K txs) so the congestion ring is flat. The 144 blocks on the spine are uniform because block stress is only 0.9/10.",
+      title: "Current State — Calm Network",
+      text: "Block #880,547. The rings are dim and thin — fee pressure 0.9/10, congestion 0.0/10. The fee pressure ring (innermost, deep orange) has 4 small sectors — one per fee tier. The congestion ring (red-orange) is barely a sliver because there's almost no backlog. The settlement ring (orange) is nearly full circle — stress only 0.9/10, blocks arriving on schedule.",
       action: () => { setActiveId("current"); resetOverrides(); },
     },
     {
-      title: "Now let's go back to the 2017 Bull Run",
-      text: "Watch every ring change. Congestion jumps to 4.7/10 — the red-orange ring ignites with 343K pending transactions. The mempool strata particles appear. Hashrate is only 13 EH/s (vs 876 today). Health drops to 6.9. The entire scene feels stressed.",
+      title: "2017 Bull Run — Watch the Colors Change",
+      text: "Now look at the difference. Congestion jumps to 4.7 — the red-orange congestion ring expands to fill half the circle, glowing intensely. Fee pressure rises to 2.9 — the deep orange fee ring sectors grow taller, especially the 81+ sat/vB tier. The outer mining ring (copper) shows only 13 EH/s across 5 small pool nodes. Everything is brighter, hotter, more stressed.",
       action: () => { setActiveId("bull-2017"); resetOverrides(); },
     },
     {
-      title: "Block #457,316 — 2017 Peak",
-      text: "The spine shows block #457,316. The outer rings glow intensely — fee pressure at 2.9/10 means users are competing for block space. Notice the fee pressure ring has taller segments in the high-fee quadrants. Hover any block on the spine to see its number.",
-      action: () => { setActiveId("bull-2017"); resetOverrides(); },
-    },
-    {
-      title: "Compare: FTX Collapse",
-      text: "November 2022 — FTX just collapsed. The market is panicking. But look at the network: health 8.5/10, blocks perfect at 600s, mempool barely 12K. Bitcoin's protocol was completely indifferent to FTX. The core is large and bright. 245 EH/s.",
+      title: "FTX Collapse — Network Doesn't Care",
+      text: "November 2022 — FTX just imploded. But look: the rings are calm. Congestion 0.09 — the red-orange ring is nearly invisible. Settlement stress 0.9 — the orange ring is a full, steady circle. Fee pressure 0.9. The network's geometry looks almost identical to today's calm state. Bitcoin's protocol was indifferent to the exchange chaos. The data proves it visually.",
       action: () => { setActiveId("ftx"); resetOverrides(); },
     },
     {
-      title: "Jump to the 2024 ATH — $73K",
-      text: "March 2024. ETF-driven surge to $73K. 380K mempool transactions — the highest in our dataset. Congestion at 4.8/10. The congestion ring is ablaze. Particles are dense. But blocks are still coming every 600s. The network bends but doesn't break.",
+      title: "2024 ATH $73K — Maximum Stress",
+      text: "March 2024. 380K mempool transactions. Congestion ring at 4.8 — the red-orange arc expands dramatically and glows hot. Fee pressure ring sectors are tall — the 81+ sat/vB tier dominates as users bid up fees. But the settlement ring stays full — blocks still arriving on time despite the chaos. The network bends but doesn't break.",
       action: () => { setActiveId("ath-2024"); resetOverrides(); },
     },
     {
-      title: "What-If: Stress Test the Network",
-      text: "Now let's simulate. We'll take today's healthy network and flood the mempool to 400K transactions. Watch the congestion ring ignite, particles multiply, and health score plummet.",
+      title: "What-If: Flood the Mempool",
+      text: "Watch the color shift in real-time. We're taking today's calm network and flooding it with 400K transactions. The congestion ring (red-orange) expands and ignites. Fee pressure ring sectors grow tall. The KPI cards in the corner update — health drops from 8.7 to under 5. The visualization literally heats up.",
       action: () => { setActiveId("current"); resetOverrides(); setOverride("mempool", 400000); setOverride("congestion", 8.5); setOverride("feePressure", 7.0); },
     },
     {
       title: "What-If: Mining Crisis",
-      text: "Now drop the hashrate to 50 EH/s — like a massive mining ban. The mining pool nodes shrink dramatically. Block stress increases. The core dims. This is what a 94% hashrate drop looks like geometrically.",
+      text: "Now drop hashrate to 50 EH/s — a 94% crash. The mining pool nodes (copper, outer perimeter) shrink dramatically — Foundry USA goes from a large node to tiny. Block stress increases to 7.5 — the settlement ring shrinks from a full circle to a thin arc, signaling irregular block production. The visualization tells you exactly where the stress is.",
       action: () => { setActiveId("current"); resetOverrides(); setOverride("hashrate", 50); setOverride("blockStress", 7.5); },
     },
     {
       title: "Your Turn",
-      text: "You've seen how the visualization responds to real events and hypothetical scenarios. Switch time periods on the right. Drag the What-If sliders on the left. Hover and click any element. Every shape tells a story rooted in data.",
+      text: "Hover any group to highlight it — everything else dims. Click to lock the selection and see details. Switch time periods on the right to compare eras. Use What-If sliders to stress-test. Every ring color, every arc width, every sector height traces back to a specific Mosaic metric.",
       action: () => { setActiveId("current"); resetOverrides(); },
     },
   ];
