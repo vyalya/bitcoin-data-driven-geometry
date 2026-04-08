@@ -10,11 +10,7 @@ import type { NetworkSnapshot, RingBand, MiningPoolSnapshot, FeeBucket } from ".
    HELPERS
    ═══════════════════════════════════════════════════════ */
 
-function getSeverity(value: number): "normal" | "elevated" | "critical" {
-  if (value >= 8) return "critical";
-  if (value >= 6) return "elevated";
-  return "normal";
-}
+/* getSeverity removed — cockpit readout shows raw values */
 
 /** Per-ring color palette — each ring has a distinct identity */
 const RING_COLORS = [
@@ -115,20 +111,15 @@ function App() {
   // Unified interaction: hover = highlight + dim others, click = lock + show detail panel
   const [hoveredGroup, setHoveredGroup] = useState<string | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
-  const [detailText, setDetailText] = useState<{ title: string; body: string } | null>(null);
+  /* detailText removed — cockpit readout replaces the detail panel */
   const [showDataInfo, setShowDataInfo] = useState(false);
+  const [timeExpanded, setTimeExpanded] = useState(false);
 
-  const handleGroupClick = (groupId: string, title: string, body: string) => {
-    if (selectedGroup === groupId) {
-      setSelectedGroup(null);
-      setDetailText(null);
-    } else {
-      setSelectedGroup(groupId);
-      setDetailText({ title, body });
-    }
+  const handleGroupClick = (groupId: string, _title: string, _body: string) => {
+    setSelectedGroup(selectedGroup === groupId ? null : groupId);
   };
 
-  const clearSelection = () => { setSelectedGroup(null); setDetailText(null); setHoveredGroup(null); };
+  const clearSelection = () => { setSelectedGroup(null); setHoveredGroup(null); };
 
   // The active group is either the clicked (locked) or hovered one
   const activeGroup = selectedGroup ?? hoveredGroup;
@@ -237,62 +228,79 @@ function App() {
         </div>
       </div>
 
-      {/* Top-right: Time presets */}
-      <div className="hud hud-top-right">
-        <p className="eyebrow">Time Period</p>
-        <div className="hud-time-list">
-          {mosaicSnapshots.map((s) => (
-            <button key={s.id} className={s.id === baseSnapshot.id ? "hud-time-btn active" : "hud-time-btn"} onClick={() => { setActiveId(s.id); resetOverrides(); clearSelection(); }} type="button">
-              <span>{s.label}</span>
-              <span className="hud-time-date">{s.snapshotTime.slice(0, 10)}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Left-center: What-If Simulation */}
-      <div className="hud hud-left-center">
-        <div className="hud-whatif-header">
-          <p className="eyebrow">What-If Simulation</p>
-          {hasOverrides && <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>}
-        </div>
-        {WHAT_IF_PARAMS.map((param) => {
-          const baseVal = baseSnapshot[param.snapshotField] as number;
-          const currentVal = overrides[param.key] ?? baseVal;
-          const isOverridden = overrides[param.key] !== null && overrides[param.key] !== undefined;
-          return (
-            <div key={param.key} className={`slider-row ${isOverridden ? "overridden" : ""}`}>
-              <div className="slider-header">
-                <span className="slider-label">{param.label}</span>
-                <span className="slider-value">{param.max > 100 ? currentVal.toLocaleString() : currentVal.toFixed(1)}<span className="slider-unit">{param.unit}</span></span>
-              </div>
-              <input type="range" min={param.min} max={param.max} step={param.step} value={currentVal} onChange={(e) => setOverride(param.key, parseFloat(e.target.value))} onDoubleClick={() => setOverride(param.key, null)} />
+      {/* Right panel: Cockpit readout + collapsible time picker */}
+      <div className="hud hud-right-panel">
+        {/* Collapsible time picker */}
+        <div className="cockpit-time">
+          <button className="time-toggle" onClick={() => setTimeExpanded(!timeExpanded)} type="button">
+            <span className="eyebrow" style={{ margin: 0 }}>Time Period</span>
+            <span className="time-current">{baseSnapshot.label} · {baseSnapshot.snapshotTime.slice(0, 10)}</span>
+          </button>
+          {timeExpanded && (
+            <div className="time-dropdown">
+              {mosaicSnapshots.map((s) => (
+                <button key={s.id} className={s.id === baseSnapshot.id ? "time-option active" : "time-option"} onClick={() => { setActiveId(s.id); resetOverrides(); clearSelection(); setTimeExpanded(false); }} type="button">
+                  <span>{s.label}</span>
+                  <span className="time-option-date">{s.snapshotTime.slice(0, 10)}</span>
+                </button>
+              ))}
             </div>
-          );
-        })}
-      </div>
-
-      {/* Bottom-left: KPIs + Legend */}
-      <div className="hud hud-bottom-left">
-        <div className="hud-kpis">
-          <MetricCard label="Fee Pressure" value={effectiveSnapshot.feePressureIndex.toFixed(1)} severity={getSeverity(effectiveSnapshot.feePressureIndex)} />
-          <MetricCard label="Congestion" value={effectiveSnapshot.congestionScore.toFixed(1)} severity={getSeverity(effectiveSnapshot.congestionScore)} />
-          <MetricCard label="Block Stress" value={effectiveSnapshot.blockProductionStress.toFixed(1)} severity={getSeverity(effectiveSnapshot.blockProductionStress)} />
-          <MetricCard label="Health" value={effectiveSnapshot.networkHealthScore.toFixed(1)} severity={getSeverity(10 - effectiveSnapshot.networkHealthScore)} />
+          )}
         </div>
-        {/* Legend removed — rings have their own labels in the scene */}
-      </div>
 
-      {/* Fixed detail panel — appears on click */}
-      {detailText && (
-        <div className="hud hud-detail-panel">
-          <div className="detail-header">
-            <strong>{detailText.title}</strong>
-            <button onClick={clearSelection} type="button">x</button>
+        {/* Cockpit readout — all metrics grouped by what they drive */}
+        <div className="cockpit-readout">
+          <CockpitSection title="Block Production" groupId="ring-1" activeGroup={activeGroup} items={[
+            ["Blocks Mined", "144"],
+            ["Avg Interval", `${effectiveSnapshot.avgBlockIntervalSeconds}s`],
+            ["Block Stress", `${effectiveSnapshot.blockProductionStress.toFixed(1)}/10`],
+            ["Block Height", `#${effectiveSnapshot.blockHeight.toLocaleString()}`],
+          ]} />
+          <CockpitSection title="Fee Market" groupId="ring-0" activeGroup={activeGroup} items={[
+            ["1-10 sat/vB", `${(effectiveSnapshot.feeBuckets[0]?.txShare * 100).toFixed(1)}%`],
+            ["11-30 sat/vB", `${(effectiveSnapshot.feeBuckets[1]?.txShare * 100).toFixed(1)}%`],
+            ["31-80 sat/vB", `${(effectiveSnapshot.feeBuckets[2]?.txShare * 100).toFixed(1)}%`],
+            ["81+ sat/vB", `${(effectiveSnapshot.feeBuckets[3]?.txShare * 100).toFixed(1)}%`],
+            ["Fee Pressure", `${effectiveSnapshot.feePressureIndex.toFixed(1)}/10`],
+          ]} />
+          <CockpitSection title="Mempool" groupId="ring-2" activeGroup={activeGroup} items={[
+            ["Pending Txs", effectiveSnapshot.mempoolTxCount.toLocaleString()],
+            ["Size", `${effectiveSnapshot.mempoolSizeMb.toFixed(1)} MB`],
+            ["Congestion", `${effectiveSnapshot.congestionScore.toFixed(1)}/10`],
+          ]} />
+          <CockpitSection title="Mining" groupId="ring-3" activeGroup={activeGroup} items={[
+            ["Hashrate", `${effectiveSnapshot.networkHashrateEh.toFixed(1)} EH/s`],
+            ["HHI", `${effectiveSnapshot.minerConcentrationScore.toFixed(1)}/10`],
+            ...effectiveSnapshot.miningPools.map((p) => [p.name, `${(p.sharePct * 100).toFixed(1)}%`] as [string, string]),
+          ]} />
+          <CockpitSection title="Network Health" groupId={null} activeGroup={activeGroup} items={[
+            ["Health Score", `${effectiveSnapshot.networkHealthScore.toFixed(1)}/10`],
+            ["Halving Era", `${Math.floor(effectiveSnapshot.blockHeight / 210000) + 1}`],
+          ]} />
+        </div>
+
+        {/* What-If Simulation */}
+        <div className="cockpit-whatif">
+          <div className="hud-whatif-header">
+            <p className="eyebrow" style={{ margin: 0 }}>What-If</p>
+            {hasOverrides && <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>}
           </div>
-          <p>{detailText.body}</p>
+          {WHAT_IF_PARAMS.map((param) => {
+            const baseVal = baseSnapshot[param.snapshotField] as number;
+            const currentVal = overrides[param.key] ?? baseVal;
+            const isOverridden = overrides[param.key] !== null && overrides[param.key] !== undefined;
+            return (
+              <div key={param.key} className={`slider-row ${isOverridden ? "overridden" : ""}`}>
+                <div className="slider-header">
+                  <span className="slider-label">{param.label}</span>
+                  <span className="slider-value">{param.max > 100 ? currentVal.toLocaleString() : currentVal.toFixed(1)}<span className="slider-unit">{param.unit}</span></span>
+                </div>
+                <input type="range" min={param.min} max={param.max} step={param.step} value={currentVal} onChange={(e) => setOverride(param.key, parseFloat(e.target.value))} onDoubleClick={() => setOverride(param.key, null)} />
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
 
       {/* Data source info modal */}
       {showDataInfo && (
@@ -366,11 +374,24 @@ function App() {
   );
 }
 
-function MetricCard({ label, value, severity }: { label: string; value: string; severity: "normal" | "elevated" | "critical" }) {
+/* MetricCard removed — replaced by cockpit readout */
+
+function CockpitSection({ title, groupId, activeGroup, items }: {
+  title: string;
+  groupId: string | null;
+  activeGroup: string | null;
+  items: Array<[string, string]>;
+}) {
+  const isActive = groupId !== null && activeGroup === groupId;
   return (
-    <div className="metric-card" data-severity={severity}>
-      <span>{label}</span>
-      <strong>{value}</strong>
+    <div className={`cockpit-section ${isActive ? "active" : ""}`}>
+      <div className="cockpit-section-title">{title}</div>
+      {items.map(([label, value], i) => (
+        <div key={i} className="cockpit-row">
+          <span className="cockpit-label">{label}</span>
+          <span className="cockpit-value">{value}</span>
+        </div>
+      ))}
     </div>
   );
 }

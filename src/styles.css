@@ -132,67 +132,133 @@ button, input, textarea { font: inherit; }
   font-weight: 500;
 }
 
-/* ─── Top Right: Time Presets ─── */
-.hud-top-right {
+/* ─── Right Panel: Cockpit Readout ─── */
+.hud-right-panel {
   top: 16px;
   right: 16px;
-  width: 240px;
-  max-height: calc(100vh - 32px);
-  overflow-y: auto;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  bottom: 16px;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border);
   border-radius: 10px;
-  padding: 10px;
+  overflow: hidden;
+}
+
+/* ─── Time Picker (collapsible) ─── */
+.cockpit-time {
+  background: var(--surface-solid);
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.time-toggle {
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.time-toggle:hover { background: rgba(255, 255, 255, 0.02); }
+
+.time-current {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.time-dropdown {
+  max-height: 300px;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
 }
 
-.hud-time-list {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.hud-time-btn {
+.time-option {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 6px 8px;
+  padding: 5px 12px;
   background: transparent;
-  border: 1px solid transparent;
-  border-radius: 5px;
-  color: var(--text);
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
   cursor: pointer;
-  font-size: 0.78rem;
-  transition: border-color 0.15s, background 0.15s;
+  font-size: 0.7rem;
 }
 
-.hud-time-btn:hover {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: var(--border);
-}
+.time-option:hover { background: rgba(255, 255, 255, 0.03); color: var(--text); }
+.time-option.active { color: var(--accent); background: var(--accent-dim); }
 
-.hud-time-btn.active {
-  border-color: var(--accent);
-  background: var(--accent-dim);
-}
-
-.hud-time-btn.active .hud-time-date {
-  color: var(--accent);
-}
-
-.hud-time-date {
-  font-size: 0.68rem;
+.time-option-date {
+  font-size: 0.62rem;
   color: var(--text-tertiary);
   font-variant-numeric: tabular-nums;
 }
 
-/* What-If inside right panel */
-.hud-whatif-section {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--border);
+/* ─── Cockpit Readout ─── */
+.cockpit-readout {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--surface-solid);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+}
+
+.cockpit-section {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.cockpit-section.active {
+  border-left-color: var(--accent);
+  background: rgba(250, 102, 15, 0.04);
+}
+
+.cockpit-section-title {
+  font-size: 0.58rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.cockpit-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 1px 0;
+}
+
+.cockpit-label {
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+}
+
+.cockpit-value {
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+/* ─── What-If (in right panel) ─── */
+.cockpit-whatif {
+  background: var(--surface-solid);
+  padding: 8px 12px;
+  flex-shrink: 0;
 }
 
 .hud-whatif-header {
@@ -202,18 +268,7 @@ button, input, textarea { font: inherit; }
   margin-bottom: 4px;
 }
 
-/* ─── Bottom Left: KPIs + Legend ─── */
-.hud-bottom-left {
-  bottom: 16px;
-  left: 16px;
-}
-
-.hud-kpis {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
-  margin-bottom: 8px;
-}
+/* (KPI cards and legend moved into cockpit readout) */
 
 .metric-card {
   background: var(--surface);
@@ -278,17 +333,7 @@ button, input, textarea { font: inherit; }
   flex-shrink: 0;
 }
 
-/* ─── Left Center: What-If Sliders ─── */
-.hud-left-center {
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 200px;
-  padding: 10px 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-}
+/* (What-if sliders moved into right cockpit panel) */
 
 .hud-toggle-row {
   display: flex;
