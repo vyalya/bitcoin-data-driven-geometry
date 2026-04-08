@@ -56,7 +56,8 @@ const WHAT_IF_PARAMS: WhatIfParam[] = [
 ];
 
 function App() {
-  const [activeId, setActiveId] = useState(mosaicSnapshots[0].id);
+  // Default to "Current State" (last chronological) instead of Genesis
+  const [activeId, setActiveId] = useState(mosaicSnapshots[mosaicSnapshots.length - 2]?.id ?? mosaicSnapshots[0].id);
   const baseSnapshot = useMemo(
     () => mosaicSnapshots.find((s) => s.id === activeId) ?? mosaicSnapshots[0],
     [activeId]
@@ -389,12 +390,12 @@ function PrimeRadiantScene({ snapshot, selectedLayer, selectedPool, onSelectLaye
 
       {/* Every element below is rooted in real data with a tooltip */}
 
-      <BlockSpine snapshot={snapshot} />
+      <BlockSpine key={`spine-${snapshot.id}`} snapshot={snapshot} />
 
-      {/* 4 data rings — each segment is a unique data point */}
+      {/* 4 data rings — key includes snapshot.id to force remount on switch */}
       {snapshot.ringBands.map((band, i) => (
         <SegmentedDataRing
-          key={band.id}
+          key={`${snapshot.id}-${band.id}`}
           band={band}
           index={i}
           snapshot={snapshot}
@@ -405,27 +406,21 @@ function PrimeRadiantScene({ snapshot, selectedLayer, selectedPool, onSelectLaye
       ))}
 
       {/* Fee tier orbital paths */}
-      <FeeOrbitRings feeBuckets={snapshot.feeBuckets} />
+      <FeeOrbitRings key={`fee-${snapshot.id}`} feeBuckets={snapshot.feeBuckets} />
 
       {/* Mining pool constellation */}
       <MiningConstellation
+        key={`mining-${snapshot.id}`}
         pools={snapshot.miningPools}
         hashrate={snapshot.networkHashrateEh}
         selectedPool={selectedPool}
         onSelectPool={onSelectPool}
       />
 
-      {/* Mempool strata — per-tier pending tx layers */}
-      <MempoolStrata snapshot={snapshot} />
-
-      {/* Difficulty epoch markers */}
-      <EpochMarkers snapshot={snapshot} />
-
-      {/* Fee flow arcs between rings */}
-      <InterRingFilaments snapshot={snapshot} />
-
-      {/* Floating data labels */}
-      <DataInscriptions snapshot={snapshot} />
+      <MempoolStrata key={`strata-${snapshot.id}`} snapshot={snapshot} />
+      <EpochMarkers key={`epoch-${snapshot.id}`} snapshot={snapshot} />
+      <InterRingFilaments key={`filaments-${snapshot.id}`} snapshot={snapshot} />
+      <DataInscriptions key={`labels-${snapshot.id}`} snapshot={snapshot} />
     </group>
   );
 }
@@ -634,11 +629,12 @@ function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSele
       {segments.map((seg, si) => {
         const isHovered = hoveredSeg === si;
         const arcLen = seg.endAngle - seg.startAngle;
-        if (arcLen < 0.001) return null; // skip zero-width segments
+        if (!arcLen || arcLen < 0.001 || !isFinite(arcLen)) return null;
         const subCount = Math.max(2, Math.round(arcLen / (Math.PI * 2) * 48));
         const gap = arcLen * 0.06;
         const usableArc = arcLen - gap;
-        if (usableArc < 0.001) return null;
+        if (!usableArc || usableArc < 0.001 || !isFinite(usableArc)) return null;
+        if (!isFinite(seg.height) || !isFinite(seg.depth)) return null;
 
         return (
           <group key={si}>
