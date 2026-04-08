@@ -52,11 +52,8 @@ function App() {
     <div className="app-shell">
       <header className="topbar">
         <div>
-          <p className="eyebrow">Institutional Bitcoin Network Intelligence</p>
           <h1>Visualizing the Bitcoin Network as a Digital Twin</h1>
-          <p className="subhead">
-            High-fidelity view of Bitcoin network state, stress, resilience, and simulation rooted in real data contracts.
-          </p>
+          <p className="subhead">High-fidelity view of Bitcoin network state, stress, resilience, and simulation rooted in real data contracts.</p>
         </div>
         <div className="status-cluster">
           <div className="status-pill">
