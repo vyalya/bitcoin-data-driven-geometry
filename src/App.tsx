@@ -1,7 +1,7 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Text, Line, Html } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { mosaicSnapshots, deriveRingBands } from "./data/mosaicSnapshots";
 import type { NetworkSnapshot, RingBand, MiningPoolSnapshot, FeeBucket } from "./types";
@@ -545,6 +545,9 @@ function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSele
   const dimFactor = isDimmed ? 0.15 : 1;
   const [hoveredSeg, setHoveredSeg] = useState<number | null>(null);
 
+  // Reset hover when snapshot changes
+  useEffect(() => { setHoveredSeg(null); }, [snapshot.id]);
+
   // Build segments based on ring type — each segment is a UNIQUE data point
   const segments = useMemo(() => {
     const result: Array<{
@@ -645,20 +648,21 @@ function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSele
       {/* Data segments — each is a unique data point */}
       {segments.map((seg, si) => {
         const isHovered = hoveredSeg === si;
-        // Render segment as multiple small boxes along the arc
         const arcLen = seg.endAngle - seg.startAngle;
-        const subCount = Math.max(3, Math.round(arcLen / (Math.PI * 2) * 60)); // proportional sub-segments
-        const gap = arcLen * 0.05; // 5% gap between segments
+        if (arcLen < 0.001) return null; // skip zero-width segments
+        const subCount = Math.max(2, Math.round(arcLen / (Math.PI * 2) * 48));
+        const gap = arcLen * 0.06;
+        const usableArc = arcLen - gap;
+        if (usableArc < 0.001) return null;
 
         return (
           <group key={si}>
             {Array.from({ length: subCount }).map((_, j) => {
               const t = j / subCount;
-              const angle = seg.startAngle + gap / 2 + t * (arcLen - gap);
+              const angle = seg.startAngle + gap / 2 + t * usableArc;
               const x = Math.cos(angle) * band.radius;
               const y = Math.sin(angle) * band.radius;
-              const subArc = (arcLen - gap) / subCount;
-              const w = subArc * band.radius * 0.9;
+              const w = Math.max(0.005, (usableArc / subCount) * band.radius * 0.85);
 
               return (
                 <mesh

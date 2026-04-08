@@ -429,19 +429,29 @@ button, input, textarea { font: inherit; }
 
 /* ─── Scene Tooltips ─── */
 .scene-tooltip {
-  background: rgba(0, 0, 0, 0.88);
-  border: 1px solid rgba(250, 102, 15, 0.35);
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 0.7rem;
-  color: #FFFFFF;
-  white-space: nowrap;
-  line-height: 1.4;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  background: rgba(5, 5, 5, 0.92);
+  border: 1px solid rgba(250, 102, 15, 0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: pre-line;
+  line-height: 1.55;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 1px rgba(250, 102, 15, 0.2);
+  min-width: 160px;
+  max-width: 260px;
+  border-left: 2px solid var(--accent);
 }
 
-.scene-tooltip strong { color: var(--accent); font-weight: 600; }
+.scene-tooltip strong {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.78rem;
+  display: block;
+  margin-bottom: 4px;
+}
 
 /* ─── Simulation Badge ─── */
 .simulation-badge {
