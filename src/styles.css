@@ -369,7 +369,7 @@ textarea {
 
 /* Threshold severity indicators */
 .metric-card[data-severity="normal"] {
-  border-left-color: rgba(255, 255, 255, 0.15);
+  border-left-color: rgba(255, 255, 255, 0.2);
 }
 
 .metric-card[data-severity="normal"] strong {
@@ -378,18 +378,30 @@ textarea {
 
 .metric-card[data-severity="elevated"] {
   border-left-color: var(--accent);
+  background: rgba(250, 102, 15, 0.06);
 }
 
 .metric-card[data-severity="elevated"] strong {
   color: var(--accent);
 }
 
+.metric-card[data-severity="elevated"] span {
+  color: var(--accent);
+  opacity: 0.7;
+}
+
 .metric-card[data-severity="critical"] {
   border-left-color: #FF3D00;
+  background: rgba(255, 61, 0, 0.06);
 }
 
 .metric-card[data-severity="critical"] strong {
   color: #FF3D00;
+}
+
+.metric-card[data-severity="critical"] span {
+  color: #FF3D00;
+  opacity: 0.7;
 }
 
 /* ─── Pool / Bucket Lists ─── */
@@ -719,20 +731,23 @@ textarea {
 }
 
 .bottom-item strong {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 500;
+  color: var(--text);
 }
 
 .bottom-item .bottom-value {
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
-  margin-top: 1px;
+  margin-top: 2px;
+  color: var(--accent);
 }
 
 .bottom-item .bottom-sub {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--text-tertiary);
+  margin-top: 1px;
 }
 
 .bottom-divider {

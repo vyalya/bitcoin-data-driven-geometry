@@ -252,15 +252,6 @@ function App() {
             <MetricCard label="Health" value={effectiveSnapshot.networkHealthScore.toFixed(1)} severity={getSeverity(10 - effectiveSnapshot.networkHealthScore)} />
           </section>
 
-          {/* Interpretation */}
-          <section className="panel">
-            <p className="eyebrow">Interpretation</p>
-            <ul className="notes-list">
-              {effectiveSnapshot.notes.map((note) => (
-                <li key={note}>{note}</li>
-              ))}
-            </ul>
-          </section>
         </aside>
       </main>
 
@@ -416,35 +407,56 @@ function RadiantCore({ healthScore }: { healthScore: number }) {
   );
 }
 
-/* ─── BLOCK SPINE ─── 144 blocks (one day's production) along the spine.
-   Each block is an octahedron sized by a deterministic data pattern.
-   Blocks near the tip are brighter. Hoverable with block # tooltip.
+/* ─── BLOCK SPINE ─── 144 blocks (one day's production).
+   Block SIZE = avg block weight (normalized). A day with fuller blocks
+   has larger octahedra.
+   Block SIZE VARIANCE = block production stress. High stress (irregular
+   intervals) creates a jagged spine. Low stress = uniform spine.
+   This makes healthy vs stressed days visually distinct at a glance.
 */
 
 function BlockSpine({ snapshot }: { snapshot: NetworkSnapshot }) {
   const healthColor = snapshot.networkHealthScore < 5.5 ? "#FF3D00" : "#FA660F";
   const blockCount = Math.max(20, Math.min(snapshot.blockHeight > 0 ? 144 : 20, 144));
 
-  // Deterministic size variation per block (seeded from block height)
   const blocks = useMemo(() => {
+    // Deterministic RNG seeded from block height
     const rng = (seed: number) => {
       let s = seed;
       return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
     };
     const rand = rng(snapshot.blockHeight);
 
+    // Base block size from avg block interval (slower = bigger blocks accumulate more txs)
+    const intervalFactor = Math.min(snapshot.avgBlockIntervalSeconds / 600, 1.5);
+    const baseSize = 0.02 + intervalFactor * 0.02;
+
+    // Variance from block production stress (high stress = jagged, low = uniform)
+    const stressVariance = snapshot.blockProductionStress / 10; // 0-1
+
+    // Fee contribution — higher fees = brighter blocks
+    const feeFactor = snapshot.feePressureIndex / 10;
+
     const spacing = 8.5 / blockCount;
     return Array.from({ length: blockCount }).map((_, i) => {
       const r = rand();
+      // Size varies based on stress — low stress = tight range, high stress = wide range
+      const sizeNoise = (r - 0.5) * 2 * stressVariance;
+      const scale = baseSize * (1 + sizeNoise * 0.8);
+
+      // Brightness: combination of position (tip = bright) and fee pressure
+      const positionBrightness = 0.25 + (i / blockCount) * 0.5;
+      const feeBrightness = feeFactor * 0.3;
+
       return {
         y: i * spacing - 4.25,
-        scale: 0.025 + r * 0.055, // varied sizes
+        scale: Math.max(0.01, scale),
         blockHeight: snapshot.blockHeight - (blockCount - 1 - i),
-        brightness: 0.3 + (i / blockCount) * 0.7, // brighter toward tip
+        brightness: positionBrightness + feeBrightness,
         isTip: i >= blockCount - 3,
       };
     });
-  }, [snapshot.blockHeight, blockCount]);
+  }, [snapshot.blockHeight, blockCount, snapshot.avgBlockIntervalSeconds, snapshot.blockProductionStress, snapshot.feePressureIndex]);
 
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
@@ -452,11 +464,10 @@ function BlockSpine({ snapshot }: { snapshot: NetworkSnapshot }) {
     <group>
       {/* Central axis */}
       <mesh position={[0, 0, 0.12]}>
-        <cylinderGeometry args={[0.012, 0.012, 9, 16]} />
-        <meshStandardMaterial color="#FF8C3A" emissive="#FA660F" emissiveIntensity={0.5} metalness={0.7} roughness={0.15} />
+        <cylinderGeometry args={[0.01, 0.01, 9, 16]} />
+        <meshStandardMaterial color="#FF8C3A" emissive="#FA660F" emissiveIntensity={0.4} metalness={0.7} roughness={0.15} />
       </mesh>
 
-      {/* 144 blocks */}
       {blocks.map((b, i) => (
         <group key={i} position={[0, b.y, 0.14]}>
           <mesh
@@ -467,14 +478,17 @@ function BlockSpine({ snapshot }: { snapshot: NetworkSnapshot }) {
             <meshStandardMaterial
               color={b.isTip ? "#FFAA55" : "#FF8C3A"}
               emissive={healthColor}
-              emissiveIntensity={hoveredIdx === i ? 1.6 : b.brightness}
+              emissiveIntensity={hoveredIdx === i ? 1.8 : b.brightness}
               metalness={0.4}
               roughness={0.08}
             />
           </mesh>
           {hoveredIdx === i && (
             <Html center style={{ pointerEvents: "none" }}>
-              <div className="scene-tooltip">Block #{b.blockHeight.toLocaleString()}</div>
+              <div className="scene-tooltip">
+                <strong>Block #{b.blockHeight.toLocaleString()}</strong><br />
+                Interval: {snapshot.avgBlockIntervalSeconds}s avg
+              </div>
             </Html>
           )}
         </group>
@@ -484,11 +498,20 @@ function BlockSpine({ snapshot }: { snapshot: NetworkSnapshot }) {
 }
 
 /* ─── SEGMENTED DATA RING ───
-   Each ring has:
-   - Distinct color from RING_COLORS
-   - Segment heights driven by its SPECIFIC metric (not generic intensity)
-   - A label identifying what it represents
-   - Different wave patterns per ring for visual variety
+   Each ring's segments represent a REAL data distribution:
+
+   Ring 0 (Fee Pressure): Segments are sized by fee bucket distribution.
+     The circle is divided into 4 quadrants matching the 4 fee tiers.
+     Each quadrant's segments are taller where that fee tier is dominant.
+
+   Ring 1 (Settlement): Segments represent block production health.
+     Height = how close to target interval. Uniform = healthy. Jagged = stressed.
+
+   Ring 2 (Congestion): Segments sized by congestion score.
+     More active segments = more congestion. Empty congestion = sparse ring.
+
+   Ring 3 (Mempool Depth): Segments represent pending transaction volume.
+     Dense ring = deep mempool. Sparse = clear mempool.
 */
 
 function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSelect }: {
@@ -497,23 +520,21 @@ function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSele
 }) {
   const groupRef = useRef<THREE.Group>(null);
 
-  // No rotation — static data means static scene
-  // Rings only rotate when receiving live data updates
-
   const color = RING_COLORS[index] || "#FA660F";
   const label = RING_LABELS[index] || "";
 
-  // Each ring's segment heights are driven by its SPECIFIC metric
   const metricValue = [
-    snapshot.feePressureIndex / 10,    // Ring 1: fee pressure
-    1 - snapshot.blockProductionStress / 10, // Ring 2: settlement health (inverted)
-    snapshot.congestionScore / 10,     // Ring 3: congestion
-    Math.min(snapshot.mempoolTxCount / 400000, 1), // Ring 4: mempool depth
+    snapshot.feePressureIndex / 10,
+    1 - snapshot.blockProductionStress / 10,
+    snapshot.congestionScore / 10,
+    Math.min(snapshot.mempoolTxCount / 400000, 1),
   ][index] ?? 0.5;
 
   const segCount = 96;
   const activeCount = Math.round(segCount * band.activeShare);
-  const seed = index * 137.5;
+
+  // Fee bucket shares for distribution-based height mapping
+  const feeShares = snapshot.feeBuckets.map((b) => b.txShare);
 
   const segments = useMemo(() => {
     const result: Array<{
@@ -527,26 +548,47 @@ function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSele
       const angle = (i / segCount) * Math.PI * 2;
       const isActive = i < activeCount;
       const isMajor = i % 8 === 0;
+      const segFraction = i / segCount;
 
-      // More dramatic height variation — driven by the ring's specific metric
-      const wave = Math.sin(angle * (2 + index) + seed) * 0.5 + 0.5;
-      const dataHeight = isActive
-        ? 0.02 + metricValue * 0.22 * (0.25 + wave * 0.75)
-        : 0.008;
-      const height = isMajor ? dataHeight * 2.0 : dataHeight;
+      // DATA-DRIVEN height per ring type
+      let dataHeight: number;
 
+      if (index === 0) {
+        // Fee Pressure ring: height maps to fee tier distribution
+        // 4 quadrants, each representing a fee tier
+        const quadrant = Math.floor(segFraction * 4);
+        const tierShare = feeShares[quadrant] ?? 0.25;
+        dataHeight = isActive ? 0.02 + tierShare * 0.35 * metricValue : 0.005;
+      } else if (index === 1) {
+        // Settlement ring: uniform height when healthy, jagged when stressed
+        const stress = snapshot.blockProductionStress / 10;
+        const rng = Math.sin(i * 7.3 + snapshot.blockHeight * 0.01);
+        const jag = stress * rng * 0.5; // stress adds irregularity
+        dataHeight = isActive ? 0.03 + metricValue * 0.12 + jag * 0.08 : 0.005;
+      } else if (index === 2) {
+        // Congestion ring: height builds from one side like a wave
+        const wave = Math.max(0, Math.sin(angle * 1.5 - Math.PI * 0.3));
+        dataHeight = isActive ? 0.01 + metricValue * 0.25 * wave : 0.003;
+      } else {
+        // Mempool depth ring: sparse or dense based on actual count
+        const density = Math.min(snapshot.mempoolTxCount / 400000, 1);
+        const pulse = 0.5 + Math.sin(angle * 3 + 1.2) * 0.5;
+        dataHeight = isActive ? 0.008 + density * 0.2 * pulse : 0.003;
+      }
+
+      const height = isMajor ? dataHeight * 1.8 : dataHeight;
       const arcLen = (2 * Math.PI * band.radius) / segCount;
       const width = arcLen * 0.65;
-      const depth = isActive ? 0.025 + metricValue * 0.04 : 0.01;
+      const depth = isActive ? 0.02 + metricValue * 0.035 : 0.008;
 
       const emIntensity = isActive
-        ? (0.3 + metricValue * 1.2) * (isMajor ? 1.3 : 0.6 + wave * 0.6)
+        ? (0.2 + metricValue * 1.0) * (height / 0.1) // brighter when taller
         : 0;
 
-      result.push({ x: Math.cos(angle) * band.radius, y: Math.sin(angle) * band.radius, angle, isActive, isMajor, height, width, depth, emIntensity });
+      result.push({ x: Math.cos(angle) * band.radius, y: Math.sin(angle) * band.radius, angle, isActive, isMajor, height: Math.max(0.003, height), width, depth, emIntensity: Math.min(emIntensity, 2) });
     }
     return result;
-  }, [segCount, activeCount, band.radius, metricValue, seed, index]);
+  }, [segCount, activeCount, band.radius, metricValue, index, feeShares, snapshot.blockProductionStress, snapshot.blockHeight, snapshot.mempoolTxCount]);
 
   const dimFactor = isDimmed ? 0.15 : 1;
 
