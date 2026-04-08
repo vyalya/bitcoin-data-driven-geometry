@@ -61,8 +61,17 @@ button, input, textarea { font: inherit; }
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  margin-bottom: 8px;
+  margin-bottom: 3px;
   opacity: 0.7;
+}
+
+.hud-datasource {
+  font-size: 0.58rem;
+  color: var(--text-tertiary);
+  line-height: 1.4;
+  max-width: 340px;
+  margin-bottom: 8px;
+  opacity: 0.5;
 }
 
 .hud-metrics {
