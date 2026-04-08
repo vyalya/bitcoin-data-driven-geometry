@@ -218,7 +218,7 @@ function App() {
         <h1 className="hud-title">Visualizing the Bitcoin Network as a Digital Twin</h1>
         <p className="hud-powered">Powered by Strategy Mosaic</p>
         <p className="hud-datasource">
-          Raw blockchain data governed through a universal semantic layer — every metric traceable, every visual accountable.
+          Raw blockchain data published in-memory through a universal semantic layer — every metric traceable, every visual accountable.
           <button className="info-icon" onClick={() => setShowDataInfo(true)} type="button" title="Data source details">i</button>
         </p>
         <div className="hud-metrics">
@@ -290,12 +290,12 @@ function App() {
 
             <div className="data-info-section">
               <h4>Source Data</h4>
-              <p>Historical Bitcoin blockchain metrics extracted from public APIs (blockchain.com, mempool.space) covering 2009 to present. Daily granularity — one snapshot per calendar day.</p>
+              <p>Historical Bitcoin blockchain metrics extracted from public APIs (blockchain.com, mempool.space) covering 2009 to present. Daily granularity — one snapshot per calendar day. Published in-memory directly from source through Strategy.</p>
             </div>
 
             <div className="data-info-section">
               <h4>Strategy Mosaic</h4>
-              <p>Raw data is loaded into Snowflake and governed through the Strategy Mosaic universal semantic layer. Mosaic defines the canonical metrics (fee pressure index, congestion score, block production stress, miner concentration, network health) as governed, auditable calculations. Every number displayed traces back to a Mosaic-defined metric.</p>
+              <p>Raw data is governed through the Strategy Mosaic universal semantic layer — published in-memory from source, no intermediate warehouse. Mosaic defines the canonical metrics (fee pressure index, congestion score, block production stress, miner concentration, network health) as governed, auditable calculations. Every number displayed traces back to a Mosaic-defined metric.</p>
             </div>
 
             <div className="data-info-section">
