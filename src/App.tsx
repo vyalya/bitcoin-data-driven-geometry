@@ -56,8 +56,7 @@ const WHAT_IF_PARAMS: WhatIfParam[] = [
 ];
 
 function App() {
-  // Default to "Current State" (last chronological) instead of Genesis
-  const [activeId, setActiveId] = useState(mosaicSnapshots[mosaicSnapshots.length - 2]?.id ?? mosaicSnapshots[0].id);
+  const [activeId, setActiveId] = useState("current");
   const baseSnapshot = useMemo(
     () => mosaicSnapshots.find((s) => s.id === activeId) ?? mosaicSnapshots[0],
     [activeId]
@@ -585,44 +584,38 @@ function SegmentedDataRing({ band, index, snapshot, isDimmed, isHighlighted, gro
         angleOffset += arcSpan;
       });
     } else if (index === 1) {
-      // SETTLEMENT: 24 segments (one per ~6 blocks, representing block production rhythm)
-      const blockCount = 24;
+      // SETTLEMENT: 1 arc = one daily block production stress value
+      // This is honest — we have ONE stress metric per day, not per-block
       const stress = snapshot.blockProductionStress / 10;
-      let seed = snapshot.blockHeight * 17;
-      for (let i = 0; i < blockCount; i++) {
-        const arcSpan = (Math.PI * 2) / blockCount;
-        const startAngle = i * arcSpan;
-        seed = (seed * 16807) % 2147483647;
-        const jag = stress * ((seed / 2147483647) - 0.5) * 2;
-        const baseHeight = 0.05 + (1 - stress) * 0.1;
-        const height = Math.max(0.01, baseHeight + jag * 0.12);
-        const blocksPerSeg = Math.round(144 / blockCount);
-        const blockNum = snapshot.blockHeight - 144 + i * blocksPerSeg;
-        result.push({
-          startAngle, endAngle: startAngle + arcSpan, midAngle: startAngle + arcSpan / 2,
-          height, depth: 0.04, emIntensity: 0.4 + (1 - stress) * 0.6,
-          tooltipTitle: `Blocks #${blockNum.toLocaleString()}–${(blockNum + blocksPerSeg - 1).toLocaleString()}`,
-          tooltipDetail: `${blocksPerSeg} blocks in this segment\nAvg interval: ${snapshot.avgBlockIntervalSeconds}s\nStress: ${snapshot.blockProductionStress.toFixed(1)}/10`,
-        });
-      }
+      const health = 1 - stress;
+      const fillAngle = Math.PI * 2 * Math.max(0.1, health); // healthy = more fill
+      const height = 0.03 + health * 0.15;
+      result.push({
+        startAngle: -fillAngle / 2,
+        endAngle: fillAngle / 2,
+        midAngle: 0,
+        height,
+        depth: 0.04,
+        emIntensity: 0.3 + health * 0.8,
+        tooltipTitle: "Block Production",
+        tooltipDetail: `Stress: ${snapshot.blockProductionStress.toFixed(1)}/10\nAvg interval: ${snapshot.avgBlockIntervalSeconds}s (target: 600s)\n144 blocks mined\n${stress < 0.2 ? "Healthy — blocks on schedule" : stress < 0.5 ? "Moderate stress — some irregularity" : "High stress — irregular block times"}`,
+      });
     } else if (index === 2) {
-      // CONGESTION: 4 sectors = mempool breakdown by fee tier
-      const tiers = snapshot.feeBuckets;
+      // CONGESTION: 1 arc = one daily congestion score
+      // Honest — we have ONE congestion metric, not per-tier congestion
+      const cg = snapshot.congestionScore / 10;
       const total = snapshot.mempoolTxCount;
-      let angleOffset = 0;
-      tiers.forEach((tier) => {
-        const txsInTier = Math.round(total * tier.txShare);
-        const tierFraction = total > 0 ? txsInTier / 400000 : 0; // normalize to max
-        const arcSpan = (Math.PI * 2) / 4;
-        const height = 0.01 + tierFraction * 0.35 + (snapshot.congestionScore / 10) * 0.05;
-        result.push({
-          startAngle: angleOffset, endAngle: angleOffset + arcSpan, midAngle: angleOffset + arcSpan / 2,
-          height: Math.max(0.005, height), depth: 0.03 + tierFraction * 0.04,
-          emIntensity: total > 0 ? 0.3 + tierFraction * 1.5 : 0.05,
-          tooltipTitle: `Mempool: ${tier.feeRateLabel}`,
-          tooltipDetail: `${txsInTier.toLocaleString()} pending txs\n${(tier.txShare * 100).toFixed(1)}% of mempool\nCongestion: ${snapshot.congestionScore.toFixed(1)}/10`,
-        });
-        angleOffset += arcSpan;
+      const fillAngle = Math.PI * 2 * Math.max(0.05, cg); // more congestion = more fill
+      const height = 0.01 + cg * 0.25;
+      result.push({
+        startAngle: -fillAngle / 2,
+        endAngle: fillAngle / 2,
+        midAngle: 0,
+        height: Math.max(0.005, height),
+        depth: 0.03 + cg * 0.04,
+        emIntensity: cg > 0.01 ? 0.3 + cg * 1.5 : 0.05,
+        tooltipTitle: "Network Congestion",
+        tooltipDetail: `Score: ${snapshot.congestionScore.toFixed(1)}/10\n${total.toLocaleString()} pending transactions\n${snapshot.mempoolSizeMb.toFixed(1)} MB mempool\n${cg < 0.1 ? "Clear — no congestion" : cg < 0.3 ? "Light traffic" : cg < 0.5 ? "Moderate backlog" : "Heavy congestion"}`,
       });
     } else {
       // MINING: 5 sectors = 5 pools, arc width = hashrate share
@@ -698,27 +691,29 @@ function SegmentedDataRing({ band, index, snapshot, isDimmed, isHighlighted, gro
       })}
 
       {/* Ring label */}
+      {/* Ring label — name */}
       <Text
-        position={[0, band.radius + 0.2, 0.1]}
-        fontSize={0.06}
+        position={[0, band.radius + 0.22, 0.1]}
+        fontSize={0.07}
         color={color}
         anchorX="center"
         anchorY="bottom"
-        fillOpacity={isHighlighted ? 0.6 : 0.3 * dimFactor}
+        fillOpacity={isHighlighted ? 0.8 : 0.4 * dimFactor}
         font={undefined}
       >
         {label}
       </Text>
+      {/* Ring label — score + segment count */}
       <Text
-        position={[0, band.radius + 0.12, 0.1]}
-        fontSize={0.045}
+        position={[0, band.radius + 0.13, 0.1]}
+        fontSize={0.05}
         color="#FFFFFF"
         anchorX="center"
         anchorY="bottom"
-        fillOpacity={0.18}
+        fillOpacity={isHighlighted ? 0.5 : 0.2 * dimFactor}
         font={undefined}
       >
-        {([snapshot.feePressureIndex, snapshot.blockProductionStress, snapshot.congestionScore, snapshot.minerConcentrationScore][index] ?? 0).toFixed(1)}/10
+        {([snapshot.feePressureIndex, snapshot.blockProductionStress, snapshot.congestionScore, snapshot.minerConcentrationScore][index] ?? 0).toFixed(1)}/10 · {segments.length} {segments.length === 1 ? "value" : "values"}
       </Text>
     </group>
   );

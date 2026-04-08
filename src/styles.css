@@ -450,11 +450,10 @@ button, input, textarea { font: inherit; }
   align-self: stretch;
 }
 
-/* ─── Detail Panel (fixed, bottom center) ─── */
+/* ─── Detail Panel (fixed, right side below time periods) ─── */
 .hud-detail-panel {
+  right: 16px;
   bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
   min-width: 240px;
   max-width: 400px;
   padding: 12px 16px;
@@ -569,18 +568,19 @@ button, input, textarea { font: inherit; }
 .tour-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
+  padding-bottom: 80px;
   z-index: 200;
   pointer-events: auto;
   cursor: pointer;
 }
 
 .tour-card {
-  max-width: 440px;
-  padding: 24px 28px;
+  max-width: 500px;
+  padding: 20px 24px;
   background: rgba(10, 10, 10, 0.95);
   border: 1px solid var(--accent);
   border-radius: 12px;
