@@ -110,179 +110,114 @@ function App() {
   const [selectedLayer, setSelectedLayer] = useState<string | null>(null);
   const [selectedPool, setSelectedPool] = useState<string | null>(null);
 
+  const [showSliders, setShowSliders] = useState(false);
   const clearSelection = () => { setSelectedLayer(null); setSelectedPool(null); };
 
   return (
-    <div className="app-shell">
-      <header className="topbar">
-        <div>
-          <h1>Visualizing the Bitcoin Network as a Digital Twin</h1>
-          <p className="subhead">High-fidelity view of Bitcoin network state, stress, resilience, and simulation rooted in real data contracts.</p>
+    <div className="hud-shell">
+      {/* Full-bleed Canvas */}
+      <Canvas
+        camera={{ position: [0, 2.2, 14], fov: 34 }}
+        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.9 }}
+        dpr={[1, 2]}
+        style={{ position: "fixed", inset: 0 }}
+      >
+        <color attach="background" args={["#000000"]} />
+        <fog attach="fog" args={["#000000", 25, 55]} />
+        <PrimeRadiantScene
+          snapshot={effectiveSnapshot}
+          selectedLayer={selectedLayer}
+          onSelectLayer={(layer) => { setSelectedLayer(layer); setSelectedPool(null); }}
+          onSelectPool={(pool) => { setSelectedPool(pool); setSelectedLayer(null); }}
+          onDeselect={clearSelection}
+        />
+        <EffectComposer>
+          <Bloom luminanceThreshold={0.08} luminanceSmoothing={0.6} intensity={2.8} mipmapBlur />
+        </EffectComposer>
+        <OrbitControls enablePan enableZoom minDistance={1.5} maxDistance={45} minPolarAngle={Math.PI / 8} maxPolarAngle={Math.PI / 1.2} />
+      </Canvas>
+
+      {/* ═══ FLOATING HUD PANELS ═══ */}
+
+      {/* Top-left: Title + key metrics */}
+      <div className="hud hud-top-left">
+        <h1 className="hud-title">Visualizing the Bitcoin Network as a Digital Twin</h1>
+        <div className="hud-metrics">
+          <div className="hud-metric"><span>Block</span><strong>#{effectiveSnapshot.blockHeight.toLocaleString()}</strong></div>
+          <div className="hud-metric"><span>Mempool</span><strong>{effectiveSnapshot.mempoolTxCount.toLocaleString()}</strong></div>
+          <div className="hud-metric"><span>Hashrate</span><strong>{effectiveSnapshot.networkHashrateEh.toFixed(0)} EH/s</strong></div>
         </div>
-        <div className="status-cluster">
-          {hasOverrides && (
-            <div className="simulation-badge">
-              <span>What-If Active</span>
-              <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>
-            </div>
-          )}
+      </div>
+
+      {/* Top-right: Time presets */}
+      <div className="hud hud-top-right">
+        <p className="eyebrow">Time Period</p>
+        <div className="hud-time-list">
+          {mosaicSnapshots.map((s) => (
+            <button key={s.id} className={s.id === baseSnapshot.id ? "hud-time-btn active" : "hud-time-btn"} onClick={() => { setActiveId(s.id); resetOverrides(); clearSelection(); }} type="button">
+              <span>{s.label}</span>
+              <span className="hud-time-date">{s.snapshotTime.slice(0, 10)}</span>
+            </button>
+          ))}
         </div>
-      </header>
+      </div>
 
-      <main className="workspace">
-        <section className="canvas-panel">
-          <div className="canvas-overlay">
-            <div className="hud-card">
-              <span>Block Height</span>
-              <strong>#{effectiveSnapshot.blockHeight.toLocaleString()}</strong>
-            </div>
-            <div className="hud-card">
-              <span>Mempool</span>
-              <strong>{effectiveSnapshot.mempoolTxCount.toLocaleString()} txs</strong>
-            </div>
-            <div className="hud-card">
-              <span>Hashrate</span>
-              <strong>{effectiveSnapshot.networkHashrateEh.toFixed(0)} EH/s</strong>
-            </div>
-          </div>
+      {/* Bottom-left: KPIs + Legend */}
+      <div className="hud hud-bottom-left">
+        <div className="hud-kpis">
+          <MetricCard label="Fee Pressure" value={effectiveSnapshot.feePressureIndex.toFixed(1)} severity={getSeverity(effectiveSnapshot.feePressureIndex)} />
+          <MetricCard label="Congestion" value={effectiveSnapshot.congestionScore.toFixed(1)} severity={getSeverity(effectiveSnapshot.congestionScore)} />
+          <MetricCard label="Block Stress" value={effectiveSnapshot.blockProductionStress.toFixed(1)} severity={getSeverity(effectiveSnapshot.blockProductionStress)} />
+          <MetricCard label="Health" value={effectiveSnapshot.networkHealthScore.toFixed(1)} severity={getSeverity(10 - effectiveSnapshot.networkHealthScore)} />
+        </div>
+        <div className="hud-legend">
+          {RING_LABELS.map((label, i) => (
+            <div key={i} className="legend-item" onClick={() => { setSelectedLayer(String(i)); setSelectedPool(null); }}><span className="legend-dot" style={{ background: RING_COLORS[i] }} /><span>{label}</span></div>
+          ))}
+          <div className="legend-item"><span className="legend-dot" style={{ background: "#FF8C3A" }} /><span>Mining Pools</span></div>
+        </div>
+      </div>
 
-          {/* Legend */}
-          <div className="canvas-legend">
-            {RING_LABELS.map((label, i) => (
-              <div key={i} className="legend-item" onClick={() => { setSelectedLayer(String(i)); setSelectedPool(null); }}>
-                <span className="legend-dot" style={{ background: RING_COLORS[i] }} />
-                <span>{label}</span>
-              </div>
-            ))}
-            <div className="legend-item">
-              <span className="legend-dot" style={{ background: "#FF8C3A" }} />
-              <span>Mining Pools</span>
-            </div>
-            <div className="legend-item">
-              <span className="legend-dot" style={{ background: "#FFCC00" }} />
-              <span>Halving Epoch</span>
-            </div>
-          </div>
-
-          {selectedLayer && (
-            <div className="selection-indicator">
-              <span>{RING_LABELS[parseInt(selectedLayer)] || "Selected"}</span>
-              <button onClick={clearSelection} type="button">x</button>
-            </div>
-          )}
-
-          <Canvas
-            camera={{ position: [0, 2.2, 14], fov: 34 }}
-            gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.9 }}
-            dpr={[1, 2]}
-          >
-            <color attach="background" args={["#000000"]} />
-            <fog attach="fog" args={["#000000", 25, 55]} />
-            <PrimeRadiantScene
-              snapshot={effectiveSnapshot}
-              selectedLayer={selectedLayer}
-              onSelectLayer={(layer) => { setSelectedLayer(layer); setSelectedPool(null); }}
-              onSelectPool={(pool) => { setSelectedPool(pool); setSelectedLayer(null); }}
-              onDeselect={clearSelection}
-            />
-            <EffectComposer>
-              <Bloom luminanceThreshold={0.08} luminanceSmoothing={0.6} intensity={2.8} mipmapBlur />
-            </EffectComposer>
-            <OrbitControls enablePan enableZoom minDistance={1.5} maxDistance={45} minPolarAngle={Math.PI / 8} maxPolarAngle={Math.PI / 1.2} />
-          </Canvas>
-        </section>
-
-        <aside className="sidebar">
-          {/* Time filter — scenario presets */}
-          <section className="panel">
-            <p className="eyebrow">Time Period</p>
-            <div className="button-stack">
-              {mosaicSnapshots.map((snapshot) => (
-                <button
-                  key={snapshot.id}
-                  className={snapshot.id === baseSnapshot.id ? "scenario-button active" : "scenario-button"}
-                  onClick={() => { setActiveId(snapshot.id); resetOverrides(); clearSelection(); }}
-                  type="button"
-                >
-                  <span>{snapshot.label}</span>
-                  <strong>{snapshot.snapshotTime.slice(0, 10)}</strong>
-                </button>
-              ))}
-            </div>
-          </section>
-
-          {/* What-If Simulation sliders */}
-          <section className="panel">
-            <p className="eyebrow">What-If Simulation</p>
-            <div className="slider-stack">
-              {WHAT_IF_PARAMS.map((param) => {
-                const baseVal = baseSnapshot[param.snapshotField] as number;
-                const currentVal = overrides[param.key] ?? baseVal;
-                const isOverridden = overrides[param.key] !== null && overrides[param.key] !== undefined;
-
-                return (
-                  <div key={param.key} className={`slider-row ${isOverridden ? "overridden" : ""}`}>
-                    <div className="slider-header">
-                      <span className="slider-label">{param.label}</span>
-                      <span className="slider-value">
-                        {param.max > 100 ? currentVal.toLocaleString() : currentVal.toFixed(1)}
-                        <span className="slider-unit">{param.unit}</span>
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min={param.min}
-                      max={param.max}
-                      step={param.step}
-                      value={currentVal}
-                      onChange={(e) => setOverride(param.key, parseFloat(e.target.value))}
-                      onDoubleClick={() => setOverride(param.key, null)}
-                    />
+      {/* Bottom-right: What-if sliders (collapsible) */}
+      <div className="hud hud-bottom-right">
+        <div className="hud-toggle-row">
+          <button className="hud-toggle" onClick={() => setShowSliders(!showSliders)} type="button">
+            {showSliders ? "Close" : "What-If"}{hasOverrides ? " ●" : ""}
+          </button>
+          {hasOverrides && <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>}
+        </div>
+        {showSliders && (
+          <div className="hud-sliders">
+            {WHAT_IF_PARAMS.map((param) => {
+              const baseVal = baseSnapshot[param.snapshotField] as number;
+              const currentVal = overrides[param.key] ?? baseVal;
+              const isOverridden = overrides[param.key] !== null && overrides[param.key] !== undefined;
+              return (
+                <div key={param.key} className={`slider-row ${isOverridden ? "overridden" : ""}`}>
+                  <div className="slider-header">
+                    <span className="slider-label">{param.label}</span>
+                    <span className="slider-value">{param.max > 100 ? currentVal.toLocaleString() : currentVal.toFixed(1)}<span className="slider-unit">{param.unit}</span></span>
                   </div>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* KPI cards */}
-          <section className="metrics-grid">
-            <MetricCard label="Fee Pressure" value={effectiveSnapshot.feePressureIndex.toFixed(1)} severity={getSeverity(effectiveSnapshot.feePressureIndex)} />
-            <MetricCard label="Congestion" value={effectiveSnapshot.congestionScore.toFixed(1)} severity={getSeverity(effectiveSnapshot.congestionScore)} />
-            <MetricCard label="Block Stress" value={effectiveSnapshot.blockProductionStress.toFixed(1)} severity={getSeverity(effectiveSnapshot.blockProductionStress)} />
-            <MetricCard label="Health" value={effectiveSnapshot.networkHealthScore.toFixed(1)} severity={getSeverity(10 - effectiveSnapshot.networkHealthScore)} />
-          </section>
-
-        </aside>
-      </main>
-
-      {/* Bottom bar — fee buckets + mining pools, filterable from 3D scene clicks */}
-      <footer className="bottom-bar">
-        <div className={`bottom-panel ${selectedLayer !== null && selectedLayer !== "0" && selectedLayer !== "1" ? "dimmed" : ""}`}>
-          <p className="eyebrow">Fee Buckets</p>
-          <div className="bottom-row-list">
-            {effectiveSnapshot.feeBuckets.map((bucket) => (
-              <div className="bottom-item" key={bucket.id}>
-                <strong>{bucket.feeRateLabel}</strong>
-                <span className="bottom-value">{formatPct(bucket.txShare)}</span>
-                <span className="bottom-sub">I: {(bucket.intensity * 100).toFixed(0)}</span>
-              </div>
-            ))}
+                  <input type="range" min={param.min} max={param.max} step={param.step} value={currentVal} onChange={(e) => setOverride(param.key, parseFloat(e.target.value))} onDoubleClick={() => setOverride(param.key, null)} />
+                </div>
+              );
+            })}
           </div>
+        )}
+      </div>
+
+      {/* Bottom-center: Data strip (fee buckets + pools) */}
+      <div className="hud hud-bottom-center">
+        <div className="hud-data-strip">
+          {effectiveSnapshot.feeBuckets.map((b) => (
+            <div className="strip-item" key={b.id}><span className="strip-label">{b.feeRateLabel}</span><span className="strip-value">{formatPct(b.txShare)}</span></div>
+          ))}
+          <div className="strip-divider" />
+          {effectiveSnapshot.miningPools.map((p) => (
+            <div className={`strip-item ${selectedPool === p.id ? "highlighted" : ""}`} key={p.id}><span className="strip-label">{p.name}</span><span className="strip-value">{formatPct(p.sharePct)}</span></div>
+          ))}
         </div>
-        <div className="bottom-divider" />
-        <div className={`bottom-panel ${selectedLayer !== null && selectedLayer !== "3" ? "dimmed" : ""}`}>
-          <p className="eyebrow">Mining Pools</p>
-          <div className="bottom-row-list">
-            {effectiveSnapshot.miningPools.map((pool) => (
-              <div className={`bottom-item ${selectedPool === pool.id ? "highlighted" : ""}`} key={pool.id}>
-                <strong>{pool.name}</strong>
-                <span className="bottom-value">{formatPct(pool.sharePct)}</span>
-                <span className="bottom-sub">{pool.hashRateEh} EH/s</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }
