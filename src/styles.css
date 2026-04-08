@@ -222,13 +222,14 @@ button, input, textarea { font: inherit; }
   flex-shrink: 0;
 }
 
-/* ─── Bottom Right: What-If Sliders ─── */
-.hud-bottom-right {
-  bottom: 16px;
-  right: 16px;
+/* ─── Left Center: What-If Sliders ─── */
+.hud-left-center {
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 6px;
 }
 

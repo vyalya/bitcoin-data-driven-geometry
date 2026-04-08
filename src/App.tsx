@@ -179,8 +179,8 @@ function App() {
         </div>
       </div>
 
-      {/* Bottom-right: What-if sliders (collapsible) */}
-      <div className="hud hud-bottom-right">
+      {/* Left-center: What-if sliders (collapsible) */}
+      <div className="hud hud-left-center">
         <div className="hud-toggle-row">
           <button className="hud-toggle" onClick={() => setShowSliders(!showSliders)} type="button">
             {showSliders ? "Close" : "What-If"}{hasOverrides ? " ●" : ""}
@@ -825,52 +825,68 @@ function MiningNode({ pool, index, total, networkHashrate, isHighlighted, onSele
 }
 
 /* ─── MEMPOOL STRATA ───
-   Layered particle sheets at different z-depths representing fee tiers.
-   Low-fee txs float at the back, high-fee txs push to the front.
-   Creates visible stratification when viewed from the side.
+   Each particle = ~1,000 pending transactions at a specific fee tier.
+   Stratified by z-depth: low-fee txs behind, priority txs in front.
+   Only visible when mempool has transactions — zero mempool = nothing.
 */
 
 function MempoolStrata({ snapshot }: { snapshot: NetworkSnapshot }) {
   const mempoolNorm = Math.min(snapshot.mempoolTxCount / 400000, 1);
-  if (mempoolNorm < 0.01) return null; // no mempool = no strata
+  const [hoveredLayer, setHoveredLayer] = useState<number | null>(null);
+  if (mempoolNorm < 0.01) return null;
 
-  const strata = useMemo(() => {
-    const layers: Array<{ z: number; count: number; radius: number; color: string; size: number; opacity: number }> = [];
-    const buckets = snapshot.feeBuckets;
-
-    buckets.forEach((bucket, i) => {
-      const count = Math.max(15, Math.round(bucket.txShare * mempoolNorm * 300));
-      layers.push({
-        z: -0.8 + i * 0.5,
-        count,
-        radius: 1.8 + i * 0.6,
-        color: ["#FFAA44", "#FF8833", "#FF5500", "#FF3300"][i] || "#FA660F",
-        size: 0.008 + bucket.intensity * 0.012,
-        opacity: 0.15 + bucket.intensity * 0.3,
-      });
-    });
-
-    return layers;
-  }, [snapshot.feeBuckets, mempoolNorm]);
+  const feeColors = ["#FFAA44", "#FF8833", "#FF5500", "#FF3300"];
+  const feeLabels = ["1-10 sat/vB", "11-30 sat/vB", "31-80 sat/vB", "81+ sat/vB"];
 
   return (
     <group>
-      {strata.map((layer, li) => {
-        const positions = new Float32Array(layer.count * 3);
-        for (let i = 0; i < layer.count; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const r = layer.radius * (0.5 + Math.random() * 0.8);
-          positions[i * 3] = Math.cos(angle) * r;
-          positions[i * 3 + 1] = Math.sin(angle) * r;
-          positions[i * 3 + 2] = layer.z + (Math.random() - 0.5) * 0.3;
+      {snapshot.feeBuckets.map((bucket, li) => {
+        const txsInTier = Math.round(snapshot.mempoolTxCount * bucket.txShare);
+        const particleCount = Math.max(8, Math.round(txsInTier / 1000));
+        const positions = new Float32Array(particleCount * 3);
+        const radius = 1.8 + li * 0.6;
+        const z = -0.8 + li * 0.5;
+
+        // Deterministic placement seeded from block height + tier
+        let seed = snapshot.blockHeight * 7 + li * 31;
+        for (let i = 0; i < particleCount; i++) {
+          seed = (seed * 16807) % 2147483647;
+          const angle = (seed / 2147483647) * Math.PI * 2;
+          seed = (seed * 16807) % 2147483647;
+          const rVar = (seed / 2147483647) * 0.8 + 0.5;
+          positions[i * 3] = Math.cos(angle) * radius * rVar;
+          positions[i * 3 + 1] = Math.sin(angle) * radius * rVar;
+          seed = (seed * 16807) % 2147483647;
+          positions[i * 3 + 2] = z + ((seed / 2147483647) - 0.5) * 0.3;
         }
+
         return (
-          <points key={li}>
-            <bufferGeometry>
-              <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-            </bufferGeometry>
-            <pointsMaterial color={layer.color} size={layer.size} sizeAttenuation transparent opacity={layer.opacity} />
-          </points>
+          <group key={li}>
+            <points
+              onPointerOver={(e) => { e.stopPropagation(); setHoveredLayer(li); }}
+              onPointerOut={() => setHoveredLayer(null)}
+            >
+              <bufferGeometry>
+                <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+              </bufferGeometry>
+              <pointsMaterial
+                color={feeColors[li]}
+                size={0.008 + bucket.intensity * 0.014}
+                sizeAttenuation
+                transparent
+                opacity={hoveredLayer === li ? 0.8 : 0.15 + bucket.intensity * 0.3}
+              />
+            </points>
+            {hoveredLayer === li && (
+              <Html position={[0, radius * 0.7, z]} center style={{ pointerEvents: "none" }}>
+                <div className="scene-tooltip">
+                  <strong>{feeLabels[li]}</strong><br />
+                  ~{txsInTier.toLocaleString()} pending txs<br />
+                  {(bucket.txShare * 100).toFixed(1)}% of mempool
+                </div>
+              </Html>
+            )}
+          </group>
         );
       })}
     </group>
@@ -947,120 +963,124 @@ function EpochMarkers({ snapshot }: { snapshot: NetworkSnapshot }) {
   );
 }
 
-/* ─── INTER-RING FILAMENTS ───
-   Thin arcs connecting adjacent rings, suggesting data flow between
-   network layers. Density proportional to network activity.
-   Creates visual complexity between the concentric rings.
+/* ─── FEE FLOW ARCS ───
+   Arcs connecting fee pressure ring → congestion ring, representing
+   the flow of transaction fees through the network. Each arc = fee
+   pressure at that angular position pushing into congestion.
+   Count = feePressureIndex × congestionScore. Zero activity = no arcs.
 */
 
 function InterRingFilaments({ snapshot }: { snapshot: NetworkSnapshot }) {
-  const activity = (snapshot.feePressureIndex + snapshot.congestionScore) / 20;
-  const filamentCount = Math.max(8, Math.round(activity * 40));
+  const [hovered, setHovered] = useState(false);
+  const intensity = snapshot.feePressureIndex * snapshot.congestionScore;
+  if (intensity < 0.1) return null; // no fee pressure + congestion = no flow
 
-  const filaments = useMemo(() => {
+  const arcCount = Math.max(4, Math.round(intensity * 2));
+  const radii = [2.0, 2.85, 3.75, 4.85];
+
+  const arcs = useMemo(() => {
     const result: Array<{ startR: number; endR: number; angle: number; opacity: number }> = [];
-    const rng = (seed: number) => {
-      let s = seed;
-      return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
-    };
-    const rand = rng(snapshot.blockHeight);
-
-    for (let i = 0; i < filamentCount; i++) {
-      const ringIdx = Math.floor(rand() * 3);
-      const radii = [2.0, 2.85, 3.75, 4.85];
-      result.push({
-        startR: radii[ringIdx],
-        endR: radii[ringIdx + 1],
-        angle: rand() * Math.PI * 2,
-        opacity: 0.02 + rand() * 0.06,
-      });
+    let seed = snapshot.blockHeight * 13;
+    for (let i = 0; i < arcCount; i++) {
+      seed = (seed * 16807) % 2147483647;
+      const ringIdx = Math.floor((seed / 2147483647) * 3);
+      seed = (seed * 16807) % 2147483647;
+      const angle = (seed / 2147483647) * Math.PI * 2;
+      seed = (seed * 16807) % 2147483647;
+      result.push({ startR: radii[ringIdx], endR: radii[ringIdx + 1], angle, opacity: 0.02 + (seed / 2147483647) * 0.06 });
     }
     return result;
-  }, [filamentCount, snapshot.blockHeight]);
+  }, [arcCount, snapshot.blockHeight]);
 
   return (
-    <group>
-      {filaments.map((f, i) => {
-        const angleSpread = 0.04;
-        return (
-          <Line
-            key={i}
-            points={[
-              [Math.cos(f.angle) * f.startR, Math.sin(f.angle) * f.startR, 0],
-              [Math.cos(f.angle + angleSpread) * ((f.startR + f.endR) / 2), Math.sin(f.angle + angleSpread) * ((f.startR + f.endR) / 2), 0.1],
-              [Math.cos(f.angle + angleSpread * 2) * f.endR, Math.sin(f.angle + angleSpread * 2) * f.endR, 0],
-            ]}
-            color="#FA660F"
-            lineWidth={0.2}
-            transparent
-            opacity={f.opacity}
-          />
-        );
-      })}
+    <group
+      onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
+      onPointerOut={() => setHovered(false)}
+    >
+      {arcs.map((f, i) => (
+        <Line key={i} points={[
+          [Math.cos(f.angle) * f.startR, Math.sin(f.angle) * f.startR, 0],
+          [Math.cos(f.angle + 0.04) * ((f.startR + f.endR) / 2), Math.sin(f.angle + 0.04) * ((f.startR + f.endR) / 2), 0.1],
+          [Math.cos(f.angle + 0.08) * f.endR, Math.sin(f.angle + 0.08) * f.endR, 0],
+        ]} color="#FA660F" lineWidth={0.3} transparent opacity={hovered ? f.opacity * 3 : f.opacity} />
+      ))}
+      {hovered && (
+        <Html position={[0, 3.3, 0.2]} center style={{ pointerEvents: "none" }}>
+          <div className="scene-tooltip">
+            <strong>Fee Flow</strong><br />
+            {arcCount} active fee pressure channels<br />
+            Intensity: {intensity.toFixed(1)}
+          </div>
+        </Html>
+      )}
     </group>
   );
 }
 
-/* ─── TRANSACTION DUST ───
-   Tiny geometric fragments scattered throughout the scene representing
-   individual data points — blocks, transactions, confirmations.
-   Each is a micro-octahedron or cube. Creates the "organized chaos" texture.
-   Count scales with network activity.
+/* ─── CONFIRMED TX FRAGMENTS ───
+   Each micro-octahedron = ~1,000 confirmed transactions from blocks
+   mined that day. Total count = blocks_mined (from Mosaic).
+   Scattered around the spine at distances proportional to their
+   block's position. Zero blocks = no fragments.
 */
 
 function TransactionDust({ snapshot }: { snapshot: NetworkSnapshot }) {
-  const activity = (snapshot.feePressureIndex + snapshot.congestionScore + snapshot.blockProductionStress) / 30;
-  const mempoolNorm = Math.min(snapshot.mempoolTxCount / 400000, 1);
-  const dustCount = Math.max(30, Math.round((activity + mempoolNorm) * 120));
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const blocksMined = Math.max(0, Math.round(144)); // 144 blocks per day
+  const fragmentCount = Math.min(blocksMined, 144); // one fragment per block
+  if (fragmentCount < 1) return null;
 
   const fragments = useMemo(() => {
-    const result: Array<{
-      x: number; y: number; z: number;
-      scale: number; type: "oct" | "box";
-      opacity: number;
-    }> = [];
-
-    const rng = (seed: number) => {
-      let s = seed;
-      return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
-    };
-    const rand = rng(snapshot.blockHeight + 999);
-
-    for (let i = 0; i < dustCount; i++) {
-      const angle = rand() * Math.PI * 2;
-      const radius = 1.0 + rand() * 6.5;
-      const z = (rand() - 0.5) * 3;
-
+    const result: Array<{ x: number; y: number; z: number; scale: number; blockNum: number }> = [];
+    let seed = snapshot.blockHeight * 3 + 777;
+    for (let i = 0; i < fragmentCount; i++) {
+      seed = (seed * 16807) % 2147483647;
+      const angle = (seed / 2147483647) * Math.PI * 2;
+      seed = (seed * 16807) % 2147483647;
+      const radius = 1.0 + (seed / 2147483647) * 6;
+      seed = (seed * 16807) % 2147483647;
+      const z = ((seed / 2147483647) - 0.5) * 2.5;
+      seed = (seed * 16807) % 2147483647;
+      const scale = 0.01 + (seed / 2147483647) * 0.02;
       result.push({
         x: Math.cos(angle) * radius,
         y: Math.sin(angle) * radius,
-        z,
-        scale: 0.008 + rand() * 0.025,
-        type: rand() > 0.5 ? "oct" : "box",
-        opacity: 0.04 + rand() * 0.12,
+        z, scale,
+        blockNum: snapshot.blockHeight - fragmentCount + i,
       });
     }
     return result;
-  }, [dustCount, snapshot.blockHeight]);
+  }, [fragmentCount, snapshot.blockHeight]);
 
   return (
     <group>
       {fragments.map((f, i) => (
-        <mesh key={i} position={[f.x, f.y, f.z]}>
-          {f.type === "oct" ? (
-            <octahedronGeometry args={[f.scale, 0]} />
-          ) : (
-            <boxGeometry args={[f.scale, f.scale, f.scale]} />
-          )}
+        <mesh
+          key={i}
+          position={[f.x, f.y, f.z]}
+          onPointerOver={(e) => { e.stopPropagation(); setHoveredIdx(i); }}
+          onPointerOut={() => setHoveredIdx(null)}
+        >
+          <octahedronGeometry args={[f.scale, 0]} />
           <meshStandardMaterial
             color="#FA660F"
             emissive="#FA660F"
-            emissiveIntensity={0.3}
+            emissiveIntensity={hoveredIdx === i ? 1.5 : 0.3}
             transparent
-            opacity={f.opacity}
+            opacity={hoveredIdx === i ? 0.9 : 0.08}
           />
         </mesh>
       ))}
+      {hoveredIdx !== null && hoveredIdx < fragments.length && (
+        <group position={[fragments[hoveredIdx].x, fragments[hoveredIdx].y, fragments[hoveredIdx].z]}>
+          <Html center style={{ pointerEvents: "none" }}>
+            <div className="scene-tooltip">
+              <strong>Block #{fragments[hoveredIdx].blockNum.toLocaleString()}</strong><br />
+              Confirmed block fragment
+            </div>
+          </Html>
+        </group>
+      )}
     </group>
   );
 }

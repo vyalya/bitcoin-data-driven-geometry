@@ -335,18 +335,102 @@ const snapshot_2022_11_11: NetworkSnapshot = (() => {
   };
 })();
 
+const snapshot_2009_01_09: NetworkSnapshot = (() => {
+  const s = { feePressureIndex: 0.87, congestionScore: 0, blockProductionStress: 0.92, mempoolTxCount: 0, networkHealthScore: 8.55 };
+  return {
+    id: "genesis-2009", label: "Genesis Era", snapshotTime: "2009-01-09T00:00:00Z", mode: "historical" as const,
+    blockHeight: 982, avgBlockIntervalSeconds: 600, networkHashrateEh: 0,
+    mempoolSizeMb: 0, minerConcentrationScore: 4.0, ...s,
+    miningPools: topPools(0), feeBuckets: stdBuckets(), ringBands: deriveRingBands(s),
+    notes: ["6 days after genesis. Block #982. Satoshi mining alone.", "Zero hashrate by modern standards. The entire network on one CPU."],
+  };
+})();
+
+const snapshot_2013_04_10: NetworkSnapshot = (() => {
+  const s = { feePressureIndex: 0.87, congestionScore: 0, blockProductionStress: 2.4, mempoolTxCount: 0, networkHealthScore: 8.18 };
+  return {
+    id: "bubble-2013", label: "2013 Bubble Pop", snapshotTime: "2013-04-10T00:00:00Z", mode: "historical" as const,
+    blockHeight: 217811, avgBlockIntervalSeconds: 452, networkHashrateEh: 0,
+    mempoolSizeMb: 0, minerConcentrationScore: 4.0, ...s,
+    miningPools: topPools(0), feeBuckets: stdBuckets(), ringBands: deriveRingBands(s),
+    notes: ["First major Bitcoin bubble popped — BTC fell from $266 to $50.", "Fast blocks (452s) from rapid hashrate growth."],
+  };
+})();
+
+const snapshot_2022_02_24: NetworkSnapshot = (() => {
+  const s = { feePressureIndex: 0.87, congestionScore: 0, blockProductionStress: 0.92, mempoolTxCount: 0, networkHealthScore: 8.55 };
+  return {
+    id: "ukraine-2022", label: "Ukraine War", snapshotTime: "2022-02-24T00:00:00Z", mode: "historical" as const,
+    blockHeight: 670608, avgBlockIntervalSeconds: 600, networkHashrateEh: 183.5,
+    mempoolSizeMb: 0, minerConcentrationScore: 4.0, ...s,
+    miningPools: topPools(183.5), feeBuckets: stdBuckets(), ringBands: deriveRingBands(s),
+    notes: ["Russia invaded Ukraine. Bitcoin used for cross-border donations.", "Network completely unfazed — 184 EH/s, perfect block intervals."],
+  };
+})();
+
+const snapshot_2024_03_14: NetworkSnapshot = (() => {
+  const s = { feePressureIndex: 2.87, congestionScore: 4.76, blockProductionStress: 0.92, mempoolTxCount: 379934, networkHealthScore: 6.86 };
+  return {
+    id: "ath-2024", label: "2024 ATH $73K", snapshotTime: "2024-03-14T00:00:00Z", mode: "historical" as const,
+    blockHeight: 775228, avgBlockIntervalSeconds: 600, networkHashrateEh: 630.4,
+    mempoolSizeMb: 108.6, minerConcentrationScore: 4.0, ...s,
+    miningPools: topPools(630.4), feeBuckets: stdBuckets(), ringBands: deriveRingBands(s),
+    notes: ["Bitcoin hit all-time high of ~$73K. 380K mempool txs.", "Heavy congestion (4.76) but blocks producing normally."],
+  };
+})();
+
+const snapshot_2024_11_10: NetworkSnapshot = (() => {
+  const s = { feePressureIndex: 2.6, congestionScore: 3.69, blockProductionStress: 1.09, mempoolTxCount: 243425, networkHealthScore: 7.18 };
+  return {
+    id: "trump-2024", label: "Post-Election Rally", snapshotTime: "2024-11-10T00:00:00Z", mode: "historical" as const,
+    blockHeight: 808895, avgBlockIntervalSeconds: 584, networkHashrateEh: 700.8,
+    mempoolSizeMb: 69.6, minerConcentrationScore: 3.9, ...s,
+    miningPools: topPools(700.8), feeBuckets: stdBuckets(), ringBands: deriveRingBands(s),
+    notes: ["Post US election Bitcoin rally toward $90K.", "243K mempool, 701 EH/s — network handling demand well."],
+  };
+})();
+
+const snapshot_2025_04_07: NetworkSnapshot = (() => {
+  const s = { feePressureIndex: 0.99, congestionScore: 0.12, blockProductionStress: 0.96, mempoolTxCount: 13751, networkHealthScore: 8.59 };
+  return {
+    id: "today-2025", label: "Today", snapshotTime: "2025-04-07T00:00:00Z", mode: "historical" as const,
+    blockHeight: 829564, avgBlockIntervalSeconds: 596, networkHashrateEh: 879.6,
+    mempoolSizeMb: 3.9, minerConcentrationScore: 3.6, ...s,
+    miningPools: topPools(879.6), feeBuckets: stdBuckets(), ringBands: deriveRingBands(s),
+    notes: ["Current state — 880 EH/s hashrate, all-time high.", "Mempool clear (14K), fees low, network extremely healthy at 8.6/10."],
+  };
+})();
+
+const snapshot_2025_10_10: NetworkSnapshot = (() => {
+  const s = { feePressureIndex: 0.9, congestionScore: 0.05, blockProductionStress: 0.92, mempoolTxCount: 8688, networkHealthScore: 8.64 };
+  return {
+    id: "correction-2025", label: "2025 Correction", snapshotTime: "2025-10-10T00:00:00Z", mode: "historical" as const,
+    blockHeight: 855544, avgBlockIntervalSeconds: 600, networkHashrateEh: 906.5,
+    mempoolSizeMb: 2.5, minerConcentrationScore: 3.6, ...s,
+    miningPools: topPools(906.5), feeBuckets: stdBuckets(), ringBands: deriveRingBands(s),
+    notes: ["Market correction — BTC price declining. Network unfazed.", "906 EH/s all-time high hashrate. Mempool near-empty."],
+  };
+})();
+
 /**
- * All network snapshots sourced from Strategy Mosaic,
- * ordered chronologically — each a historically significant event.
+ * All network snapshots from Strategy Mosaic, chronological.
+ * 16 historically significant Bitcoin events spanning 2009–2025.
  */
 export const mosaicSnapshots: NetworkSnapshot[] = [
+  snapshot_2009_01_09,
+  snapshot_2013_04_10,
   snapshot_2014_02_24,
   snapshot_2016_07_09,
   snapshot_2017_12_20,
   snapshot_2020_03_12,
   snapshot_2020_05_11,
   snapshot_2021_06_28,
+  snapshot_2022_02_24,
   snapshot_2022_11_11,
   snapshot_2023_12_16,
+  snapshot_2024_03_14,
   snapshot_2024_04_20,
+  snapshot_2024_11_10,
+  snapshot_2025_04_07,
+  snapshot_2025_10_10,
 ];
