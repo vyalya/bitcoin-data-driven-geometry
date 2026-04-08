@@ -458,6 +458,25 @@ textarea {
   color: var(--accent);
 }
 
+/* ─── Scene Tooltips ─── */
+.scene-tooltip {
+  background: rgba(0, 0, 0, 0.88);
+  border: 1px solid rgba(250, 102, 15, 0.35);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  color: #FFFFFF;
+  white-space: nowrap;
+  line-height: 1.5;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.scene-tooltip strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 /* ─── Interpretation Notes ─── */
 .notes-list {
   margin: 0;

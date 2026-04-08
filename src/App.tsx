@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Text, Line } from "@react-three/drei";
+import { OrbitControls, Text, Line, Html } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
@@ -19,6 +19,21 @@ function getSeverity(value: number): "normal" | "elevated" | "critical" {
   if (value >= 6) return "elevated";
   return "normal";
 }
+
+/** Per-ring color palette — each ring has a distinct identity */
+const RING_COLORS = [
+  "#FF6B00", // Ring 1: deep orange — fee pressure
+  "#FA660F", // Ring 2: primary orange — settlement
+  "#FF4400", // Ring 3: red-orange — congestion (hot)
+  "#CC5500", // Ring 4: copper — mempool depth
+] as const;
+
+const RING_LABELS = [
+  "Fee Pressure",
+  "Settlement",
+  "Congestion",
+  "Mempool Depth",
+] as const;
 
 /* ═══════════════════════════════════════════════════════
    APP SHELL
@@ -89,12 +104,7 @@ function App() {
             <fog attach="fog" args={["#000000", 25, 55]} />
             <PrimeRadiantScene snapshot={activeSnapshot} />
             <EffectComposer>
-              <Bloom
-                luminanceThreshold={0.08}
-                luminanceSmoothing={0.6}
-                intensity={2.8}
-                mipmapBlur
-              />
+              <Bloom luminanceThreshold={0.08} luminanceSmoothing={0.6} intensity={2.8} mipmapBlur />
             </EffectComposer>
             <OrbitControls
               enablePan
@@ -103,17 +113,13 @@ function App() {
               maxDistance={45}
               minPolarAngle={Math.PI / 8}
               maxPolarAngle={Math.PI / 1.2}
-              autoRotate
-              autoRotateSpeed={0.08}
             />
           </Canvas>
         </section>
 
         <aside className="sidebar">
           {isSimulation && (
-            <div className="simulation-badge">
-              <span>⚡ Simulation Active</span>
-            </div>
+            <div className="simulation-badge"><span>Simulation Active</span></div>
           )}
 
           <section className="panel">
@@ -131,11 +137,6 @@ function App() {
                 </button>
               ))}
             </div>
-          </section>
-
-          <section className="panel">
-            <strong className="panel-title">Prime Radiant</strong>
-            <p className="panel-subtitle">Network State Instrument</p>
           </section>
 
           <section className="metrics-grid">
@@ -211,7 +212,7 @@ function MetricCard({ label, value, severity }: { label: string; value: string; 
 function PrimeRadiantScene({ snapshot }: { snapshot: NetworkSnapshot }) {
   return (
     <group position={[0, -0.15, 0]} scale={0.78}>
-      {/* Lighting rig — dramatic, warm */}
+      {/* Lighting */}
       <ambientLight intensity={0.05} />
       <pointLight position={[0, 0, 2]} intensity={12} color="#FA660F" distance={22} decay={1.8} />
       <pointLight position={[6, 5, 4]} intensity={5} color="#FF8C3A" distance={20} decay={2} />
@@ -219,36 +220,20 @@ function PrimeRadiantScene({ snapshot }: { snapshot: NetworkSnapshot }) {
       <pointLight position={[0, -6, 2]} intensity={3} color="#7A3308" distance={16} decay={2} />
       <pointLight position={[0, 6, 1]} intensity={2} color="#FF6B00" distance={14} decay={2} />
 
-      {/* L0 — Reference grid */}
       <ReferenceGrid />
-
-      {/* L1 — Central nexus */}
       <RadiantCore healthScore={snapshot.networkHealthScore} />
-
-      {/* L2 — Settlement spine */}
       <SettlementSpine snapshot={snapshot} />
 
-      {/* L3 — Segmented data rings (each block = a data abstraction) */}
+      {/* Each ring is visually distinct — different color, sizing, label */}
       {snapshot.ringBands.map((band, i) => (
-        <SegmentedDataRing key={band.id} band={band} index={i} />
+        <SegmentedDataRing key={band.id} band={band} index={i} snapshot={snapshot} />
       ))}
 
-      {/* L4 — Fee orbit rings (tilted, segmented by fee tier) */}
       <FeeOrbitRings feeBuckets={snapshot.feeBuckets} />
-
-      {/* L5 — Outer sweep rings (sparse, structural) */}
       <OuterSweepRings />
-
-      {/* L6 — Particle nebula */}
       <ParticleNebula snapshot={snapshot} />
-
-      {/* L7 — Mining constellation */}
-      <MiningConstellation pools={snapshot.miningPools} />
-
-      {/* L8 — Data inscriptions */}
+      <MiningConstellation pools={snapshot.miningPools} hashrate={snapshot.networkHashrateEh} />
       <DataInscriptions snapshot={snapshot} />
-
-      {/* L9 — Block labels */}
       <BlockLabels snapshot={snapshot} />
     </group>
   );
@@ -271,49 +256,26 @@ function RadiantCore({ healthScore }: { healthScore: number }) {
       const mat = innerRef.current.material as THREE.MeshStandardMaterial;
       mat.emissiveIntensity = 1.4 + Math.sin(t * 0.5) * 0.5;
     }
-    if (midRef.current) {
-      midRef.current.rotation.y = -t * 0.08;
-      midRef.current.rotation.z = t * 0.06;
-    }
-    if (outerRef.current) {
-      outerRef.current.rotation.y = t * 0.035;
-      outerRef.current.rotation.x = -t * 0.028;
-    }
-    if (glowRef.current) {
-      glowRef.current.scale.setScalar(scale * (2.8 + Math.sin(t * 0.35) * 0.25));
-    }
+    if (midRef.current) { midRef.current.rotation.y = -t * 0.08; midRef.current.rotation.z = t * 0.06; }
+    if (outerRef.current) { outerRef.current.rotation.y = t * 0.035; outerRef.current.rotation.x = -t * 0.028; }
+    if (glowRef.current) glowRef.current.scale.setScalar(scale * (2.8 + Math.sin(t * 0.35) * 0.25));
   });
 
   return (
     <group>
-      {/* Solid core */}
       <mesh ref={innerRef} scale={scale * 0.5}>
         <dodecahedronGeometry args={[1, 0]} />
-        <meshStandardMaterial
-          color="#FF8C3A"
-          emissive="#FA660F"
-          emissiveIntensity={1.6}
-          metalness={0.5}
-          roughness={0.05}
-        />
+        <meshStandardMaterial color="#FF8C3A" emissive="#FA660F" emissiveIntensity={1.6} metalness={0.5} roughness={0.05} />
       </mesh>
-
-      {/* Wireframe shell 1 */}
-      <mesh ref={midRef} scale={scale * 0.95}>
+      <mesh ref={midRef} scale={scale}>
         <icosahedronGeometry args={[1, 1]} />
         <meshBasicMaterial color="#FA660F" wireframe transparent opacity={0.35} />
       </mesh>
-
-      {/* Wireframe shell 2 */}
       <mesh ref={outerRef} scale={scale * 1.5}>
         <icosahedronGeometry args={[1, 0]} />
         <meshBasicMaterial color="#FF8C3A" wireframe transparent opacity={0.12} />
       </mesh>
-
-      {/* Core illumination */}
       <pointLight color="#FA660F" intensity={8} distance={6} decay={1.5} />
-
-      {/* Volumetric glow */}
       <mesh ref={glowRef}>
         <sphereGeometry args={[1, 48, 48]} />
         <meshBasicMaterial color="#FA660F" transparent opacity={0.025} side={THREE.BackSide} />
@@ -322,35 +284,36 @@ function RadiantCore({ healthScore }: { healthScore: number }) {
   );
 }
 
-/* ─── SETTLEMENT SPINE ─── */
+/* ─── SETTLEMENT SPINE ─── with hover tooltips */
 
 function SettlementSpine({ snapshot }: { snapshot: NetworkSnapshot }) {
   const healthColor = snapshot.networkHealthScore < 5.5 ? "#FF3D00" : "#FA660F";
-
   return (
     <group>
-      {/* Central axis */}
       <mesh position={[0, 0, 0.12]}>
         <cylinderGeometry args={[0.025, 0.025, 10, 24]} />
-        <meshStandardMaterial
-          color="#FF8C3A"
-          emissive="#FA660F"
-          emissiveIntensity={0.8}
-          metalness={0.7}
-          roughness={0.1}
-        />
+        <meshStandardMaterial color="#FF8C3A" emissive="#FA660F" emissiveIntensity={0.8} metalness={0.7} roughness={0.1} />
       </mesh>
-
-      {/* Blocks */}
       {Array.from({ length: 9 }).map((_, i) => (
-        <SpineBlock key={i} index={i} y={i * 0.78 - 3.1} scale={0.18 + i * 0.008} healthColor={healthColor} isTip={i > 6} />
+        <SpineBlock
+          key={i}
+          index={i}
+          y={i * 0.78 - 3.1}
+          scale={0.18 + i * 0.008}
+          healthColor={healthColor}
+          isTip={i > 6}
+          blockHeight={snapshot.blockHeight - (8 - i)}
+        />
       ))}
     </group>
   );
 }
 
-function SpineBlock({ index, y, scale, healthColor, isTip }: { index: number; y: number; scale: number; healthColor: string; isTip: boolean }) {
+function SpineBlock({ index, y, scale, healthColor, isTip, blockHeight }: {
+  index: number; y: number; scale: number; healthColor: string; isTip: boolean; blockHeight: number;
+}) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const [hovered, setHovered] = useState(false);
 
   useFrame((state) => {
     if (meshRef.current) {
@@ -364,12 +327,16 @@ function SpineBlock({ index, y, scale, healthColor, isTip }: { index: number; y:
 
   return (
     <group position={[0, y, 0.16]}>
-      <mesh ref={meshRef}>
+      <mesh
+        ref={meshRef}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
+        onPointerOut={() => setHovered(false)}
+      >
         <octahedronGeometry args={[scale, 0]} />
         <meshStandardMaterial
-          color={isTip ? "#FFAA55" : "#FF8C3A"}
+          color={hovered ? "#FFAA55" : isTip ? "#FFAA55" : "#FF8C3A"}
           emissive={healthColor}
-          emissiveIntensity={0.8}
+          emissiveIntensity={hovered ? 1.4 : 0.8}
           metalness={0.45}
           roughness={0.08}
         />
@@ -378,35 +345,42 @@ function SpineBlock({ index, y, scale, healthColor, isTip }: { index: number; y:
         <octahedronGeometry args={[scale * 1.4, 0]} />
         <meshBasicMaterial color="#FA660F" wireframe transparent opacity={0.04} />
       </mesh>
+      {hovered && (
+        <Html center style={{ pointerEvents: "none" }}>
+          <div className="scene-tooltip">Block #{blockHeight.toLocaleString()}</div>
+        </Html>
+      )}
     </group>
   );
 }
 
 /* ─── SEGMENTED DATA RING ───
-   Each ring is composed of discrete building blocks, not solid geometry.
-
-   Ring 1 (Inner fee band):   segments = transaction batches grouped by fee level
-   Ring 2 (Settlement band):  segments = confirmed blocks in recent epoch
-   Ring 3 (Congestion band):  segments = mempool depth slices by priority
-   Ring 4 (Outer mempool):    segments = pending transaction cohorts by age
-
-   Active segments glow (data present), inactive are dim scaffolding.
-   Height variation = metric intensity at that position.
-   The ring reads like a circular bar chart — every block means something.
+   Each ring has:
+   - Distinct color from RING_COLORS
+   - Segment heights driven by its SPECIFIC metric (not generic intensity)
+   - A label identifying what it represents
+   - Different wave patterns per ring for visual variety
 */
 
-function SegmentedDataRing({ band, index }: { band: RingBand; index: number }) {
+function SegmentedDataRing({ band, index, snapshot }: { band: RingBand; index: number; snapshot: NetworkSnapshot }) {
   const groupRef = useRef<THREE.Group>(null);
-  const speed = (index % 2 === 0 ? 1 : -1) * (0.008 + index * 0.003);
 
-  useFrame((_, delta) => {
-    if (groupRef.current) groupRef.current.rotation.z += delta * speed;
-  });
+  // No rotation — static data means static scene
+  // Rings only rotate when receiving live data updates
+
+  const color = RING_COLORS[index] || "#FA660F";
+  const label = RING_LABELS[index] || "";
+
+  // Each ring's segment heights are driven by its SPECIFIC metric
+  const metricValue = [
+    snapshot.feePressureIndex / 10,    // Ring 1: fee pressure
+    1 - snapshot.blockProductionStress / 10, // Ring 2: settlement health (inverted)
+    snapshot.congestionScore / 10,     // Ring 3: congestion
+    Math.min(snapshot.mempoolTxCount / 400000, 1), // Ring 4: mempool depth
+  ][index] ?? 0.5;
 
   const segCount = 96;
   const activeCount = Math.round(segCount * band.activeShare);
-
-  // Pre-generate a deterministic height variation pattern per ring
   const seed = index * 137.5;
 
   const segments = useMemo(() => {
@@ -422,128 +396,113 @@ function SegmentedDataRing({ band, index }: { band: RingBand; index: number }) {
       const isActive = i < activeCount;
       const isMajor = i % 8 === 0;
 
-      // Height varies based on data intensity + positional wave
-      const wave = Math.sin(angle * 3 + seed) * 0.5 + 0.5; // 0-1
+      // More dramatic height variation — driven by the ring's specific metric
+      const wave = Math.sin(angle * (2 + index) + seed) * 0.5 + 0.5;
       const dataHeight = isActive
-        ? 0.04 + band.intensity * 0.12 * (0.5 + wave * 0.5)
-        : 0.015;
+        ? 0.02 + metricValue * 0.22 * (0.25 + wave * 0.75)
+        : 0.008;
+      const height = isMajor ? dataHeight * 2.0 : dataHeight;
 
-      // Major segments are taller structural pillars
-      const height = isMajor ? dataHeight * 1.8 : dataHeight;
-
-      // Width = arc length each segment occupies (with gap)
       const arcLen = (2 * Math.PI * band.radius) / segCount;
-      const width = arcLen * 0.65; // 65% fill, 35% gap
-
-      const depth = isActive ? 0.035 + band.intensity * 0.025 : 0.015;
+      const width = arcLen * 0.65;
+      const depth = isActive ? 0.025 + metricValue * 0.04 : 0.01;
 
       const emIntensity = isActive
-        ? (0.5 + band.intensity * 0.9) * (isMajor ? 1.2 : 0.8 + wave * 0.4)
+        ? (0.3 + metricValue * 1.2) * (isMajor ? 1.3 : 0.6 + wave * 0.6)
         : 0;
 
-      result.push({
-        x: Math.cos(angle) * band.radius,
-        y: Math.sin(angle) * band.radius,
-        angle, isActive, isMajor, height, width, depth, emIntensity,
-      });
+      result.push({ x: Math.cos(angle) * band.radius, y: Math.sin(angle) * band.radius, angle, isActive, isMajor, height, width, depth, emIntensity });
     }
     return result;
-  }, [segCount, activeCount, band.radius, band.intensity, seed]);
+  }, [segCount, activeCount, band.radius, metricValue, seed, index]);
 
   return (
     <group ref={groupRef}>
-      {/* Faint track ring — the rail these blocks sit on */}
+      {/* Faint track ring */}
       <mesh>
         <ringGeometry args={[band.radius - 0.008, band.radius + 0.008, 256]} />
-        <meshBasicMaterial color="#FA660F" transparent opacity={0.025} />
+        <meshBasicMaterial color={color} transparent opacity={0.02} />
       </mesh>
 
-      {/* Building blocks */}
+      {/* Segments */}
       {segments.map((seg, i) => (
         <mesh key={i} position={[seg.x, seg.y, 0]} rotation={[0, 0, seg.angle]}>
           <boxGeometry args={[seg.width, seg.height, seg.depth]} />
           {seg.isActive ? (
             <meshStandardMaterial
-              color="#FA660F"
-              emissive="#FA660F"
+              color={color}
+              emissive={color}
               emissiveIntensity={seg.emIntensity}
               metalness={0.3}
               roughness={0.3}
               transparent
-              opacity={0.75 + band.intensity * 0.2}
+              opacity={0.7 + metricValue * 0.25}
             />
           ) : (
-            <meshBasicMaterial
-              color="#1A1000"
-              transparent
-              opacity={0.04}
-            />
+            <meshBasicMaterial color="#0D0800" transparent opacity={0.03} />
           )}
         </mesh>
       ))}
+
+      {/* Ring label — positioned at the top of each ring */}
+      <Text
+        position={[0, band.radius + 0.2, 0.1]}
+        fontSize={0.06}
+        color={color}
+        anchorX="center"
+        anchorY="bottom"
+        fillOpacity={0.3}
+        font={undefined}
+      >
+        {label}
+      </Text>
+
+      {/* Metric value label */}
+      <Text
+        position={[0, band.radius + 0.12, 0.1]}
+        fontSize={0.045}
+        color="#FFFFFF"
+        anchorX="center"
+        anchorY="bottom"
+        fillOpacity={0.18}
+        font={undefined}
+      >
+        {(metricValue * 10).toFixed(1)}/10
+      </Text>
     </group>
   );
 }
 
-/* ─── FEE ORBIT RINGS ───
-   Tilted segmented rings — each segment is a batch of transactions
-   at that fee tier. Tilt differentiates them from the flat data rings.
-   More segments lit = more transactions at that fee level.
-*/
+/* ─── FEE ORBIT RINGS ─── */
 
 function FeeOrbitRings({ feeBuckets }: { feeBuckets: FeeBucket[] }) {
-  const groupRefs = useRef<(THREE.Group | null)[]>([]);
-
-  useFrame((_, delta) => {
-    groupRefs.current.forEach((g, i) => {
-      if (g) {
-        const spd = (i % 2 === 0 ? -1 : 1) * (0.005 + i * 0.002);
-        g.rotation.z += delta * spd;
-      }
-    });
-  });
+  const feeColors = ["#FFAA44", "#FF8833", "#FF5500", "#FF3300"];
 
   return (
     <group>
       {feeBuckets.map((bucket, i) => {
         const radius = 1.05 + i * 0.5;
         const segCount = 64;
-        const activeCount = Math.round(segCount * bucket.txShare * 2.5); // scale up for visibility
+        const activeCount = Math.round(segCount * bucket.txShare * 2.5);
         const tiltX = Math.PI / 2.4 + i * 0.06;
+        const color = feeColors[i] || "#FA660F";
 
         return (
-          <group
-            key={bucket.id}
-            ref={(el) => { groupRefs.current[i] = el; }}
-            rotation={[tiltX, 0, Math.PI * 0.12 + i * 0.18]}
-          >
+          <group key={bucket.id} rotation={[tiltX, 0, Math.PI * 0.12 + i * 0.18]}>
             {Array.from({ length: segCount }).map((_, j) => {
               const angle = (j / segCount) * Math.PI * 2;
               const isActive = j < activeCount;
               const wave = Math.sin(angle * 2 + i * 1.7) * 0.5 + 0.5;
-              const h = isActive ? 0.02 + bucket.intensity * 0.06 * (0.6 + wave * 0.4) : 0.008;
+              const h = isActive ? 0.015 + bucket.intensity * 0.08 * (0.5 + wave * 0.5) : 0.005;
               const arcLen = (2 * Math.PI * radius) / segCount;
-              const w = arcLen * 0.55;
 
               return (
-                <mesh
-                  key={j}
-                  position={[Math.cos(angle) * radius, Math.sin(angle) * radius, 0]}
-                  rotation={[0, 0, angle]}
-                >
-                  <boxGeometry args={[w, h, 0.025]} />
+                <mesh key={j} position={[Math.cos(angle) * radius, Math.sin(angle) * radius, 0]} rotation={[0, 0, angle]}>
+                  <boxGeometry args={[arcLen * 0.55, h, 0.02]} />
                   {isActive ? (
-                    <meshStandardMaterial
-                      color="#FA660F"
-                      emissive="#FA660F"
-                      emissiveIntensity={0.4 + bucket.intensity * 0.7}
-                      metalness={0.2}
-                      roughness={0.4}
-                      transparent
-                      opacity={0.5 + bucket.intensity * 0.35}
-                    />
+                    <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3 + bucket.intensity * 0.8} metalness={0.2} roughness={0.4} transparent opacity={0.4 + bucket.intensity * 0.4} />
                   ) : (
-                    <meshBasicMaterial color="#0D0800" transparent opacity={0.02} />
+                    <meshBasicMaterial color="#0D0800" transparent opacity={0.015} />
                   )}
                 </mesh>
               );
@@ -555,54 +514,25 @@ function FeeOrbitRings({ feeBuckets }: { feeBuckets: FeeBucket[] }) {
   );
 }
 
-/* ─── OUTER SWEEP RINGS ───
-   Sparse structural rings at the perimeter — like scaffolding
-   or orbital tracks waiting for data. Very faint, widely spaced segments.
-*/
+/* ─── OUTER SWEEP RINGS ─── */
 
 function OuterSweepRings() {
-  const groupRef = useRef<THREE.Group>(null);
-  useFrame((_, delta) => {
-    if (groupRef.current) groupRef.current.rotation.z += delta * 0.001;
-  });
-
   const rings = useMemo(() => {
-    const result: Array<{ radius: number; segCount: number; tiltX: number; tiltZ: number }> = [];
-    for (let i = 0; i < 3; i++) {
-      result.push({
-        radius: 5.5 + i * 0.65,
-        segCount: 48 - i * 8,
-        tiltX: Math.PI / 2 + (i - 1) * 0.1,
-        tiltZ: i * 0.2,
-      });
-    }
-    return result;
+    const r: Array<{ radius: number; segCount: number; tiltX: number; tiltZ: number }> = [];
+    for (let i = 0; i < 3; i++) r.push({ radius: 5.5 + i * 0.65, segCount: 48 - i * 8, tiltX: Math.PI / 2 + (i - 1) * 0.1, tiltZ: i * 0.2 });
+    return r;
   }, []);
 
   return (
-    <group ref={groupRef}>
+    <group>
       {rings.map((ring, ri) =>
         Array.from({ length: ring.segCount }).map((_, i) => {
           const angle = (i / ring.segCount) * Math.PI * 2;
           const arcLen = (2 * Math.PI * ring.radius) / ring.segCount;
           return (
-            <mesh
-              key={`${ri}-${i}`}
-              position={[
-                Math.cos(angle) * ring.radius,
-                Math.sin(angle) * ring.radius,
-                0,
-              ]}
-              rotation={[ring.tiltX - Math.PI / 2, 0, angle + ring.tiltZ]}
-            >
+            <mesh key={`${ri}-${i}`} position={[Math.cos(angle) * ring.radius, Math.sin(angle) * ring.radius, 0]} rotation={[ring.tiltX - Math.PI / 2, 0, angle + ring.tiltZ]}>
               <boxGeometry args={[arcLen * 0.4, 0.01, 0.015]} />
-              <meshStandardMaterial
-                color="#FA660F"
-                emissive="#FA660F"
-                emissiveIntensity={0.15}
-                transparent
-                opacity={0.06 - ri * 0.015}
-              />
+              <meshStandardMaterial color="#FA660F" emissive="#FA660F" emissiveIntensity={0.15} transparent opacity={0.05 - ri * 0.012} />
             </mesh>
           );
         })
@@ -611,191 +541,161 @@ function OuterSweepRings() {
   );
 }
 
-/* ─── PARTICLE NEBULA ─── Dense multi-layer cloud */
+/* ─── PARTICLE NEBULA ─── density driven by actual mempool count */
 
 function ParticleNebula({ snapshot }: { snapshot: NetworkSnapshot }) {
   const layer1Ref = useRef<THREE.Group>(null);
   const layer2Ref = useRef<THREE.Group>(null);
   const layer3Ref = useRef<THREE.Group>(null);
-  const layer4Ref = useRef<THREE.Group>(null);
 
   const pressure = snapshot.feePressureIndex / 10;
   const congestion = snapshot.congestionScore / 10;
+  const mempoolNorm = Math.min(snapshot.mempoolTxCount / 400000, 1);
 
-  // Layer 1: Dense inner cloud (mempool core)
-  const innerCount = Math.max(400, Math.round(snapshot.mempoolTxCount / 500));
+  // Particle counts scale with real mempool — empty mempool = sparse field
+  const innerCount = Math.max(50, Math.round(mempoolNorm * 600));
+  const midCount = Math.max(30, Math.round(mempoolNorm * 400));
+  const outerCount = Math.max(20, Math.round(mempoolNorm * 250));
+
   const innerPos = useMemo(() => {
     const pos = new Float32Array(innerCount * 3);
     for (let i = 0; i < innerCount; i++) {
-      const r = 1.2 + Math.random() * (2.5 + congestion);
+      const r = 1.2 + Math.random() * (2.5 + congestion * 2);
       const a = (i / innerCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-      const tilt = (Math.random() - 0.5) * 1.8;
       pos[i * 3] = Math.cos(a) * r;
       pos[i * 3 + 1] = Math.sin(a) * r * (0.7 + Math.random() * 0.5);
-      pos[i * 3 + 2] = tilt;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 1.8;
     }
     return pos;
   }, [innerCount, congestion]);
 
-  // Layer 2: Mid-range particles
-  const midCount = Math.max(300, Math.round(snapshot.mempoolTxCount / 800));
   const midPos = useMemo(() => {
     const pos = new Float32Array(midCount * 3);
     for (let i = 0; i < midCount; i++) {
       const r = 2.8 + Math.random() * 3;
-      const a = Math.random() * Math.PI * 2;
-      const tilt = (Math.random() - 0.5) * 2.8;
-      pos[i * 3] = Math.cos(a) * r;
-      pos[i * 3 + 1] = Math.sin(a) * r;
-      pos[i * 3 + 2] = tilt;
+      pos[i * 3] = Math.cos(Math.random() * Math.PI * 2) * r;
+      pos[i * 3 + 1] = Math.sin(Math.random() * Math.PI * 2) * r;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 2.8;
     }
     return pos;
   }, [midCount]);
 
-  // Layer 3: Outer haze (wide, sparse, larger particles)
-  const outerCount = Math.max(200, Math.round(snapshot.mempoolTxCount / 1400));
   const outerPos = useMemo(() => {
     const pos = new Float32Array(outerCount * 3);
     for (let i = 0; i < outerCount; i++) {
       const r = 4.5 + Math.random() * 4;
-      const a = Math.random() * Math.PI * 2;
-      const tilt = (Math.random() - 0.5) * 4;
-      pos[i * 3] = Math.cos(a) * r;
-      pos[i * 3 + 1] = Math.sin(a) * r;
-      pos[i * 3 + 2] = tilt;
+      pos[i * 3] = Math.cos(Math.random() * Math.PI * 2) * r;
+      pos[i * 3 + 1] = Math.sin(Math.random() * Math.PI * 2) * r;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 4;
     }
     return pos;
   }, [outerCount]);
 
-  // Layer 4: Background dust (very sparse, very wide)
-  const dustCount = 500;
-  const dustPos = useMemo(() => {
-    const pos = new Float32Array(dustCount * 3);
-    for (let i = 0; i < dustCount; i++) {
-      const r = 2 + Math.random() * 10;
-      const a = Math.random() * Math.PI * 2;
-      const tilt = (Math.random() - 0.5) * 6;
-      pos[i * 3] = Math.cos(a) * r;
-      pos[i * 3 + 1] = Math.sin(a) * r;
-      pos[i * 3 + 2] = tilt;
-    }
-    return pos;
-  }, []);
-
+  // Gentle drift — particles float slowly, not spin
   useFrame((_, delta) => {
-    if (layer1Ref.current) layer1Ref.current.rotation.z += delta * 0.018;
-    if (layer2Ref.current) layer2Ref.current.rotation.z -= delta * 0.01;
-    if (layer3Ref.current) layer3Ref.current.rotation.z += delta * 0.005;
-    if (layer4Ref.current) layer4Ref.current.rotation.z -= delta * 0.002;
+    if (layer1Ref.current) layer1Ref.current.rotation.z += delta * 0.003;
+    if (layer2Ref.current) layer2Ref.current.rotation.z -= delta * 0.002;
+    if (layer3Ref.current) layer3Ref.current.rotation.z += delta * 0.001;
   });
 
-  const baseSize = 0.014 + pressure * 0.008;
-  const baseOpacity = 0.35 + pressure * 0.4;
+  const baseSize = 0.012 + pressure * 0.01;
+  const baseOpacity = 0.3 + pressure * 0.4;
 
   return (
     <group>
-      {/* Dense inner */}
       <group ref={layer1Ref}>
         <points>
-          <bufferGeometry>
-            <bufferAttribute attach="attributes-position" args={[innerPos, 3]} />
-          </bufferGeometry>
+          <bufferGeometry><bufferAttribute attach="attributes-position" args={[innerPos, 3]} /></bufferGeometry>
           <pointsMaterial color="#FA660F" size={baseSize * 1.2} sizeAttenuation transparent opacity={baseOpacity} />
         </points>
       </group>
-
-      {/* Mid-range */}
       <group ref={layer2Ref}>
         <points>
-          <bufferGeometry>
-            <bufferAttribute attach="attributes-position" args={[midPos, 3]} />
-          </bufferGeometry>
-          <pointsMaterial color="#FF8C3A" size={baseSize} sizeAttenuation transparent opacity={baseOpacity * 0.65} />
+          <bufferGeometry><bufferAttribute attach="attributes-position" args={[midPos, 3]} /></bufferGeometry>
+          <pointsMaterial color="#FF8C3A" size={baseSize} sizeAttenuation transparent opacity={baseOpacity * 0.5} />
         </points>
       </group>
-
-      {/* Outer haze */}
       <group ref={layer3Ref}>
         <points>
-          <bufferGeometry>
-            <bufferAttribute attach="attributes-position" args={[outerPos, 3]} />
-          </bufferGeometry>
-          <pointsMaterial color="#FA660F" size={baseSize * 1.5} sizeAttenuation transparent opacity={baseOpacity * 0.3} />
-        </points>
-      </group>
-
-      {/* Background dust */}
-      <group ref={layer4Ref}>
-        <points>
-          <bufferGeometry>
-            <bufferAttribute attach="attributes-position" args={[dustPos, 3]} />
-          </bufferGeometry>
-          <pointsMaterial color="#FF6B00" size={baseSize * 0.5} sizeAttenuation transparent opacity={0.12} />
+          <bufferGeometry><bufferAttribute attach="attributes-position" args={[outerPos, 3]} /></bufferGeometry>
+          <pointsMaterial color="#FF6B00" size={baseSize * 0.6} sizeAttenuation transparent opacity={baseOpacity * 0.2} />
         </points>
       </group>
     </group>
   );
 }
 
-/* ─── MINING CONSTELLATION ─── */
+/* ─── MINING CONSTELLATION ─── with hover tooltips, dramatic size differences */
 
-function MiningConstellation({ pools }: { pools: MiningPoolSnapshot[] }) {
+function MiningConstellation({ pools, hashrate }: { pools: MiningPoolSnapshot[]; hashrate: number }) {
   return (
     <group>
       {pools.map((pool, i) => (
-        <MiningNode key={pool.id} pool={pool} index={i} total={pools.length} />
+        <MiningNode key={pool.id} pool={pool} index={i} total={pools.length} networkHashrate={hashrate} />
       ))}
     </group>
   );
 }
 
-function MiningNode({ pool, index, total }: { pool: MiningPoolSnapshot; index: number; total: number }) {
+function MiningNode({ pool, index, total, networkHashrate }: { pool: MiningPoolSnapshot; index: number; total: number; networkHashrate: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const [hovered, setHovered] = useState(false);
+
   const angle = (index / total) * Math.PI * 2 - Math.PI / 2;
   const r = 5.8;
   const x = Math.cos(angle) * r;
   const y = Math.sin(angle) * r;
-  const nodeSize = 0.05 + pool.sharePct * 0.35;
+
+  // Dramatic size scaling — Foundry (30%) is 6x bigger than MARA (4.3%)
+  const nodeSize = 0.03 + pool.sharePct * 0.55;
 
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.15;
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.08;
+      meshRef.current.rotation.y = state.clock.elapsedTime * 0.1;
+      meshRef.current.rotation.x = state.clock.elapsedTime * 0.06;
     }
   });
 
   return (
     <group position={[x, y, 0]}>
-      <mesh ref={meshRef}>
+      <mesh
+        ref={meshRef}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
+        onPointerOut={() => setHovered(false)}
+      >
         <octahedronGeometry args={[nodeSize, 0]} />
         <meshStandardMaterial
-          color="#FF8C3A"
+          color={hovered ? "#FFCC66" : "#FF8C3A"}
           emissive="#FA660F"
-          emissiveIntensity={0.9}
+          emissiveIntensity={hovered ? 1.5 : 0.7 + pool.sharePct * 1.5}
           metalness={0.4}
           roughness={0.1}
         />
       </mesh>
       <mesh>
         <octahedronGeometry args={[nodeSize * 1.7, 0]} />
-        <meshBasicMaterial color="#FA660F" wireframe transparent opacity={0.06} />
+        <meshBasicMaterial color="#FA660F" wireframe transparent opacity={0.05} />
       </mesh>
-      <Line
-        points={[[0, 0, 0], [-x, -y, 0]]}
-        color="#FA660F"
-        lineWidth={0.3}
-        transparent
-        opacity={0.04}
-        dashed
-        dashSize={0.12}
-        gapSize={0.06}
-      />
-      <Text position={[x > 0 ? 0.3 : -0.3, 0.22, 0]} fontSize={0.08} color="#FFFFFF" anchorX={x > 0 ? "left" : "right"} anchorY="middle" fillOpacity={0.4} font={undefined}>
+      <Line points={[[0, 0, 0], [-x, -y, 0]]} color="#FA660F" lineWidth={0.3} transparent opacity={0.03} dashed dashSize={0.12} gapSize={0.06} />
+
+      {/* Always-visible pool label */}
+      <Text position={[x > 0 ? 0.3 : -0.3, 0.22, 0]} fontSize={0.075} color="#FFFFFF" anchorX={x > 0 ? "left" : "right"} anchorY="middle" fillOpacity={0.4} font={undefined}>
         {pool.name}
       </Text>
       <Text position={[x > 0 ? 0.3 : -0.3, 0.1, 0]} fontSize={0.055} color="#FA660F" anchorX={x > 0 ? "left" : "right"} anchorY="middle" fillOpacity={0.3} font={undefined}>
-        {(pool.sharePct * 100).toFixed(0)}%
+        {(pool.sharePct * 100).toFixed(1)}%
       </Text>
+
+      {/* Hover tooltip with full detail */}
+      {hovered && (
+        <Html center style={{ pointerEvents: "none" }}>
+          <div className="scene-tooltip">
+            <strong>{pool.name}</strong><br />
+            {(pool.sharePct * 100).toFixed(1)}% hashrate share<br />
+            ~{pool.hashRateEh} EH/s of {networkHashrate.toFixed(0)} EH/s
+          </div>
+        </Html>
+      )}
     </group>
   );
 }
@@ -816,34 +716,20 @@ function ReferenceGrid() {
 
   return (
     <group position={[0, 0, -0.8]}>
-      {/* Concentric reference circles */}
       {[1.5, 2.3, 3.2, 4.3, 5.5].map((r) => (
-        <mesh key={r}>
-          <ringGeometry args={[r, r + 0.003, 320]} />
-          <meshBasicMaterial color="#FFFFFF" transparent opacity={0.015} />
-        </mesh>
+        <mesh key={r}><ringGeometry args={[r, r + 0.003, 320]} /><meshBasicMaterial color="#FFFFFF" transparent opacity={0.015} /></mesh>
       ))}
-
-      {/* Cardinal crosshairs */}
       <Line points={[[-8, 0, 0], [8, 0, 0]]} color="#FFFFFF" lineWidth={0.3} transparent opacity={0.02} />
       <Line points={[[0, -8, 0], [0, 8, 0]]} color="#FFFFFF" lineWidth={0.3} transparent opacity={0.02} />
-
-      {/* Diagonal refs */}
       <Line points={[[-6, -6, 0], [6, 6, 0]]} color="#FFFFFF" lineWidth={0.2} transparent opacity={0.008} />
       <Line points={[[-6, 6, 0], [6, -6, 0]]} color="#FFFFFF" lineWidth={0.2} transparent opacity={0.008} />
-
-      {/* 30° radials */}
       {[1, 2, 4, 5, 7, 8, 10, 11].map((i) => {
         const a = (i / 12) * Math.PI * 2;
         return <Line key={i} points={[[0, 0, 0], [Math.cos(a) * 6.6, Math.sin(a) * 6.6, 0]]} color="#FFFFFF" lineWidth={0.15} transparent opacity={0.006} />;
       })}
-
-      {/* Compass graduation */}
       {compassMarks.map((m, i) => (
         <Line key={i} points={[[Math.cos(m.angle) * m.innerR, Math.sin(m.angle) * m.innerR, 0], [Math.cos(m.angle) * m.outerR, Math.sin(m.angle) * m.outerR, 0]]} color="#FA660F" lineWidth={m.isMajor ? 0.45 : 0.2} transparent opacity={m.isMajor ? 0.09 : 0.035} />
       ))}
-
-      {/* Outer boundary */}
       <mesh><ringGeometry args={[6.85, 6.87, 320]} /><meshBasicMaterial color="#FA660F" transparent opacity={0.06} /></mesh>
       <mesh><ringGeometry args={[6.58, 6.6, 320]} /><meshBasicMaterial color="#FA660F" transparent opacity={0.035} /></mesh>
     </group>
@@ -855,7 +741,7 @@ function ReferenceGrid() {
 function DataInscriptions({ snapshot }: { snapshot: NetworkSnapshot }) {
   const items = useMemo(() => [
     { text: `${snapshot.avgBlockIntervalSeconds}s avg interval`, angle: Math.PI * 0.12, radius: 6.3 },
-    { text: `${snapshot.mempoolSizeMb} MB mempool`, angle: Math.PI * 0.4, radius: 6.0 },
+    { text: `${snapshot.mempoolSizeMb > 0 ? snapshot.mempoolSizeMb.toFixed(0) + " MB mempool" : "Mempool clear"}`, angle: Math.PI * 0.4, radius: 6.0 },
     { text: `${snapshot.networkHashrateEh.toFixed(0)} EH/s`, angle: -Math.PI * 0.15, radius: 6.2 },
     { text: `Health ${snapshot.networkHealthScore.toFixed(1)}/10`, angle: -Math.PI * 0.44, radius: 5.9 },
   ], [snapshot]);
