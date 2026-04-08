@@ -109,19 +109,71 @@ function App() {
 
   // Guided tour
   const [tourStep, setTourStep] = useState<number | null>(null);
-  // Tour walks through a REAL scenario with specific metric values
-  const s = effectiveSnapshot;
-  const tourSteps = [
-    { title: "Welcome", text: "This is a digital twin of the Bitcoin network, powered by Strategy Mosaic. Every shape is driven by actual historical blockchain metrics. Select any event to see how the network looked at that moment." },
-    { title: `Block Spine — ${s.blockHeight.toLocaleString()} blocks deep`, text: `You're looking at block #${s.blockHeight.toLocaleString()}. The central column shows 144 blocks (one day's production). Each octahedron is a confirmed block. Current block interval: ${s.avgBlockIntervalSeconds}s avg (target: 600s). ${s.blockProductionStress > 2 ? "The jagged sizing shows irregular intervals — block stress is " + s.blockProductionStress.toFixed(1) + "/10." : "Uniform sizing means healthy block production — stress only " + s.blockProductionStress.toFixed(1) + "/10."}` },
-    { title: `Core Nexus — Health ${s.networkHealthScore.toFixed(1)}/10`, text: `The glowing core scales with Network Health Score: ${s.networkHealthScore.toFixed(1)}/10. ${s.networkHealthScore > 8 ? "Large and bright = very healthy. " : s.networkHealthScore > 6 ? "Moderate size = some stress present. " : "Small and reddish = significant stress. "}Health = inverse of (fee pressure + congestion + block stress + miner concentration) / 4.` },
-    { title: `Fee Pressure Ring — ${s.feePressureIndex.toFixed(1)}/10`, text: `Innermost ring (deep orange). Fee pressure is ${s.feePressureIndex.toFixed(1)}/10. ${s.feePressureIndex > 2 ? "Active segments are tall — users are competing for block space. " : "Low segments — fees are cheap, no competition. "}The ring is divided into 4 quadrants matching fee tiers (1-10, 11-30, 31-80, 81+ sat/vB). Taller quadrant = more transactions at that fee level.` },
-    { title: `Congestion Ring — ${s.congestionScore.toFixed(1)}/10`, text: `Third ring (red-orange). Congestion score: ${s.congestionScore.toFixed(1)}/10. ${s.congestionScore > 3 ? "Dramatic wave peaks — " + s.mempoolTxCount.toLocaleString() + " transactions waiting in the mempool (" + s.mempoolSizeMb.toFixed(0) + " MB). " : s.mempoolTxCount > 0 ? "Mild activity — " + s.mempoolTxCount.toLocaleString() + " pending txs. " : "Nearly flat — mempool is clear. "}Compare this to the 2024 ATH (congestion 4.76, 380K txs) or the China Ban (0, empty).` },
-    { title: `Hashrate — ${s.networkHashrateEh.toFixed(0)} EH/s`, text: `Mining pool nodes on the outer ring show who secures the network. Total hashrate: ${s.networkHashrateEh.toFixed(0)} EH/s. Foundry USA leads at 30%. ${s.networkHashrateEh > 500 ? "This is massive — 500x more than 2017's 13 EH/s. " : s.networkHashrateEh > 100 ? "Solid hashrate — network well-secured. " : "Early days — the network was small but functional. "}Node size is proportional to pool share. Hover for details.` },
-    { title: "Time Travel — 25 Events", text: "The right panel has 25 historically significant dates from Genesis (2009) to today. Each completely transforms the visualization. Try: select '2017 Bull Run Peak' and watch the rings light up with congestion. Then select 'FTX Collapse' — the network looks healthy because Bitcoin's protocol didn't care about FTX." },
-    { title: "What-If Simulation", text: `Current mempool: ${s.mempoolTxCount.toLocaleString()} txs. Try dragging 'Mempool Depth' to 400,000 and watch particles flood the scene, the congestion ring ignite, and health score drop. Then drag 'Hashrate' to 50 EH/s to simulate a mining crisis. The visualization is your hypothesis testing lab.` },
-    { title: "Start Exploring", text: "Hover any element for its data tooltip. Click rings to highlight them. Switch time periods to compare eras. Use What-If sliders to stress-test the network. Every shape, size, and color traces back to a real Mosaic metric." },
+  // Tour that DRIVES the app — switches time periods, adjusts sliders
+  interface TourStep {
+    title: string;
+    text: string;
+    action?: () => void; // runs when step activates
+  }
+
+  const tourSteps: TourStep[] = [
+    {
+      title: "Welcome",
+      text: "This is a digital twin of the Bitcoin network. Every shape is driven by real blockchain data from Strategy Mosaic. Let's walk through a live analysis.",
+      action: () => { setActiveId("current"); resetOverrides(); },
+    },
+    {
+      title: "Current State — Block #880,547",
+      text: "You're looking at today's network. 876 EH/s hashrate. Health score 8.7/10 — the core is large and bright. Mempool is nearly empty (1K txs) so the congestion ring is flat. The 144 blocks on the spine are uniform because block stress is only 0.9/10.",
+      action: () => { setActiveId("current"); resetOverrides(); },
+    },
+    {
+      title: "Now let's go back to the 2017 Bull Run",
+      text: "Watch every ring change. Congestion jumps to 4.7/10 — the red-orange ring ignites with 343K pending transactions. The mempool strata particles appear. Hashrate is only 13 EH/s (vs 876 today). Health drops to 6.9. The entire scene feels stressed.",
+      action: () => { setActiveId("bull-2017"); resetOverrides(); },
+    },
+    {
+      title: "Block #457,316 — 2017 Peak",
+      text: "The spine shows block #457,316. The outer rings glow intensely — fee pressure at 2.9/10 means users are competing for block space. Notice the fee pressure ring has taller segments in the high-fee quadrants. Hover any block on the spine to see its number.",
+      action: () => { setActiveId("bull-2017"); resetOverrides(); },
+    },
+    {
+      title: "Compare: FTX Collapse",
+      text: "November 2022 — FTX just collapsed. The market is panicking. But look at the network: health 8.5/10, blocks perfect at 600s, mempool barely 12K. Bitcoin's protocol was completely indifferent to FTX. The core is large and bright. 245 EH/s.",
+      action: () => { setActiveId("ftx"); resetOverrides(); },
+    },
+    {
+      title: "Jump to the 2024 ATH — $73K",
+      text: "March 2024. ETF-driven surge to $73K. 380K mempool transactions — the highest in our dataset. Congestion at 4.8/10. The congestion ring is ablaze. Particles are dense. But blocks are still coming every 600s. The network bends but doesn't break.",
+      action: () => { setActiveId("ath-2024"); resetOverrides(); },
+    },
+    {
+      title: "What-If: Stress Test the Network",
+      text: "Now let's simulate. We'll take today's healthy network and flood the mempool to 400K transactions. Watch the congestion ring ignite, particles multiply, and health score plummet.",
+      action: () => { setActiveId("current"); resetOverrides(); setOverride("mempool", 400000); setOverride("congestion", 8.5); setOverride("feePressure", 7.0); },
+    },
+    {
+      title: "What-If: Mining Crisis",
+      text: "Now drop the hashrate to 50 EH/s — like a massive mining ban. The mining pool nodes shrink dramatically. Block stress increases. The core dims. This is what a 94% hashrate drop looks like geometrically.",
+      action: () => { setActiveId("current"); resetOverrides(); setOverride("hashrate", 50); setOverride("blockStress", 7.5); },
+    },
+    {
+      title: "Your Turn",
+      text: "You've seen how the visualization responds to real events and hypothetical scenarios. Switch time periods on the right. Drag the What-If sliders on the left. Hover and click any element. Every shape tells a story rooted in data.",
+      action: () => { setActiveId("current"); resetOverrides(); },
+    },
   ];
+
+  const goToTourStep = (step: number) => {
+    if (step >= tourSteps.length) {
+      setTourStep(null);
+      setActiveId("current");
+      resetOverrides();
+      return;
+    }
+    setTourStep(step);
+    tourSteps[step].action?.();
+  };
 
   return (
     <div className="hud-shell">
@@ -217,14 +269,14 @@ function App() {
 
       {/* Tour button */}
       {tourStep === null && (
-        <button className="hud tour-button" onClick={() => setTourStep(0)} type="button">
+        <button className="hud tour-button" onClick={() => goToTourStep(0)} type="button">
           Take a Tour
         </button>
       )}
 
       {/* Tour overlay */}
       {tourStep !== null && tourStep < tourSteps.length && (
-        <div className="tour-overlay" onClick={() => setTourStep((tourStep ?? 0) + 1)}>
+        <div className="tour-overlay" onClick={() => goToTourStep((tourStep ?? 0) + 1)}>
           <div className="tour-card" onClick={(e) => e.stopPropagation()}>
             <div className="tour-step-indicator">
               {tourSteps.map((_, i) => (
@@ -234,13 +286,13 @@ function App() {
             <h3>{tourSteps[tourStep].title}</h3>
             <p>{tourSteps[tourStep].text}</p>
             <div className="tour-actions">
-              {tourStep > 0 && <button onClick={() => setTourStep(tourStep - 1)} type="button">Back</button>}
+              {tourStep > 0 && <button onClick={() => goToTourStep(tourStep - 1)} type="button">Back</button>}
               {tourStep < tourSteps.length - 1 ? (
-                <button className="tour-next" onClick={() => setTourStep(tourStep + 1)} type="button">Next</button>
+                <button className="tour-next" onClick={() => goToTourStep(tourStep + 1)} type="button">Next</button>
               ) : (
                 <button className="tour-next" onClick={() => setTourStep(null)} type="button">Start Exploring</button>
               )}
-              <button className="tour-skip" onClick={() => setTourStep(null)} type="button">Skip</button>
+              <button className="tour-skip" onClick={() => { setTourStep(null); setActiveId("current"); resetOverrides(); }} type="button">Skip</button>
             </div>
           </div>
         </div>
