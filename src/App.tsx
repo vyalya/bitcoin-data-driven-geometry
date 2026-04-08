@@ -395,7 +395,6 @@ function PrimeRadiantScene({ snapshot, selectedLayer, selectedPool, onSelectLaye
 
       {/* Every element below is rooted in real data with a tooltip */}
 
-      <RadiantCore healthScore={snapshot.networkHealthScore} snapshot={snapshot} />
       <BlockSpine snapshot={snapshot} />
 
       {/* 4 data rings — each segment is a unique data point */}
@@ -439,73 +438,15 @@ function PrimeRadiantScene({ snapshot, selectedLayer, selectedPool, onSelectLaye
 
 /* ─── RADIANT CORE ─── */
 
-function RadiantCore({ healthScore, snapshot }: { healthScore: number; snapshot: NetworkSnapshot }) {
-  const innerRef = useRef<THREE.Mesh>(null);
-  const midRef = useRef<THREE.Mesh>(null);
-  const outerRef = useRef<THREE.Mesh>(null);
-  const glowRef = useRef<THREE.Mesh>(null);
-  const [hovered, setHovered] = useState(false);
-  const scale = 0.3 + (healthScore / 10) * 0.2;
+/* RadiantCore removed — wireframe shells were decorative.
+   Health score is communicated via KPI cards and the overall ring activity.
+   The spine blocks serve as the central visual anchor. */
 
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    if (innerRef.current) {
-      innerRef.current.rotation.y = t * 0.2;
-      innerRef.current.rotation.x = t * 0.12;
-      const mat = innerRef.current.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = 1.4 + Math.sin(t * 0.5) * 0.5;
-    }
-    if (midRef.current) { midRef.current.rotation.y = -t * 0.08; midRef.current.rotation.z = t * 0.06; }
-    if (outerRef.current) { outerRef.current.rotation.y = t * 0.035; outerRef.current.rotation.x = -t * 0.028; }
-    if (glowRef.current) glowRef.current.scale.setScalar(scale * (2.8 + Math.sin(t * 0.35) * 0.25));
-  });
-
-  return (
-    <group
-      onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
-      onPointerOut={() => setHovered(false)}
-    >
-      <mesh ref={innerRef} scale={scale * 0.5}>
-        <dodecahedronGeometry args={[1, 0]} />
-        <meshStandardMaterial color="#FF8C3A" emissive="#FA660F" emissiveIntensity={hovered ? 2.2 : 1.6} metalness={0.5} roughness={0.05} />
-      </mesh>
-      <mesh ref={midRef} scale={scale}>
-        <icosahedronGeometry args={[1, 1]} />
-        <meshBasicMaterial color="#FA660F" wireframe transparent opacity={0.35} />
-      </mesh>
-      <mesh ref={outerRef} scale={scale * 1.5}>
-        <icosahedronGeometry args={[1, 0]} />
-        <meshBasicMaterial color="#FF8C3A" wireframe transparent opacity={0.12} />
-      </mesh>
-      <pointLight color="#FA660F" intensity={8} distance={6} decay={1.5} />
-      <mesh ref={glowRef}>
-        <sphereGeometry args={[1, 48, 48]} />
-        <meshBasicMaterial color="#FA660F" transparent opacity={0.025} side={THREE.BackSide} />
-      </mesh>
-      {hovered && (
-        <Html position={[0, scale * 1.8, 0]} center style={{ pointerEvents: "none" }}>
-          <div className="scene-tooltip">
-            <strong>Protocol Core — Health {healthScore.toFixed(1)}/10</strong>
-            Size = Network Health Score
-            {healthScore > 8 ? "\nHealthy — all systems nominal" : healthScore > 6 ? "\nModerate stress detected" : "\nSignificant stress — check rings"}
-            {"\n"}Hashrate: {snapshot.networkHashrateEh.toFixed(0)} EH/s
-            {"\n"}Block interval: {snapshot.avgBlockIntervalSeconds}s avg
-          </div>
-        </Html>
-      )}
-    </group>
-  );
-}
-
-/* ─── BLOCK SPINE ─── Uses InstancedMesh for efficient rendering.
-   Renders up to 2000 blocks in a single draw call.
-
-   Block SIZE = driven by block production stress (jagged vs uniform)
-   Block BRIGHTNESS = position along spine + fee pressure
-   Block COUNT = 144 per day (actual Bitcoin block rate)
-
-   For the current single-day view: 144 blocks.
-   When multi-day ranges are added, this scales to thousands.
+/* ─── BLOCK SPINE ─── 144 blocks per day via InstancedMesh.
+   All blocks are the SAME size because we have daily aggregates,
+   not per-block data. The COUNT is the data (more/fewer blocks =
+   faster/slower block production). Each block is hoverable.
+   Color = health (orange = healthy, red = stressed).
 */
 
 function BlockSpine({ snapshot }: { snapshot: NetworkSnapshot }) {
@@ -513,40 +454,26 @@ function BlockSpine({ snapshot }: { snapshot: NetworkSnapshot }) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   const healthColor = new THREE.Color(snapshot.networkHealthScore < 5.5 ? "#FF3D00" : "#FA660F");
-  const blockCount = Math.max(20, Math.min(snapshot.blockHeight > 0 ? 144 : 20, 144));
+  const blockCount = Math.max(10, Math.min(snapshot.blockHeight > 0 ? 144 : 20, 200));
+  const blockSize = 0.03;
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
-  // Precompute block data
+  useEffect(() => { setHoveredIdx(null); }, [snapshot.id]);
+
   const blockData = useMemo(() => {
-    const rng = (seed: number) => {
-      let s = seed;
-      return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
-    };
-    const rand = rng(snapshot.blockHeight);
-
-    const intervalFactor = Math.min(snapshot.avgBlockIntervalSeconds / 600, 1.5);
-    const baseSize = 0.02 + intervalFactor * 0.02;
-    const stressVariance = snapshot.blockProductionStress / 10;
-
-    const spacing = 8.5 / blockCount;
-    return Array.from({ length: blockCount }).map((_, i) => {
-      const r = rand();
-      const sizeNoise = (r - 0.5) * 2 * stressVariance;
-      const scale = Math.max(0.008, baseSize * (1 + sizeNoise * 0.8));
-      return {
-        y: i * spacing - 4.25,
-        scale,
-        blockHeight: snapshot.blockHeight - (blockCount - 1 - i),
-      };
-    });
-  }, [snapshot.blockHeight, blockCount, snapshot.avgBlockIntervalSeconds, snapshot.blockProductionStress]);
+    const spacing = 8 / blockCount;
+    return Array.from({ length: blockCount }).map((_, i) => ({
+      y: i * spacing - 4,
+      blockHeight: snapshot.blockHeight - (blockCount - 1 - i),
+    }));
+  }, [snapshot.blockHeight, blockCount]);
 
   // Update instance matrices
   useMemo(() => {
     if (!meshRef.current) return;
     blockData.forEach((b, i) => {
-      dummy.position.set(0, b.y, 0.14);
-      dummy.scale.setScalar(b.scale / 0.03); // normalize to geometry base
+      dummy.position.set(0, b.y, 0);
+      dummy.scale.setScalar(1);
       dummy.updateMatrix();
       meshRef.current!.setMatrixAt(i, dummy.matrix);
     });
@@ -555,25 +482,15 @@ function BlockSpine({ snapshot }: { snapshot: NetworkSnapshot }) {
 
   return (
     <group>
-      {/* Central axis */}
-      <mesh position={[0, 0, 0.12]}>
-        <cylinderGeometry args={[0.008, 0.008, 9, 16]} />
-        <meshStandardMaterial color="#FF8C3A" emissive="#FA660F" emissiveIntensity={0.4} metalness={0.7} roughness={0.15} />
-      </mesh>
-
-      {/* Instanced blocks — single draw call for all 144 */}
       <instancedMesh
         ref={meshRef}
         args={[undefined, undefined, blockCount]}
         onPointerMove={(e) => {
-          if (e.instanceId !== undefined) {
-            e.stopPropagation();
-            setHoveredIdx(e.instanceId);
-          }
+          if (e.instanceId !== undefined) { e.stopPropagation(); setHoveredIdx(e.instanceId); }
         }}
         onPointerOut={() => setHoveredIdx(null)}
       >
-        <octahedronGeometry args={[0.03, 0]} />
+        <octahedronGeometry args={[blockSize, 0]} />
         <meshStandardMaterial
           color="#FF8C3A"
           emissive={healthColor}
@@ -583,13 +500,14 @@ function BlockSpine({ snapshot }: { snapshot: NetworkSnapshot }) {
         />
       </instancedMesh>
 
-      {/* Hover tooltip */}
       {hoveredIdx !== null && hoveredIdx < blockData.length && (
-        <group position={[0, blockData[hoveredIdx].y, 0.14]}>
+        <group position={[0, blockData[hoveredIdx].y, 0]}>
           <Html center style={{ pointerEvents: "none" }}>
             <div className="scene-tooltip">
-              <strong>Block #{blockData[hoveredIdx].blockHeight.toLocaleString()}</strong><br />
-              Interval: ~{snapshot.avgBlockIntervalSeconds}s
+              <strong>Block #{blockData[hoveredIdx].blockHeight.toLocaleString()}</strong>
+              1 of {blockCount} blocks mined this day
+              {"\n"}Avg interval: {snapshot.avgBlockIntervalSeconds}s (target: 600s)
+              {"\n"}Stress: {snapshot.blockProductionStress.toFixed(1)}/10
             </div>
           </Html>
         </group>
