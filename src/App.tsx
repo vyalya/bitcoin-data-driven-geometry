@@ -86,6 +86,16 @@ function App() {
       }
     }
 
+    // Auto-derive correlated metrics when one slider changes
+    // If mempool changed but congestion wasn't manually set, derive it
+    if (overrides["mempool"] != null && overrides["congestion"] == null) {
+      s.congestionScore = Math.min(10, (s.mempoolTxCount / 400000) * 8 + (s.feePressureIndex / 10) * 2);
+    }
+    // If mempool changed but fee pressure wasn't manually set, derive it
+    if (overrides["mempool"] != null && overrides["feePressure"] == null) {
+      s.feePressureIndex = Math.min(10, 0.5 + (s.mempoolTxCount / 400000) * 6);
+    }
+
     // Recompute health score from stress metrics
     const fp = s.feePressureIndex;
     const cg = s.congestionScore;
