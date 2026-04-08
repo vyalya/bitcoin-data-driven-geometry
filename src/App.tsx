@@ -619,14 +619,37 @@ function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSele
   }, [segCount, activeCount, band.radius, metricValue, index, feeShares, snapshot.blockProductionStress, snapshot.blockHeight, snapshot.mempoolTxCount]);
 
   const dimFactor = isDimmed ? 0.15 : 1;
+  const [hovered, setHovered] = useState(false);
+
+  // Ring-level tooltip text
+  const ringTooltip = [
+    `Fee Pressure: ${snapshot.feePressureIndex.toFixed(1)}/10\n${segCount} segments · ${activeCount} active (${(band.activeShare * 100).toFixed(0)}%)\n4 quadrants = 4 fee tiers`,
+    `Settlement: stress ${snapshot.blockProductionStress.toFixed(1)}/10\nBlock interval: ${snapshot.avgBlockIntervalSeconds}s avg\n${snapshot.blockProductionStress < 2 ? "Uniform = healthy" : "Jagged = stressed intervals"}`,
+    `Congestion: ${snapshot.congestionScore.toFixed(1)}/10\n${snapshot.mempoolTxCount.toLocaleString()} pending txs\n${snapshot.congestionScore > 3 ? "Heavy backlog" : snapshot.congestionScore > 0 ? "Mild congestion" : "Clear"}`,
+    `Mempool Depth: ${snapshot.mempoolTxCount.toLocaleString()} txs\n${snapshot.mempoolSizeMb.toFixed(1)} MB\n${snapshot.mempoolTxCount > 100000 ? "Deep mempool" : "Shallow"}`,
+  ][index] || "";
 
   return (
-    <group ref={groupRef} onClick={(e) => { e.stopPropagation(); onSelect?.(); }}>
+    <group
+      ref={groupRef}
+      onClick={(e) => { e.stopPropagation(); onSelect?.(); }}
+      onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
+      onPointerOut={() => setHovered(false)}
+    >
       {/* Clickable track ring */}
       <mesh>
         <ringGeometry args={[band.radius - 0.008, band.radius + 0.008, 256]} />
-        <meshBasicMaterial color={color} transparent opacity={(isSelected ? 0.06 : 0.02) * dimFactor} />
+        <meshBasicMaterial color={color} transparent opacity={(isSelected || hovered ? 0.06 : 0.02) * dimFactor} />
       </mesh>
+
+      {/* Ring tooltip */}
+      {hovered && (
+        <Html position={[0, band.radius + 0.35, 0.2]} center style={{ pointerEvents: "none" }}>
+          <div className="scene-tooltip" style={{ whiteSpace: "pre-line" }}>
+            <strong>{label}</strong><br />{ringTooltip}
+          </div>
+        </Html>
+      )}
 
       {/* Segments */}
       {segments.map((seg, i) => (
@@ -681,6 +704,8 @@ function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSele
 
 function FeeOrbitRings({ feeBuckets }: { feeBuckets: FeeBucket[] }) {
   const feeColors = ["#FFAA44", "#FF8833", "#FF5500", "#FF3300"];
+  const feeLabels = ["1-10 sat/vB", "11-30 sat/vB", "31-80 sat/vB", "81+ sat/vB"];
+  const [hoveredTier, setHoveredTier] = useState<number | null>(null);
 
   return (
     <group>
@@ -692,7 +717,12 @@ function FeeOrbitRings({ feeBuckets }: { feeBuckets: FeeBucket[] }) {
         const color = feeColors[i] || "#FA660F";
 
         return (
-          <group key={bucket.id} rotation={[tiltX, 0, Math.PI * 0.12 + i * 0.18]}>
+          <group
+            key={bucket.id}
+            rotation={[tiltX, 0, Math.PI * 0.12 + i * 0.18]}
+            onPointerOver={(e) => { e.stopPropagation(); setHoveredTier(i); }}
+            onPointerOut={() => setHoveredTier(null)}
+          >
             {Array.from({ length: segCount }).map((_, j) => {
               const angle = (j / segCount) * Math.PI * 2;
               const isActive = j < activeCount;
@@ -704,13 +734,22 @@ function FeeOrbitRings({ feeBuckets }: { feeBuckets: FeeBucket[] }) {
                 <mesh key={j} position={[Math.cos(angle) * radius, Math.sin(angle) * radius, 0]} rotation={[0, 0, angle]}>
                   <boxGeometry args={[arcLen * 0.55, h, 0.02]} />
                   {isActive ? (
-                    <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3 + bucket.intensity * 0.8} metalness={0.2} roughness={0.4} transparent opacity={0.4 + bucket.intensity * 0.4} />
+                    <meshStandardMaterial color={color} emissive={color} emissiveIntensity={(hoveredTier === i ? 1.5 : 0.3) + bucket.intensity * 0.8} metalness={0.2} roughness={0.4} transparent opacity={hoveredTier === i ? 0.9 : 0.4 + bucket.intensity * 0.4} />
                   ) : (
                     <meshBasicMaterial color="#0D0800" transparent opacity={0.015} />
                   )}
                 </mesh>
               );
             })}
+            {hoveredTier === i && (
+              <Html position={[radius * 0.5, radius * 0.5, 0.3]} center style={{ pointerEvents: "none" }}>
+                <div className="scene-tooltip">
+                  <strong>Fee Tier: {feeLabels[i]}</strong><br />
+                  {(bucket.txShare * 100).toFixed(1)}% of transactions<br />
+                  Intensity: {(bucket.intensity * 100).toFixed(0)}/100
+                </div>
+              </Html>
+            )}
           </group>
         );
       })}
@@ -721,6 +760,7 @@ function FeeOrbitRings({ feeBuckets }: { feeBuckets: FeeBucket[] }) {
 /* ─── OUTER SWEEP RINGS ─── */
 
 function OuterSweepRings() {
+  const [hovered, setHovered] = useState(false);
   const rings = useMemo(() => {
     const r: Array<{ radius: number; segCount: number; tiltX: number; tiltZ: number }> = [];
     for (let i = 0; i < 3; i++) r.push({ radius: 5.5 + i * 0.65, segCount: 48 - i * 8, tiltX: Math.PI / 2 + (i - 1) * 0.1, tiltZ: i * 0.2 });
@@ -728,7 +768,10 @@ function OuterSweepRings() {
   }, []);
 
   return (
-    <group>
+    <group
+      onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
+      onPointerOut={() => setHovered(false)}
+    >
       {rings.map((ring, ri) =>
         Array.from({ length: ring.segCount }).map((_, i) => {
           const angle = (i / ring.segCount) * Math.PI * 2;
@@ -736,10 +779,19 @@ function OuterSweepRings() {
           return (
             <mesh key={`${ri}-${i}`} position={[Math.cos(angle) * ring.radius, Math.sin(angle) * ring.radius, 0]} rotation={[ring.tiltX - Math.PI / 2, 0, angle + ring.tiltZ]}>
               <boxGeometry args={[arcLen * 0.4, 0.01, 0.015]} />
-              <meshStandardMaterial color="#FA660F" emissive="#FA660F" emissiveIntensity={0.15} transparent opacity={0.05 - ri * 0.012} />
+              <meshStandardMaterial color="#FA660F" emissive="#FA660F" emissiveIntensity={hovered ? 0.4 : 0.15} transparent opacity={hovered ? 0.1 : 0.05 - ri * 0.012} />
             </mesh>
           );
         })
+      )}
+      {hovered && (
+        <Html position={[0, 6, 0.3]} center style={{ pointerEvents: "none" }}>
+          <div className="scene-tooltip">
+            <strong>Network Perimeter</strong><br />
+            3 structural boundary rings<br />
+            Scaffold for outer data layers
+          </div>
+        </Html>
       )}
     </group>
   );
