@@ -801,7 +801,7 @@ def export(network: pd.DataFrame, pools: pd.DataFrame, out: str) -> None:
 
 class _Defaults:
     """Fallback config when argparse is unavailable (e.g. Mosaic embedded runtime)."""
-    start = "2014-01-01"
+    start = "2009-01-01"
     end = datetime.now().strftime("%Y-%m-%d")
     output = "./output"
     use_bigquery = False
@@ -816,7 +816,7 @@ def _parse_args() -> _Defaults:
         return _Defaults()
     try:
         ap = argparse.ArgumentParser(description="Bitcoin Network Digital Twin — Data Extraction")
-        ap.add_argument("--start", default="2014-01-01", help="Start date (YYYY-MM-DD)")
+        ap.add_argument("--start", default="2009-01-01", help="Start date (YYYY-MM-DD)")
         ap.add_argument("--end", default=datetime.now().strftime("%Y-%m-%d"), help="End date")
         ap.add_argument("--output", default="./output", help="Output directory")
         ap.add_argument("--use-bigquery", action="store_true", help="Enable BigQuery for block-level detail (~2 GB, free)")
