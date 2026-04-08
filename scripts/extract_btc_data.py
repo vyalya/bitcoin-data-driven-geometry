@@ -78,78 +78,6 @@ def normalize(series: pd.Series, lo: float, hi: float) -> pd.Series:
     return ((series - lo) / (hi - lo)).clip(0, 1)
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-#  FALLBACK — Synthetic historical data when APIs are unreachable
-# ═══════════════════════════════════════════════════════════════════════════
-
-
-def _generate_synthetic_history(start: str, end: str) -> pd.DataFrame:
-    """Generate realistic synthetic Bitcoin network data.
-
-    Used when the script runs inside a sandboxed environment (like Strategy
-    Mosaic) that blocks outbound HTTP requests. The data follows real
-    historical patterns: halvings, difficulty growth, fee spikes, etc.
-    """
-    log("  Generating synthetic daily history …")
-    dates = pd.date_range(start, end, freq="D")
-    n = len(dates)
-    rng = np.random.default_rng(42)
-
-    # Days since genesis for growth curves
-    genesis = pd.Timestamp("2009-01-03")
-    days = (dates - genesis).days.values.astype(float)
-    years = days / 365.25
-
-    # ── Hashrate: exponential growth with halvings ──
-    # Rough model: doubles every ~1.2 years, with noise
-    base_hashrate = 0.001 * np.exp(years * 0.58)  # TH/s scale
-    noise = rng.lognormal(0, 0.05, n)
-    hashrate_th = base_hashrate * noise
-    hashrate_th = np.clip(hashrate_th, 0.0001, None)
-
-    # ── Difficulty: tracks hashrate with 2-week steps ──
-    difficulty = hashrate_th * 1e4 * (1 + rng.normal(0, 0.02, n))
-
-    # ── Block production ──
-    blocks_per_day = 144 + rng.normal(0, 8, n)
-    blocks_per_day = np.clip(blocks_per_day, 80, 220).astype(int)
-
-    # ── Transactions: growth from ~1K/day early to ~400K/day recent ──
-    tx_base = 500 + 400_000 / (1 + np.exp(-0.4 * (years - 8)))
-    total_tx = (tx_base * (1 + rng.normal(0, 0.08, n))).astype(int)
-    avg_tx_per_block = total_tx / np.maximum(blocks_per_day, 1)
-
-    # ── Block size: grows over time, capped ~1.4 MB avg ──
-    size_base = 50_000 + 1_350_000 / (1 + np.exp(-0.6 * (years - 6)))
-    avg_block_size = size_base * (1 + rng.normal(0, 0.05, n))
-
-    # ── Mempool: noisy, spiky ──
-    mempool_base = 5 + 200 / (1 + np.exp(-0.5 * (years - 8)))
-    spikes = rng.exponential(0.3, n)
-    mempool_mb = mempool_base * (1 + spikes) * (1 + rng.normal(0, 0.15, n))
-    mempool_mb = np.clip(mempool_mb, 0.1, 800)
-
-    # ── Fees USD: low early, spiking in bull markets ──
-    fee_base = 100 + 500_000 / (1 + np.exp(-0.5 * (years - 9)))
-    fee_spikes = rng.exponential(0.4, n)
-    fees_usd = fee_base * (1 + fee_spikes) * (1 + rng.normal(0, 0.2, n))
-    fees_usd = np.clip(fees_usd, 0, None)
-
-    df = pd.DataFrame({
-        "date": dates,
-        "network_hashrate_eh": hashrate_th / 1e6,
-        "difficulty": difficulty,
-        "total_tx_count": total_tx,
-        "avg_tx_per_block": avg_tx_per_block,
-        "avg_block_size_bytes": avg_block_size,
-        "mempool_size_mb": mempool_mb,
-        "fees_usd": fees_usd,
-        "median_confirm_min": 8 + rng.exponential(2, n),
-    })
-
-    log(f"  ✓ {len(df):,} synthetic rows ({dates[0].date()} → {dates[-1].date()})")
-    return df
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  PHASE 1 — Blockchain.com Charts API (10+ years, no auth)
@@ -203,8 +131,7 @@ def fetch_blockchain_com(start: str, end: str) -> pd.DataFrame:
             log(f"  ⚠  {chart} failed: {exc}")
 
     if not frames:
-        log("  ⚠  No API data — falling back to synthetic history")
-        return _generate_synthetic_history(start, end)
+        raise RuntimeError("Could not fetch any data from blockchain.com — check network access")
 
     merged = frames[0]
     for f in frames[1:]:
