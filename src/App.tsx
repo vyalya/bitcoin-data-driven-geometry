@@ -105,6 +105,7 @@ function App() {
   // Interactive selection state — driven by clicking elements in the 3D scene
   const [selectedLayer, setSelectedLayer] = useState<string | null>(null);
   const [selectedPool, setSelectedPool] = useState<string | null>(null);
+  const [showDataInfo, setShowDataInfo] = useState(false);
   const clearSelection = () => { setSelectedLayer(null); setSelectedPool(null); };
 
   // Guided tour
@@ -206,7 +207,10 @@ function App() {
       <div className="hud hud-top-left">
         <h1 className="hud-title">Visualizing the Bitcoin Network as a Digital Twin</h1>
         <p className="hud-powered">Powered by Strategy Mosaic</p>
-        <p className="hud-datasource">Raw blockchain data governed through a universal semantic layer — every metric traceable, every visual accountable.</p>
+        <p className="hud-datasource">
+          Raw blockchain data governed through a universal semantic layer — every metric traceable, every visual accountable.
+          <button className="info-icon" onClick={() => setShowDataInfo(true)} type="button" title="Data source details">i</button>
+        </p>
         <div className="hud-metrics">
           <div className="hud-metric"><span>Block</span><strong>#{effectiveSnapshot.blockHeight.toLocaleString()}</strong></div>
           <div className="hud-metric"><span>Mempool</span><strong>{effectiveSnapshot.mempoolTxCount.toLocaleString()}</strong></div>
@@ -231,6 +235,7 @@ function App() {
       <div className="hud hud-left-center">
         <div className="hud-whatif-header">
           <p className="eyebrow">What-If Simulation</p>
+          <p className="hud-whatif-note">Client-side model using Mosaic base data</p>
           {hasOverrides && <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>}
         </div>
         {WHAT_IF_PARAMS.map((param) => {
@@ -266,6 +271,42 @@ function App() {
       </div>
 
       {/* What-if sliders removed from left — now inside right panel */}
+
+      {/* Data source info modal */}
+      {showDataInfo && (
+        <div className="tour-overlay" onClick={() => setShowDataInfo(false)}>
+          <div className="data-info-card" onClick={(e) => e.stopPropagation()}>
+            <h3>Data Source & Methodology</h3>
+
+            <div className="data-info-section">
+              <h4>Source Data</h4>
+              <p>Historical Bitcoin blockchain metrics extracted from public APIs (blockchain.com, mempool.space) covering 2009 to present. Daily granularity — one snapshot per calendar day.</p>
+            </div>
+
+            <div className="data-info-section">
+              <h4>Strategy Mosaic</h4>
+              <p>Raw data is loaded into Snowflake and governed through the Strategy Mosaic universal semantic layer. Mosaic defines the canonical metrics (fee pressure index, congestion score, block production stress, miner concentration, network health) as governed, auditable calculations. Every number displayed traces back to a Mosaic-defined metric.</p>
+            </div>
+
+            <div className="data-info-section">
+              <h4>Visual Mapping</h4>
+              <p>Each geometric element maps 1:1 to a Mosaic metric. Ring heights = metric values. Ring sector widths = data proportions (fee tier share, pool hashrate share). Particle counts = mempool transaction counts. Block sizes = production stress. Nothing is decorative — if it glows, it means something.</p>
+            </div>
+
+            <div className="data-info-section">
+              <h4>What-If Simulation</h4>
+              <p>The sliders modify metric values client-side using the same derivation formulas that Mosaic uses. The base data is real; the simulation applies bounded overrides locally. Health score recomputes as the inverse average of the four stress metrics. No server round-trip occurs during what-if — it's instant, local computation on real foundations.</p>
+            </div>
+
+            <div className="data-info-section">
+              <h4>Limitations</h4>
+              <p>Mining pool shares are period-aggregated (not daily granular). Fee tier distributions use modeled estimates. Mempool data is unavailable before ~2017. Block-level metrics are daily averages, not per-block. These limitations are reflected honestly — empty data shows as empty visualization.</p>
+            </div>
+
+            <button className="tour-next" onClick={() => setShowDataInfo(false)} type="button">Close</button>
+          </div>
+        </div>
+      )}
 
       {/* Tour button */}
       {tourStep === null && (

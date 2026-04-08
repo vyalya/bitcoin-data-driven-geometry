@@ -72,6 +72,39 @@ button, input, textarea { font: inherit; }
   max-width: 340px;
   margin-bottom: 8px;
   opacity: 0.5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--text-tertiary);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 0.5rem;
+  font-style: italic;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.info-icon:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.hud-whatif-note {
+  font-size: 0.52rem;
+  color: var(--text-tertiary);
+  opacity: 0.5;
+  margin-bottom: 6px;
 }
 
 .hud-metrics {
@@ -575,4 +608,49 @@ button, input, textarea { font: inherit; }
   border: none !important;
   color: var(--text-tertiary) !important;
   font-size: 0.65rem !important;
+}
+
+/* ─── Data Info Modal ─── */
+.data-info-card {
+  max-width: 520px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 24px 28px;
+  background: rgba(10, 10, 10, 0.96);
+  border: 1px solid rgba(250, 102, 15, 0.25);
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
+  cursor: default;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+}
+
+.data-info-card h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.data-info-section {
+  margin-bottom: 14px;
+}
+
+.data-info-section h4 {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.data-info-section p {
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.data-info-card .tour-next {
+  margin-top: 8px;
 }
