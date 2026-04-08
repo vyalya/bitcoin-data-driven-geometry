@@ -799,23 +799,46 @@ def export(network: pd.DataFrame, pools: pd.DataFrame, out: str) -> None:
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def main() -> None:
-    ap = argparse.ArgumentParser(description="Bitcoin Network Digital Twin — Data Extraction")
-    ap.add_argument("--start", default="2014-01-01", help="Start date (YYYY-MM-DD)")
-    ap.add_argument("--end", default=datetime.now().strftime("%Y-%m-%d"), help="End date")
-    ap.add_argument("--output", default="./output", help="Output directory")
-    ap.add_argument("--use-bigquery", action="store_true", help="Enable BigQuery for block-level detail (~2 GB, free)")
-    ap.add_argument("--bq-full", action="store_true", help="Also scan transactions table for fee distributions (expensive — ~35 GB/year)")
-    ap.add_argument("--bq-project", default=None, help="GCP project ID (required with --use-bigquery)")
-    args = ap.parse_args()
+class _Defaults:
+    """Fallback config when argparse is unavailable (e.g. Mosaic embedded runtime)."""
+    start = "2014-01-01"
+    end = datetime.now().strftime("%Y-%m-%d")
+    output = "./output"
+    use_bigquery = False
+    bq_full = False
+    bq_project = None
+
+
+def _parse_args() -> _Defaults:
+    """Parse CLI args if available, otherwise return defaults."""
+    # Mosaic / embedded runtimes may have empty or missing sys.argv
+    if not getattr(sys, "argv", None) or len(sys.argv) == 0:
+        return _Defaults()
+    try:
+        ap = argparse.ArgumentParser(description="Bitcoin Network Digital Twin — Data Extraction")
+        ap.add_argument("--start", default="2014-01-01", help="Start date (YYYY-MM-DD)")
+        ap.add_argument("--end", default=datetime.now().strftime("%Y-%m-%d"), help="End date")
+        ap.add_argument("--output", default="./output", help="Output directory")
+        ap.add_argument("--use-bigquery", action="store_true", help="Enable BigQuery for block-level detail (~2 GB, free)")
+        ap.add_argument("--bq-full", action="store_true", help="Also scan transactions table for fee distributions (expensive — ~35 GB/year)")
+        ap.add_argument("--bq-project", default=None, help="GCP project ID (required with --use-bigquery)")
+        return ap.parse_args()
+    except (SystemExit, Exception):
+        return _Defaults()
+
+
+def main() -> pd.DataFrame:
+    """Run the full extraction pipeline.
+
+    Returns the network snapshot DataFrame — useful when called from
+    Strategy Mosaic or other embedded Python environments.
+    """
+    args = _parse_args()
 
     print()
-    print("  ╔═══════════════════════════════════════════════════════╗")
-    print("  ║  Bitcoin Network Digital Twin — Data Extraction       ║")
-    print(f"  ║  Range: {args.start} → {args.end:>27s}  ║")
-    bq_label = ("FULL (blocks+txs)" if args.bq_full else "blocks-only") if args.use_bigquery else "disabled"
-    print(f"  ║  BigQuery: {bq_label:>43s}  ║")
-    print("  ╚═══════════════════════════════════════════════════════╝")
+    print("  Bitcoin Network Digital Twin — Data Extraction")
+    print(f"  Range: {args.start} → {args.end}")
+    print()
 
     # Phase 1 — blockchain.com
     bc_df = fetch_blockchain_com(args.start, args.end)
@@ -852,16 +875,34 @@ def main() -> None:
     # Phase 6 — time dimensions
     network = add_dimensions(network)
 
-    # Phase 7 — export
-    export(network, pools_daily, args.output)
+    # Phase 7 — format output
+    cols = [c for c in NETWORK_COLUMNS if c in network.columns]
+    result = network[cols].copy()
+    result["snapshot_date"] = pd.to_datetime(result["snapshot_date"]).dt.strftime("%Y-%m-%d")
 
-    print()
-    print("  ╔═══════════════════════════════════════════════════════╗")
-    print("  ║  ✓  Extraction complete!                              ║")
-    print(f"  ║  Files: {os.path.abspath(args.output) + '/':>48s} ║")
-    print("  ╚═══════════════════════════════════════════════════════╝")
-    print()
+    # Export CSVs if running as CLI (not embedded)
+    try:
+        os.makedirs(args.output, exist_ok=True)
+        net_path = os.path.join(args.output, "BTC_DAILY_NETWORK_SNAPSHOT.csv")
+        result.to_csv(net_path, index=False)
+        log(f"✓ {net_path}  ({len(result):,} rows)")
+        if not pools_daily.empty:
+            pool_path = os.path.join(args.output, "BTC_DAILY_MINING_POOLS.csv")
+            pools_daily.to_csv(pool_path, index=False)
+            log(f"✓ {pool_path}  ({len(pools_daily):,} rows)")
+    except Exception:
+        pass  # CSV export is best-effort in embedded mode
 
+    print(f"\n  ✓ Done — {len(result):,} daily rows")
+    return result
+
+
+# ── Entry point ─────────────────────────────────────────────────────────
+# Works as both `python extract_btc_data.py` (CLI) and as an embedded
+# script in Strategy Mosaic (which executes the file directly).
 
 if __name__ == "__main__":
     main()
+else:
+    # Mosaic embedded mode — execute and expose result as `df`
+    df = main()
