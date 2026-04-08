@@ -142,6 +142,7 @@ function App() {
       {/* Top-left: Title + key metrics */}
       <div className="hud hud-top-left">
         <h1 className="hud-title">Visualizing the Bitcoin Network as a Digital Twin</h1>
+        <p className="hud-powered">Powered by Strategy Mosaic</p>
         <div className="hud-metrics">
           <div className="hud-metric"><span>Block</span><strong>#{effectiveSnapshot.blockHeight.toLocaleString()}</strong></div>
           <div className="hud-metric"><span>Mempool</span><strong>{effectiveSnapshot.mempoolTxCount.toLocaleString()}</strong></div>
