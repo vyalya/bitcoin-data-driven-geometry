@@ -464,6 +464,115 @@ textarea {
   color: var(--accent);
 }
 
+/* ─── What-If Sliders ─── */
+.slider-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slider-row {
+  padding: 4px 0;
+}
+
+.slider-row.overridden .slider-label {
+  color: var(--accent);
+}
+
+.slider-row.overridden .slider-value {
+  color: var(--accent);
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 3px;
+}
+
+.slider-label {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.slider-value {
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.slider-unit {
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  margin-left: 2px;
+}
+
+.slider-row input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  background: var(--surface-elevated);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.slider-row.overridden input[type="range"]::-webkit-slider-thumb {
+  background: var(--accent);
+}
+
+.slider-row input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text);
+  border: none;
+  cursor: pointer;
+}
+
+.slider-row.overridden input[type="range"]::-moz-range-thumb {
+  background: var(--accent);
+}
+
+/* ─── Reset Button ─── */
+.reset-button {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 0.68rem;
+  padding: 3px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.reset-button:hover {
+  background: rgba(250, 102, 15, 0.12);
+}
+
+.simulation-badge {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 /* ─── Scene Tooltips ─── */
 .scene-tooltip {
   background: rgba(0, 0, 0, 0.88);

@@ -3,7 +3,7 @@ import { OrbitControls, Text, Line, Html } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { mosaicSnapshots } from "./data/mosaicSnapshots";
+import { mosaicSnapshots, deriveRingBands } from "./data/mosaicSnapshots";
 import type { NetworkSnapshot, RingBand, MiningPoolSnapshot, FeeBucket } from "./types";
 
 /* ═══════════════════════════════════════════════════════
@@ -39,14 +39,74 @@ const RING_LABELS = [
    APP SHELL
    ═══════════════════════════════════════════════════════ */
 
+/* ─── What-If slider definitions ─── */
+
+interface WhatIfParam {
+  key: string;
+  label: string;
+  min: number;
+  max: number;
+  step: number;
+  unit: string;
+  snapshotField: keyof NetworkSnapshot;
+}
+
+const WHAT_IF_PARAMS: WhatIfParam[] = [
+  { key: "hashrate", label: "Hashrate", min: 0, max: 1000, step: 5, unit: "EH/s", snapshotField: "networkHashrateEh" },
+  { key: "mempool", label: "Mempool Depth", min: 0, max: 500000, step: 5000, unit: "txs", snapshotField: "mempoolTxCount" },
+  { key: "feePressure", label: "Fee Pressure", min: 0, max: 10, step: 0.1, unit: "/10", snapshotField: "feePressureIndex" },
+  { key: "congestion", label: "Congestion", min: 0, max: 10, step: 0.1, unit: "/10", snapshotField: "congestionScore" },
+  { key: "blockStress", label: "Block Stress", min: 0, max: 10, step: 0.1, unit: "/10", snapshotField: "blockProductionStress" },
+];
+
 function App() {
   const [activeId, setActiveId] = useState(mosaicSnapshots[0].id);
-  const activeSnapshot = useMemo(
+  const baseSnapshot = useMemo(
     () => mosaicSnapshots.find((s) => s.id === activeId) ?? mosaicSnapshots[0],
     [activeId]
   );
 
-  const isSimulation = activeSnapshot.mode === "simulation";
+  // What-if overrides — null means "use real data"
+  const [overrides, setOverrides] = useState<Record<string, number | null>>({});
+
+  const hasOverrides = Object.values(overrides).some((v) => v !== null && v !== undefined);
+
+  const setOverride = (key: string, value: number | null) => {
+    setOverrides((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const resetOverrides = () => setOverrides({});
+
+  // Compute effective snapshot by merging base with overrides
+  const effectiveSnapshot = useMemo<NetworkSnapshot>(() => {
+    if (!hasOverrides) return baseSnapshot;
+
+    const s = { ...baseSnapshot };
+
+    for (const param of WHAT_IF_PARAMS) {
+      const ov = overrides[param.key];
+      if (ov !== null && ov !== undefined) {
+        (s as Record<string, unknown>)[param.snapshotField] = ov;
+      }
+    }
+
+    // Recompute health score from stress metrics
+    const fp = s.feePressureIndex;
+    const cg = s.congestionScore;
+    const bs = s.blockProductionStress;
+    const mc = s.minerConcentrationScore;
+    s.networkHealthScore = Math.max(0, Math.min(10, 10 - (fp + cg + bs + mc) / 4));
+
+    // Recompute ring bands from new metrics
+    s.ringBands = deriveRingBands(s);
+
+    // Recompute mempool size estimate
+    s.mempoolSizeMb = s.mempoolTxCount * 0.00028;
+
+    return s;
+  }, [baseSnapshot, overrides, hasOverrides]);
+
+  const mode = hasOverrides ? "What-If" : baseSnapshot.mode === "simulation" ? "Simulation" : "Historical";
 
   return (
     <div className="app-shell">
@@ -58,11 +118,11 @@ function App() {
         <div className="status-cluster">
           <div className="status-pill">
             <span>Mode</span>
-            <strong>{isSimulation ? "Simulation" : "Historical"}</strong>
+            <strong>{mode}</strong>
           </div>
           <div className="status-pill">
             <span>Time</span>
-            <strong>{activeSnapshot.snapshotTime.slice(0, 16).replace("T", " ")}</strong>
+            <strong>{baseSnapshot.snapshotTime.slice(0, 16).replace("T", " ")}</strong>
           </div>
         </div>
       </header>
@@ -72,15 +132,15 @@ function App() {
           <div className="canvas-overlay">
             <div className="hud-card">
               <span>Block Height</span>
-              <strong>#{activeSnapshot.blockHeight.toLocaleString()}</strong>
+              <strong>#{effectiveSnapshot.blockHeight.toLocaleString()}</strong>
             </div>
             <div className="hud-card">
               <span>Mempool</span>
-              <strong>{activeSnapshot.mempoolTxCount.toLocaleString()} txs</strong>
+              <strong>{effectiveSnapshot.mempoolTxCount.toLocaleString()} txs</strong>
             </div>
             <div className="hud-card">
               <span>Hashrate</span>
-              <strong>{activeSnapshot.networkHashrateEh.toFixed(0)} EH/s</strong>
+              <strong>{effectiveSnapshot.networkHashrateEh.toFixed(0)} EH/s</strong>
             </div>
           </div>
 
@@ -99,54 +159,85 @@ function App() {
           >
             <color attach="background" args={["#000000"]} />
             <fog attach="fog" args={["#000000", 25, 55]} />
-            <PrimeRadiantScene snapshot={activeSnapshot} />
+            <PrimeRadiantScene snapshot={effectiveSnapshot} />
             <EffectComposer>
               <Bloom luminanceThreshold={0.08} luminanceSmoothing={0.6} intensity={2.8} mipmapBlur />
             </EffectComposer>
-            <OrbitControls
-              enablePan
-              enableZoom
-              minDistance={1.5}
-              maxDistance={45}
-              minPolarAngle={Math.PI / 8}
-              maxPolarAngle={Math.PI / 1.2}
-            />
+            <OrbitControls enablePan enableZoom minDistance={1.5} maxDistance={45} minPolarAngle={Math.PI / 8} maxPolarAngle={Math.PI / 1.2} />
           </Canvas>
         </section>
 
         <aside className="sidebar">
-          {isSimulation && (
-            <div className="simulation-badge"><span>Simulation Active</span></div>
+          {hasOverrides && (
+            <div className="simulation-badge">
+              <span>What-If Active</span>
+              <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>
+            </div>
           )}
 
+          {/* Time filter — scenario presets */}
           <section className="panel">
-            <p className="eyebrow">Scenario Presets</p>
+            <p className="eyebrow">Time Period</p>
             <div className="button-stack">
               {mosaicSnapshots.map((snapshot) => (
                 <button
                   key={snapshot.id}
-                  className={snapshot.id === activeSnapshot.id ? "scenario-button active" : "scenario-button"}
-                  onClick={() => setActiveId(snapshot.id)}
+                  className={snapshot.id === baseSnapshot.id ? "scenario-button active" : "scenario-button"}
+                  onClick={() => { setActiveId(snapshot.id); resetOverrides(); }}
                   type="button"
                 >
                   <span>{snapshot.label}</span>
-                  <strong>{snapshot.mode === "historical" ? "Observed" : "Simulated"}</strong>
+                  <strong>{snapshot.snapshotTime.slice(0, 10)}</strong>
                 </button>
               ))}
             </div>
           </section>
 
+          {/* What-If Simulation sliders */}
+          <section className="panel">
+            <p className="eyebrow">What-If Simulation</p>
+            <div className="slider-stack">
+              {WHAT_IF_PARAMS.map((param) => {
+                const baseVal = baseSnapshot[param.snapshotField] as number;
+                const currentVal = overrides[param.key] ?? baseVal;
+                const isOverridden = overrides[param.key] !== null && overrides[param.key] !== undefined;
+
+                return (
+                  <div key={param.key} className={`slider-row ${isOverridden ? "overridden" : ""}`}>
+                    <div className="slider-header">
+                      <span className="slider-label">{param.label}</span>
+                      <span className="slider-value">
+                        {param.max > 100 ? currentVal.toLocaleString() : currentVal.toFixed(1)}
+                        <span className="slider-unit">{param.unit}</span>
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={param.min}
+                      max={param.max}
+                      step={param.step}
+                      value={currentVal}
+                      onChange={(e) => setOverride(param.key, parseFloat(e.target.value))}
+                      onDoubleClick={() => setOverride(param.key, null)}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* KPI cards — reactive to what-if */}
           <section className="metrics-grid">
-            <MetricCard label="Fee Pressure" value={activeSnapshot.feePressureIndex.toFixed(1)} severity={getSeverity(activeSnapshot.feePressureIndex)} />
-            <MetricCard label="Congestion" value={activeSnapshot.congestionScore.toFixed(1)} severity={getSeverity(activeSnapshot.congestionScore)} />
-            <MetricCard label="Block Stress" value={activeSnapshot.blockProductionStress.toFixed(1)} severity={getSeverity(activeSnapshot.blockProductionStress)} />
-            <MetricCard label="Health" value={activeSnapshot.networkHealthScore.toFixed(1)} severity={getSeverity(10 - activeSnapshot.networkHealthScore)} />
+            <MetricCard label="Fee Pressure" value={effectiveSnapshot.feePressureIndex.toFixed(1)} severity={getSeverity(effectiveSnapshot.feePressureIndex)} />
+            <MetricCard label="Congestion" value={effectiveSnapshot.congestionScore.toFixed(1)} severity={getSeverity(effectiveSnapshot.congestionScore)} />
+            <MetricCard label="Block Stress" value={effectiveSnapshot.blockProductionStress.toFixed(1)} severity={getSeverity(effectiveSnapshot.blockProductionStress)} />
+            <MetricCard label="Health" value={effectiveSnapshot.networkHealthScore.toFixed(1)} severity={getSeverity(10 - effectiveSnapshot.networkHealthScore)} />
           </section>
 
           <section className="panel">
             <p className="eyebrow">Fee Buckets</p>
             <div className="bucket-list">
-              {activeSnapshot.feeBuckets.map((bucket) => (
+              {effectiveSnapshot.feeBuckets.map((bucket) => (
                 <div className="bucket-row" key={bucket.id}>
                   <div>
                     <strong>{bucket.feeRateLabel}</strong>
@@ -164,7 +255,7 @@ function App() {
           <section className="panel">
             <p className="eyebrow">Mining Pools</p>
             <div className="pool-list">
-              {activeSnapshot.miningPools.map((pool) => (
+              {effectiveSnapshot.miningPools.map((pool) => (
                 <div className="pool-row" key={pool.id}>
                   <div>
                     <strong>{pool.name}</strong>
@@ -182,7 +273,7 @@ function App() {
           <section className="panel">
             <p className="eyebrow">Interpretation</p>
             <ul className="notes-list">
-              {activeSnapshot.notes.map((note) => (
+              {effectiveSnapshot.notes.map((note) => (
                 <li key={note}>{note}</li>
               ))}
             </ul>

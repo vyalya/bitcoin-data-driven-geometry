@@ -16,7 +16,7 @@ import type { NetworkSnapshot } from "../types";
  * Ring bands aren't stored in Mosaic — they're a visual encoding of
  * the underlying metrics, computed here.
  */
-function deriveRingBands(snapshot: {
+export function deriveRingBands(snapshot: {
   feePressureIndex: number;
   congestionScore: number;
   blockProductionStress: number;
