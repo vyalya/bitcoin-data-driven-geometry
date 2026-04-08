@@ -113,6 +113,23 @@ function App() {
   const [showSliders, setShowSliders] = useState(false);
   const clearSelection = () => { setSelectedLayer(null); setSelectedPool(null); };
 
+  // Guided tour
+  const [tourStep, setTourStep] = useState<number | null>(null);
+  const tourSteps = [
+    { title: "Welcome to the Bitcoin Digital Twin", text: "Every shape, ring, and particle is driven by real blockchain data from Strategy Mosaic. Let's walk through what you're seeing." },
+    { title: "Block Spine — 144 Blocks Per Day", text: "The central column shows one full day of Bitcoin block production. Each octahedron is a confirmed block. Size varies with block production stress — a jagged spine means irregular block intervals." },
+    { title: "Core Nexus — Protocol Heartbeat", text: "The glowing polyhedra at the center. Size = Network Health Score. Brighter and larger = healthier. Below 5.5 it turns red-orange." },
+    { title: "Ring 1: Fee Pressure", text: "Innermost ring (deep orange). Divided into 4 quadrants matching fee tiers: 1-10, 11-30, 31-80, 81+ sat/vB. Taller segments = more transactions at that fee level." },
+    { title: "Ring 2: Settlement Health", text: "Second ring. Uniform heights = healthy block production. Jagged = stressed intervals. Driven by blockProductionStress score." },
+    { title: "Ring 3: Congestion", text: "Third ring (red-orange). Wave-shaped from congestionScore. Flat = clear network. Dramatic peaks = heavy congestion. Compare 2017 Bull Run vs 2024 Halving." },
+    { title: "Ring 4: Mempool Depth", text: "Outer ring (copper). Density proportional to pending transactions. The 2024 ATH shows 380K pending txs as a dense ring. Today's 14K is barely visible." },
+    { title: "Mining Pool Constellation", text: "Outer octahedra = top mining pools. Foundry USA (30%) is 6x larger than MARA Pool. Click any node for hashrate details." },
+    { title: "Mempool Strata", text: "Colored particle layers at different depths. Each particle = ~1,000 pending txs. Colors match fee tiers. Only visible when mempool has transactions." },
+    { title: "Time Travel", text: "16 events from Genesis (2009) to today. Switch between them to see how the network evolved. The visualization changes completely for each era." },
+    { title: "What-If Simulation", text: "Drag sliders to modify network parameters in real-time. Increase mempool to 500K and watch particles flood the scene. The visualization is your hypothesis testing tool." },
+    { title: "You're Ready", text: "Click any ring to highlight it. Hover elements for data tooltips. Use time periods to compare eras. Every visual element is deliberate and traceable to a real metric." },
+  ];
+
   return (
     <div className="hud-shell">
       {/* Full-bleed Canvas */}
@@ -206,6 +223,37 @@ function App() {
           </div>
         )}
       </div>
+
+      {/* Tour button */}
+      {tourStep === null && (
+        <button className="hud tour-button" onClick={() => setTourStep(0)} type="button">
+          Take a Tour
+        </button>
+      )}
+
+      {/* Tour overlay */}
+      {tourStep !== null && tourStep < tourSteps.length && (
+        <div className="tour-overlay" onClick={() => setTourStep((tourStep ?? 0) + 1)}>
+          <div className="tour-card" onClick={(e) => e.stopPropagation()}>
+            <div className="tour-step-indicator">
+              {tourSteps.map((_, i) => (
+                <span key={i} className={`tour-dot ${i === tourStep ? "active" : i < tourStep ? "done" : ""}`} />
+              ))}
+            </div>
+            <h3>{tourSteps[tourStep].title}</h3>
+            <p>{tourSteps[tourStep].text}</p>
+            <div className="tour-actions">
+              {tourStep > 0 && <button onClick={() => setTourStep(tourStep - 1)} type="button">Back</button>}
+              {tourStep < tourSteps.length - 1 ? (
+                <button className="tour-next" onClick={() => setTourStep(tourStep + 1)} type="button">Next</button>
+              ) : (
+                <button className="tour-next" onClick={() => setTourStep(null)} type="button">Start Exploring</button>
+              )}
+              <button className="tour-skip" onClick={() => setTourStep(null)} type="button">Skip</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bottom-center: Data strip (fee buckets + pools) */}
       <div className="hud hud-bottom-center">

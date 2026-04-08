@@ -433,3 +433,112 @@ button, input, textarea { font: inherit; }
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
+
+/* ═══ Guided Tour ═══ */
+.tour-button {
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 20px;
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  color: #000;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  z-index: 100;
+}
+
+.tour-button:hover { opacity: 0.85; }
+
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.tour-card {
+  max-width: 440px;
+  padding: 24px 28px;
+  background: rgba(10, 10, 10, 0.95);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
+  cursor: default;
+}
+
+.tour-card h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.tour-card p {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.tour-step-indicator {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.tour-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.2s;
+}
+
+.tour-dot.active { background: var(--accent); }
+.tour-dot.done { background: rgba(250, 102, 15, 0.4); }
+
+.tour-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tour-actions button {
+  padding: 6px 14px;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: border-color 0.15s;
+}
+
+.tour-actions button:hover { border-color: var(--text-tertiary); }
+
+.tour-next {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #000 !important;
+}
+
+.tour-next:hover { opacity: 0.85; }
+
+.tour-skip {
+  margin-left: auto;
+  border: none !important;
+  color: var(--text-tertiary) !important;
+  font-size: 0.65rem !important;
+}
