@@ -321,6 +321,13 @@ function PrimeRadiantScene({ snapshot }: { snapshot: NetworkSnapshot }) {
       <OuterSweepRings />
       <ParticleNebula snapshot={snapshot} />
       <MiningConstellation pools={snapshot.miningPools} hashrate={snapshot.networkHashrateEh} />
+
+      {/* Additional complexity layers */}
+      <MempoolStrata snapshot={snapshot} />
+      <EpochMarkers snapshot={snapshot} />
+      <InterRingFilaments snapshot={snapshot} />
+      <TransactionDust snapshot={snapshot} />
+
       <DataInscriptions snapshot={snapshot} />
       <BlockLabels snapshot={snapshot} />
     </group>
@@ -784,6 +791,247 @@ function MiningNode({ pool, index, total, networkHashrate }: { pool: MiningPoolS
           </div>
         </Html>
       )}
+    </group>
+  );
+}
+
+/* ─── MEMPOOL STRATA ───
+   Layered particle sheets at different z-depths representing fee tiers.
+   Low-fee txs float at the back, high-fee txs push to the front.
+   Creates visible stratification when viewed from the side.
+*/
+
+function MempoolStrata({ snapshot }: { snapshot: NetworkSnapshot }) {
+  const mempoolNorm = Math.min(snapshot.mempoolTxCount / 400000, 1);
+  if (mempoolNorm < 0.01) return null; // no mempool = no strata
+
+  const strata = useMemo(() => {
+    const layers: Array<{ z: number; count: number; radius: number; color: string; size: number; opacity: number }> = [];
+    const buckets = snapshot.feeBuckets;
+
+    buckets.forEach((bucket, i) => {
+      const count = Math.max(15, Math.round(bucket.txShare * mempoolNorm * 300));
+      layers.push({
+        z: -0.8 + i * 0.5,
+        count,
+        radius: 1.8 + i * 0.6,
+        color: ["#FFAA44", "#FF8833", "#FF5500", "#FF3300"][i] || "#FA660F",
+        size: 0.008 + bucket.intensity * 0.012,
+        opacity: 0.15 + bucket.intensity * 0.3,
+      });
+    });
+
+    return layers;
+  }, [snapshot.feeBuckets, mempoolNorm]);
+
+  return (
+    <group>
+      {strata.map((layer, li) => {
+        const positions = new Float32Array(layer.count * 3);
+        for (let i = 0; i < layer.count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const r = layer.radius * (0.5 + Math.random() * 0.8);
+          positions[i * 3] = Math.cos(angle) * r;
+          positions[i * 3 + 1] = Math.sin(angle) * r;
+          positions[i * 3 + 2] = layer.z + (Math.random() - 0.5) * 0.3;
+        }
+        return (
+          <points key={li}>
+            <bufferGeometry>
+              <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+            </bufferGeometry>
+            <pointsMaterial color={layer.color} size={layer.size} sizeAttenuation transparent opacity={layer.opacity} />
+          </points>
+        );
+      })}
+    </group>
+  );
+}
+
+/* ─── EPOCH MARKERS ───
+   Small tick marks on the outer boundary ring representing difficulty
+   adjustment epochs. Each mark = one epoch (~2016 blocks ≈ 2 weeks).
+   Denser marks = more epochs visible in the historical window.
+*/
+
+function EpochMarkers({ snapshot }: { snapshot: NetworkSnapshot }) {
+  const epochCount = Math.floor(snapshot.blockHeight / 2016);
+  // Show last 24 epochs (≈ 1 year of difficulty adjustments)
+  const visibleEpochs = Math.min(epochCount, 24);
+
+  const markers = useMemo(() => {
+    const result: Array<{ angle: number; height: number; isHalving: boolean }> = [];
+    for (let i = 0; i < visibleEpochs; i++) {
+      const epoch = epochCount - visibleEpochs + i;
+      const blockAtEpoch = epoch * 2016;
+      // Is this epoch near a halving?
+      const isHalving = [210000, 420000, 630000, 840000].some(
+        (h) => Math.abs(blockAtEpoch - h) < 2016
+      );
+      result.push({
+        angle: (i / visibleEpochs) * Math.PI * 2 - Math.PI / 2,
+        height: isHalving ? 0.25 : 0.08 + (i / visibleEpochs) * 0.06,
+        isHalving,
+      });
+    }
+    return result;
+  }, [epochCount, visibleEpochs]);
+
+  return (
+    <group position={[0, 0, -0.5]}>
+      {markers.map((m, i) => {
+        const r = 6.0;
+        return (
+          <mesh
+            key={i}
+            position={[Math.cos(m.angle) * r, Math.sin(m.angle) * r, 0]}
+            rotation={[0, 0, m.angle]}
+          >
+            <boxGeometry args={[0.005, m.height, 0.03]} />
+            <meshStandardMaterial
+              color={m.isHalving ? "#FFCC00" : "#FA660F"}
+              emissive={m.isHalving ? "#FFCC00" : "#FA660F"}
+              emissiveIntensity={m.isHalving ? 1.2 : 0.3}
+              transparent
+              opacity={m.isHalving ? 0.9 : 0.25}
+            />
+          </mesh>
+        );
+      })}
+
+      {/* Halving labels */}
+      {markers.filter((m) => m.isHalving).map((m, i) => (
+        <Text
+          key={`h-${i}`}
+          position={[Math.cos(m.angle) * 6.35, Math.sin(m.angle) * 6.35, 0]}
+          fontSize={0.05}
+          color="#FFCC00"
+          anchorX="center"
+          anchorY="middle"
+          fillOpacity={0.4}
+          font={undefined}
+        >
+          HALVING
+        </Text>
+      ))}
+    </group>
+  );
+}
+
+/* ─── INTER-RING FILAMENTS ───
+   Thin arcs connecting adjacent rings, suggesting data flow between
+   network layers. Density proportional to network activity.
+   Creates visual complexity between the concentric rings.
+*/
+
+function InterRingFilaments({ snapshot }: { snapshot: NetworkSnapshot }) {
+  const activity = (snapshot.feePressureIndex + snapshot.congestionScore) / 20;
+  const filamentCount = Math.max(8, Math.round(activity * 40));
+
+  const filaments = useMemo(() => {
+    const result: Array<{ startR: number; endR: number; angle: number; opacity: number }> = [];
+    const rng = (seed: number) => {
+      let s = seed;
+      return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+    };
+    const rand = rng(snapshot.blockHeight);
+
+    for (let i = 0; i < filamentCount; i++) {
+      const ringIdx = Math.floor(rand() * 3);
+      const radii = [2.0, 2.85, 3.75, 4.85];
+      result.push({
+        startR: radii[ringIdx],
+        endR: radii[ringIdx + 1],
+        angle: rand() * Math.PI * 2,
+        opacity: 0.02 + rand() * 0.06,
+      });
+    }
+    return result;
+  }, [filamentCount, snapshot.blockHeight]);
+
+  return (
+    <group>
+      {filaments.map((f, i) => {
+        const angleSpread = 0.04;
+        return (
+          <Line
+            key={i}
+            points={[
+              [Math.cos(f.angle) * f.startR, Math.sin(f.angle) * f.startR, 0],
+              [Math.cos(f.angle + angleSpread) * ((f.startR + f.endR) / 2), Math.sin(f.angle + angleSpread) * ((f.startR + f.endR) / 2), 0.1],
+              [Math.cos(f.angle + angleSpread * 2) * f.endR, Math.sin(f.angle + angleSpread * 2) * f.endR, 0],
+            ]}
+            color="#FA660F"
+            lineWidth={0.2}
+            transparent
+            opacity={f.opacity}
+          />
+        );
+      })}
+    </group>
+  );
+}
+
+/* ─── TRANSACTION DUST ───
+   Tiny geometric fragments scattered throughout the scene representing
+   individual data points — blocks, transactions, confirmations.
+   Each is a micro-octahedron or cube. Creates the "organized chaos" texture.
+   Count scales with network activity.
+*/
+
+function TransactionDust({ snapshot }: { snapshot: NetworkSnapshot }) {
+  const activity = (snapshot.feePressureIndex + snapshot.congestionScore + snapshot.blockProductionStress) / 30;
+  const mempoolNorm = Math.min(snapshot.mempoolTxCount / 400000, 1);
+  const dustCount = Math.max(30, Math.round((activity + mempoolNorm) * 120));
+
+  const fragments = useMemo(() => {
+    const result: Array<{
+      x: number; y: number; z: number;
+      scale: number; type: "oct" | "box";
+      opacity: number;
+    }> = [];
+
+    const rng = (seed: number) => {
+      let s = seed;
+      return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+    };
+    const rand = rng(snapshot.blockHeight + 999);
+
+    for (let i = 0; i < dustCount; i++) {
+      const angle = rand() * Math.PI * 2;
+      const radius = 1.0 + rand() * 6.5;
+      const z = (rand() - 0.5) * 3;
+
+      result.push({
+        x: Math.cos(angle) * radius,
+        y: Math.sin(angle) * radius,
+        z,
+        scale: 0.008 + rand() * 0.025,
+        type: rand() > 0.5 ? "oct" : "box",
+        opacity: 0.04 + rand() * 0.12,
+      });
+    }
+    return result;
+  }, [dustCount, snapshot.blockHeight]);
+
+  return (
+    <group>
+      {fragments.map((f, i) => (
+        <mesh key={i} position={[f.x, f.y, f.z]}>
+          {f.type === "oct" ? (
+            <octahedronGeometry args={[f.scale, 0]} />
+          ) : (
+            <boxGeometry args={[f.scale, f.scale, f.scale]} />
+          )}
+          <meshStandardMaterial
+            color="#FA660F"
+            emissive="#FA660F"
+            emissiveIntensity={0.3}
+            transparent
+            opacity={f.opacity}
+          />
+        </mesh>
+      ))}
     </group>
   );
 }
