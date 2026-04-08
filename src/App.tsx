@@ -525,151 +525,178 @@ function BlockSpine({ snapshot }: { snapshot: NetworkSnapshot }) {
   );
 }
 
-/* ─── SEGMENTED DATA RING ───
-   Each ring's segments represent a REAL data distribution:
+/* ─── DATA RING ───
+   Each ring has segments matching its ACTUAL data granularity:
 
-   Ring 0 (Fee Pressure): Segments are sized by fee bucket distribution.
-     The circle is divided into 4 quadrants matching the 4 fee tiers.
-     Each quadrant's segments are taller where that fee tier is dominant.
+   Ring 0 (Fee Pressure): 4 sectors = 4 fee tiers. Height = txShare.
+   Ring 1 (Settlement): 1 sector per block mined (up to 144). Height = uniform (healthy) or varied (stressed).
+   Ring 2 (Congestion): 4 sectors = mempool txs per fee tier. Height = pending txs in that tier.
+   Ring 3 (Mining): 5 sectors = 5 pools. Arc width = hashrate share. Height = share proportion.
 
-   Ring 1 (Settlement): Segments represent block production health.
-     Height = how close to target interval. Uniform = healthy. Jagged = stressed.
-
-   Ring 2 (Congestion): Segments sized by congestion score.
-     More active segments = more congestion. Empty congestion = sparse ring.
-
-   Ring 3 (Mempool Depth): Segments represent pending transaction volume.
-     Dense ring = deep mempool. Sparse = clear mempool.
+   Every segment is individually hoverable with a unique tooltip.
 */
 
 function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSelect }: {
   band: RingBand; index: number; snapshot: NetworkSnapshot;
   isSelected?: boolean; isDimmed?: boolean; onSelect?: () => void;
 }) {
-  const groupRef = useRef<THREE.Group>(null);
-
   const color = RING_COLORS[index] || "#FA660F";
   const label = RING_LABELS[index] || "";
+  const dimFactor = isDimmed ? 0.15 : 1;
+  const [hoveredSeg, setHoveredSeg] = useState<number | null>(null);
 
-  const metricValue = [
-    snapshot.feePressureIndex / 10,
-    1 - snapshot.blockProductionStress / 10,
-    snapshot.congestionScore / 10,
-    Math.min(snapshot.mempoolTxCount / 400000, 1),
-  ][index] ?? 0.5;
-
-  const segCount = 96;
-  const activeCount = Math.round(segCount * band.activeShare);
-
-  // Fee bucket shares for distribution-based height mapping
-  const feeShares = snapshot.feeBuckets.map((b) => b.txShare);
-
+  // Build segments based on ring type — each segment is a UNIQUE data point
   const segments = useMemo(() => {
     const result: Array<{
-      x: number; y: number; angle: number;
-      isActive: boolean; isMajor: boolean;
-      height: number; width: number; depth: number;
-      emIntensity: number;
+      startAngle: number; endAngle: number; midAngle: number;
+      height: number; depth: number; emIntensity: number;
+      tooltipTitle: string; tooltipDetail: string;
     }> = [];
 
-    for (let i = 0; i < segCount; i++) {
-      const angle = (i / segCount) * Math.PI * 2;
-      const isActive = i < activeCount;
-      const isMajor = i % 8 === 0;
-      const segFraction = i / segCount;
-
-      // DATA-DRIVEN height per ring type
-      let dataHeight: number;
-
-      if (index === 0) {
-        // Fee Pressure ring: height maps to fee tier distribution
-        // 4 quadrants, each representing a fee tier
-        const quadrant = Math.floor(segFraction * 4);
-        const tierShare = feeShares[quadrant] ?? 0.25;
-        dataHeight = isActive ? 0.02 + tierShare * 0.35 * metricValue : 0.005;
-      } else if (index === 1) {
-        // Settlement ring: uniform height when healthy, jagged when stressed
-        const stress = snapshot.blockProductionStress / 10;
-        const rng = Math.sin(i * 7.3 + snapshot.blockHeight * 0.01);
-        const jag = stress * rng * 0.5; // stress adds irregularity
-        dataHeight = isActive ? 0.03 + metricValue * 0.12 + jag * 0.08 : 0.005;
-      } else if (index === 2) {
-        // Congestion ring: height builds from one side like a wave
-        const wave = Math.max(0, Math.sin(angle * 1.5 - Math.PI * 0.3));
-        dataHeight = isActive ? 0.01 + metricValue * 0.25 * wave : 0.003;
-      } else {
-        // Mempool depth ring: sparse or dense based on actual count
-        const density = Math.min(snapshot.mempoolTxCount / 400000, 1);
-        const pulse = 0.5 + Math.sin(angle * 3 + 1.2) * 0.5;
-        dataHeight = isActive ? 0.008 + density * 0.2 * pulse : 0.003;
+    if (index === 0) {
+      // FEE PRESSURE: 4 sectors = 4 fee tiers
+      const tiers = snapshot.feeBuckets;
+      let angleOffset = 0;
+      tiers.forEach((tier) => {
+        const arcSpan = (Math.PI * 2) * tier.txShare; // proportional arc
+        const height = 0.03 + tier.txShare * 0.3 + (snapshot.feePressureIndex / 10) * 0.15;
+        const mempoolInTier = Math.round(snapshot.mempoolTxCount * tier.txShare);
+        result.push({
+          startAngle: angleOffset,
+          endAngle: angleOffset + arcSpan,
+          midAngle: angleOffset + arcSpan / 2,
+          height,
+          depth: 0.04 + tier.intensity * 0.03,
+          emIntensity: 0.3 + tier.intensity * 1.2,
+          tooltipTitle: `Fee Tier: ${tier.feeRateLabel}`,
+          tooltipDetail: `${(tier.txShare * 100).toFixed(1)}% of transactions\n${mempoolInTier > 0 ? mempoolInTier.toLocaleString() + " pending txs" : "No pending txs"}\nIntensity: ${(tier.intensity * 100).toFixed(0)}/100`,
+        });
+        angleOffset += arcSpan;
+      });
+    } else if (index === 1) {
+      // SETTLEMENT: 24 segments (one per ~6 blocks, representing block production rhythm)
+      const blockCount = 24;
+      const stress = snapshot.blockProductionStress / 10;
+      let seed = snapshot.blockHeight * 17;
+      for (let i = 0; i < blockCount; i++) {
+        const arcSpan = (Math.PI * 2) / blockCount;
+        const startAngle = i * arcSpan;
+        seed = (seed * 16807) % 2147483647;
+        const jag = stress * ((seed / 2147483647) - 0.5) * 2;
+        const baseHeight = 0.05 + (1 - stress) * 0.1;
+        const height = Math.max(0.01, baseHeight + jag * 0.12);
+        const blocksPerSeg = Math.round(144 / blockCount);
+        const blockNum = snapshot.blockHeight - 144 + i * blocksPerSeg;
+        result.push({
+          startAngle, endAngle: startAngle + arcSpan, midAngle: startAngle + arcSpan / 2,
+          height, depth: 0.04, emIntensity: 0.4 + (1 - stress) * 0.6,
+          tooltipTitle: `Blocks #${blockNum.toLocaleString()}–${(blockNum + blocksPerSeg - 1).toLocaleString()}`,
+          tooltipDetail: `${blocksPerSeg} blocks in this segment\nAvg interval: ${snapshot.avgBlockIntervalSeconds}s\nStress: ${snapshot.blockProductionStress.toFixed(1)}/10`,
+        });
       }
-
-      const height = isMajor ? dataHeight * 1.8 : dataHeight;
-      const arcLen = (2 * Math.PI * band.radius) / segCount;
-      const width = arcLen * 0.65;
-      const depth = isActive ? 0.02 + metricValue * 0.035 : 0.008;
-
-      const emIntensity = isActive
-        ? (0.2 + metricValue * 1.0) * (height / 0.1) // brighter when taller
-        : 0;
-
-      result.push({ x: Math.cos(angle) * band.radius, y: Math.sin(angle) * band.radius, angle, isActive, isMajor, height: Math.max(0.003, height), width, depth, emIntensity: Math.min(emIntensity, 2) });
+    } else if (index === 2) {
+      // CONGESTION: 4 sectors = mempool breakdown by fee tier
+      const tiers = snapshot.feeBuckets;
+      const total = snapshot.mempoolTxCount;
+      let angleOffset = 0;
+      tiers.forEach((tier) => {
+        const txsInTier = Math.round(total * tier.txShare);
+        const tierFraction = total > 0 ? txsInTier / 400000 : 0; // normalize to max
+        const arcSpan = (Math.PI * 2) / 4;
+        const height = 0.01 + tierFraction * 0.35 + (snapshot.congestionScore / 10) * 0.05;
+        result.push({
+          startAngle: angleOffset, endAngle: angleOffset + arcSpan, midAngle: angleOffset + arcSpan / 2,
+          height: Math.max(0.005, height), depth: 0.03 + tierFraction * 0.04,
+          emIntensity: total > 0 ? 0.3 + tierFraction * 1.5 : 0.05,
+          tooltipTitle: `Mempool: ${tier.feeRateLabel}`,
+          tooltipDetail: `${txsInTier.toLocaleString()} pending txs\n${(tier.txShare * 100).toFixed(1)}% of mempool\nCongestion: ${snapshot.congestionScore.toFixed(1)}/10`,
+        });
+        angleOffset += arcSpan;
+      });
+    } else {
+      // MINING: 5 sectors = 5 pools, arc width = hashrate share
+      let angleOffset = 0;
+      snapshot.miningPools.forEach((pool) => {
+        const arcSpan = (Math.PI * 2) * pool.sharePct;
+        const height = 0.03 + pool.sharePct * 0.4;
+        result.push({
+          startAngle: angleOffset, endAngle: angleOffset + arcSpan, midAngle: angleOffset + arcSpan / 2,
+          height, depth: 0.04 + pool.sharePct * 0.05,
+          emIntensity: 0.3 + pool.sharePct * 1.5,
+          tooltipTitle: pool.name,
+          tooltipDetail: `${(pool.sharePct * 100).toFixed(1)}% hashrate\n${pool.hashRateEh} EH/s\n${pool.shareChange30d >= 0 ? "+" : ""}${(pool.shareChange30d * 100).toFixed(1)}% 30d`,
+        });
+        angleOffset += arcSpan;
+      });
     }
+
     return result;
-  }, [segCount, activeCount, band.radius, metricValue, index, feeShares, snapshot.blockProductionStress, snapshot.blockHeight, snapshot.mempoolTxCount]);
+  }, [index, snapshot]);
 
-  const dimFactor = isDimmed ? 0.15 : 1;
-  const [hovered, setHovered] = useState(false);
-
-  // Ring-level tooltip text
-  const ringTooltip = [
-    `Fee Pressure: ${snapshot.feePressureIndex.toFixed(1)}/10\n${segCount} segments · ${activeCount} active (${(band.activeShare * 100).toFixed(0)}%)\n4 quadrants = 4 fee tiers`,
-    `Settlement: stress ${snapshot.blockProductionStress.toFixed(1)}/10\nBlock interval: ${snapshot.avgBlockIntervalSeconds}s avg\n${snapshot.blockProductionStress < 2 ? "Uniform = healthy" : "Jagged = stressed intervals"}`,
-    `Congestion: ${snapshot.congestionScore.toFixed(1)}/10\n${snapshot.mempoolTxCount.toLocaleString()} pending txs\n${snapshot.congestionScore > 3 ? "Heavy backlog" : snapshot.congestionScore > 0 ? "Mild congestion" : "Clear"}`,
-    `Mempool Depth: ${snapshot.mempoolTxCount.toLocaleString()} txs\n${snapshot.mempoolSizeMb.toFixed(1)} MB\n${snapshot.mempoolTxCount > 100000 ? "Deep mempool" : "Shallow"}`,
-  ][index] || "";
-
+  // Render segments as arc-shaped box groups
   return (
-    <group
-      ref={groupRef}
-      onClick={(e) => { e.stopPropagation(); onSelect?.(); }}
-      onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
-      onPointerOut={() => setHovered(false)}
-    >
-      {/* Clickable track ring */}
+    <group onClick={(e) => { e.stopPropagation(); onSelect?.(); }}>
+      {/* Track ring */}
       <mesh>
         <ringGeometry args={[band.radius - 0.008, band.radius + 0.008, 256]} />
-        <meshBasicMaterial color={color} transparent opacity={(isSelected || hovered ? 0.06 : 0.02) * dimFactor} />
+        <meshBasicMaterial color={color} transparent opacity={(isSelected ? 0.06 : 0.02) * dimFactor} />
       </mesh>
 
-      {/* Ring tooltip */}
-      {hovered && (
-        <Html position={[0, band.radius + 0.35, 0.2]} center style={{ pointerEvents: "none" }}>
-          <div className="scene-tooltip" style={{ whiteSpace: "pre-line" }}>
-            <strong>{label}</strong><br />{ringTooltip}
-          </div>
-        </Html>
-      )}
+      {/* Data segments — each is a unique data point */}
+      {segments.map((seg, si) => {
+        const isHovered = hoveredSeg === si;
+        // Render segment as multiple small boxes along the arc
+        const arcLen = seg.endAngle - seg.startAngle;
+        const subCount = Math.max(3, Math.round(arcLen / (Math.PI * 2) * 60)); // proportional sub-segments
+        const gap = arcLen * 0.05; // 5% gap between segments
 
-      {/* Segments */}
-      {segments.map((seg, i) => (
-        <mesh key={i} position={[seg.x, seg.y, 0]} rotation={[0, 0, seg.angle]}>
-          <boxGeometry args={[seg.width, seg.height, seg.depth]} />
-          {seg.isActive ? (
-            <meshStandardMaterial
-              color={color}
-              emissive={color}
-              emissiveIntensity={seg.emIntensity * dimFactor}
-              metalness={0.3}
-              roughness={0.3}
-              transparent
-              opacity={(0.7 + metricValue * 0.25) * dimFactor}
-            />
-          ) : (
-            <meshBasicMaterial color="#0D0800" transparent opacity={0.03 * dimFactor} />
-          )}
-        </mesh>
-      ))}
+        return (
+          <group key={si}>
+            {Array.from({ length: subCount }).map((_, j) => {
+              const t = j / subCount;
+              const angle = seg.startAngle + gap / 2 + t * (arcLen - gap);
+              const x = Math.cos(angle) * band.radius;
+              const y = Math.sin(angle) * band.radius;
+              const subArc = (arcLen - gap) / subCount;
+              const w = subArc * band.radius * 0.9;
+
+              return (
+                <mesh
+                  key={j}
+                  position={[x, y, 0]}
+                  rotation={[0, 0, angle]}
+                  onPointerOver={(e) => { e.stopPropagation(); setHoveredSeg(si); }}
+                  onPointerOut={() => setHoveredSeg(null)}
+                >
+                  <boxGeometry args={[w, seg.height * (isHovered ? 1.3 : 1), seg.depth]} />
+                  <meshStandardMaterial
+                    color={color}
+                    emissive={color}
+                    emissiveIntensity={(isHovered ? seg.emIntensity * 1.5 : seg.emIntensity) * dimFactor}
+                    metalness={0.3}
+                    roughness={0.3}
+                    transparent
+                    opacity={(isHovered ? 0.95 : 0.7) * dimFactor}
+                  />
+                </mesh>
+              );
+            })}
+
+            {/* Per-segment tooltip */}
+            {isHovered && (
+              <Html
+                position={[Math.cos(seg.midAngle) * (band.radius + 0.4), Math.sin(seg.midAngle) * (band.radius + 0.4), 0.2]}
+                center
+                style={{ pointerEvents: "none" }}
+              >
+                <div className="scene-tooltip" style={{ whiteSpace: "pre-line" }}>
+                  <strong>{seg.tooltipTitle}</strong><br />{seg.tooltipDetail}
+                </div>
+              </Html>
+            )}
+          </group>
+        );
+      })}
 
       {/* Ring label */}
       <Text
@@ -683,8 +710,6 @@ function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSele
       >
         {label}
       </Text>
-
-      {/* Metric value label */}
       <Text
         position={[0, band.radius + 0.12, 0.1]}
         fontSize={0.045}
@@ -694,7 +719,7 @@ function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSele
         fillOpacity={0.18}
         font={undefined}
       >
-        {(metricValue * 10).toFixed(1)}/10
+        {([snapshot.feePressureIndex, snapshot.blockProductionStress, snapshot.congestionScore, snapshot.minerConcentrationScore][index] ?? 0).toFixed(1)}/10
       </Text>
     </group>
   );
