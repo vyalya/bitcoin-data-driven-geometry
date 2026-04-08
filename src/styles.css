@@ -146,6 +146,20 @@ button, input, textarea { font: inherit; }
   font-variant-numeric: tabular-nums;
 }
 
+/* What-If inside right panel */
+.hud-whatif-section {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.hud-whatif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
 /* ─── Bottom Left: KPIs + Legend ─── */
 .hud-bottom-left {
   bottom: 16px;
@@ -222,16 +236,7 @@ button, input, textarea { font: inherit; }
   flex-shrink: 0;
 }
 
-/* ─── Left Center: What-If Sliders ─── */
-.hud-left-center {
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-}
+/* (What-If sliders moved into right panel) */
 
 .hud-toggle-row {
   display: flex;

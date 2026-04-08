@@ -10,10 +10,6 @@ import type { NetworkSnapshot, RingBand, MiningPoolSnapshot, FeeBucket } from ".
    HELPERS
    ═══════════════════════════════════════════════════════ */
 
-function formatPct(value: number) {
-  return `${(value * 100).toFixed(1)}%`;
-}
-
 function getSeverity(value: number): "normal" | "elevated" | "critical" {
   if (value >= 8) return "critical";
   if (value >= 6) return "elevated";
@@ -109,25 +105,22 @@ function App() {
   // Interactive selection state — driven by clicking elements in the 3D scene
   const [selectedLayer, setSelectedLayer] = useState<string | null>(null);
   const [selectedPool, setSelectedPool] = useState<string | null>(null);
-
-  const [showSliders, setShowSliders] = useState(false);
   const clearSelection = () => { setSelectedLayer(null); setSelectedPool(null); };
 
   // Guided tour
   const [tourStep, setTourStep] = useState<number | null>(null);
+  // Tour walks through a REAL scenario with specific metric values
+  const s = effectiveSnapshot;
   const tourSteps = [
-    { title: "Welcome to the Bitcoin Digital Twin", text: "Every shape, ring, and particle is driven by real blockchain data from Strategy Mosaic. Let's walk through what you're seeing." },
-    { title: "Block Spine — 144 Blocks Per Day", text: "The central column shows one full day of Bitcoin block production. Each octahedron is a confirmed block. Size varies with block production stress — a jagged spine means irregular block intervals." },
-    { title: "Core Nexus — Protocol Heartbeat", text: "The glowing polyhedra at the center. Size = Network Health Score. Brighter and larger = healthier. Below 5.5 it turns red-orange." },
-    { title: "Ring 1: Fee Pressure", text: "Innermost ring (deep orange). Divided into 4 quadrants matching fee tiers: 1-10, 11-30, 31-80, 81+ sat/vB. Taller segments = more transactions at that fee level." },
-    { title: "Ring 2: Settlement Health", text: "Second ring. Uniform heights = healthy block production. Jagged = stressed intervals. Driven by blockProductionStress score." },
-    { title: "Ring 3: Congestion", text: "Third ring (red-orange). Wave-shaped from congestionScore. Flat = clear network. Dramatic peaks = heavy congestion. Compare 2017 Bull Run vs 2024 Halving." },
-    { title: "Ring 4: Mempool Depth", text: "Outer ring (copper). Density proportional to pending transactions. The 2024 ATH shows 380K pending txs as a dense ring. Today's 14K is barely visible." },
-    { title: "Mining Pool Constellation", text: "Outer octahedra = top mining pools. Foundry USA (30%) is 6x larger than MARA Pool. Click any node for hashrate details." },
-    { title: "Mempool Strata", text: "Colored particle layers at different depths. Each particle = ~1,000 pending txs. Colors match fee tiers. Only visible when mempool has transactions." },
-    { title: "Time Travel", text: "16 events from Genesis (2009) to today. Switch between them to see how the network evolved. The visualization changes completely for each era." },
-    { title: "What-If Simulation", text: "Drag sliders to modify network parameters in real-time. Increase mempool to 500K and watch particles flood the scene. The visualization is your hypothesis testing tool." },
-    { title: "You're Ready", text: "Click any ring to highlight it. Hover elements for data tooltips. Use time periods to compare eras. Every visual element is deliberate and traceable to a real metric." },
+    { title: "Welcome", text: "This is a real-time digital twin of the Bitcoin network, powered by Strategy Mosaic. Every shape you see is driven by actual blockchain metrics. Let's analyze what's happening." },
+    { title: `Block Spine — ${s.blockHeight.toLocaleString()} blocks deep`, text: `You're looking at block #${s.blockHeight.toLocaleString()}. The central column shows 144 blocks (one day's production). Each octahedron is a confirmed block. Current block interval: ${s.avgBlockIntervalSeconds}s avg (target: 600s). ${s.blockProductionStress > 2 ? "The jagged sizing shows irregular intervals — block stress is " + s.blockProductionStress.toFixed(1) + "/10." : "Uniform sizing means healthy block production — stress only " + s.blockProductionStress.toFixed(1) + "/10."}` },
+    { title: `Core Nexus — Health ${s.networkHealthScore.toFixed(1)}/10`, text: `The glowing core scales with Network Health Score: ${s.networkHealthScore.toFixed(1)}/10. ${s.networkHealthScore > 8 ? "Large and bright = very healthy. " : s.networkHealthScore > 6 ? "Moderate size = some stress present. " : "Small and reddish = significant stress. "}Health = inverse of (fee pressure + congestion + block stress + miner concentration) / 4.` },
+    { title: `Fee Pressure Ring — ${s.feePressureIndex.toFixed(1)}/10`, text: `Innermost ring (deep orange). Fee pressure is ${s.feePressureIndex.toFixed(1)}/10. ${s.feePressureIndex > 2 ? "Active segments are tall — users are competing for block space. " : "Low segments — fees are cheap, no competition. "}The ring is divided into 4 quadrants matching fee tiers (1-10, 11-30, 31-80, 81+ sat/vB). Taller quadrant = more transactions at that fee level.` },
+    { title: `Congestion Ring — ${s.congestionScore.toFixed(1)}/10`, text: `Third ring (red-orange). Congestion score: ${s.congestionScore.toFixed(1)}/10. ${s.congestionScore > 3 ? "Dramatic wave peaks — " + s.mempoolTxCount.toLocaleString() + " transactions waiting in the mempool (" + s.mempoolSizeMb.toFixed(0) + " MB). " : s.mempoolTxCount > 0 ? "Mild activity — " + s.mempoolTxCount.toLocaleString() + " pending txs. " : "Nearly flat — mempool is clear. "}Compare this to the 2024 ATH (congestion 4.76, 380K txs) or the China Ban (0, empty).` },
+    { title: `Hashrate — ${s.networkHashrateEh.toFixed(0)} EH/s`, text: `Mining pool nodes on the outer ring show who secures the network. Total hashrate: ${s.networkHashrateEh.toFixed(0)} EH/s. Foundry USA leads at 30%. ${s.networkHashrateEh > 500 ? "This is massive — 500x more than 2017's 13 EH/s. " : s.networkHashrateEh > 100 ? "Solid hashrate — network well-secured. " : "Early days — the network was small but functional. "}Node size is proportional to pool share. Hover for details.` },
+    { title: "Time Travel — 25 Events", text: "The right panel has 25 historically significant dates from Genesis (2009) to today. Each completely transforms the visualization. Try: select '2017 Bull Run Peak' and watch the rings light up with congestion. Then select 'FTX Collapse' — the network looks healthy because Bitcoin's protocol didn't care about FTX." },
+    { title: "What-If Simulation", text: `Current mempool: ${s.mempoolTxCount.toLocaleString()} txs. Try dragging 'Mempool Depth' to 400,000 and watch particles flood the scene, the congestion ring ignite, and health score drop. Then drag 'Hashrate' to 50 EH/s to simulate a mining crisis. The visualization is your hypothesis testing lab.` },
+    { title: "Start Exploring", text: "Hover any element for its data tooltip. Click rings to highlight them. Switch time periods to compare eras. Use What-If sliders to stress-test the network. Every shape, size, and color traces back to a real Mosaic metric." },
   ];
 
   return (
@@ -144,6 +137,7 @@ function App() {
         <PrimeRadiantScene
           snapshot={effectiveSnapshot}
           selectedLayer={selectedLayer}
+          selectedPool={selectedPool}
           onSelectLayer={(layer) => { setSelectedLayer(layer); setSelectedPool(null); }}
           onSelectPool={(pool) => { setSelectedPool(pool); setSelectedLayer(null); }}
           onDeselect={clearSelection}
@@ -178,6 +172,27 @@ function App() {
             </button>
           ))}
         </div>
+        {/* What-If Simulation */}
+        <div className="hud-whatif-section">
+          <div className="hud-whatif-header">
+            <p className="eyebrow">What-If Simulation</p>
+            {hasOverrides && <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>}
+          </div>
+          {WHAT_IF_PARAMS.map((param) => {
+            const baseVal = baseSnapshot[param.snapshotField] as number;
+            const currentVal = overrides[param.key] ?? baseVal;
+            const isOverridden = overrides[param.key] !== null && overrides[param.key] !== undefined;
+            return (
+              <div key={param.key} className={`slider-row ${isOverridden ? "overridden" : ""}`}>
+                <div className="slider-header">
+                  <span className="slider-label">{param.label}</span>
+                  <span className="slider-value">{param.max > 100 ? currentVal.toLocaleString() : currentVal.toFixed(1)}<span className="slider-unit">{param.unit}</span></span>
+                </div>
+                <input type="range" min={param.min} max={param.max} step={param.step} value={currentVal} onChange={(e) => setOverride(param.key, parseFloat(e.target.value))} onDoubleClick={() => setOverride(param.key, null)} />
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Bottom-left: KPIs + Legend */}
@@ -196,33 +211,7 @@ function App() {
         </div>
       </div>
 
-      {/* Left-center: What-if sliders (collapsible) */}
-      <div className="hud hud-left-center">
-        <div className="hud-toggle-row">
-          <button className="hud-toggle" onClick={() => setShowSliders(!showSliders)} type="button">
-            {showSliders ? "Close" : "What-If"}{hasOverrides ? " ●" : ""}
-          </button>
-          {hasOverrides && <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>}
-        </div>
-        {showSliders && (
-          <div className="hud-sliders">
-            {WHAT_IF_PARAMS.map((param) => {
-              const baseVal = baseSnapshot[param.snapshotField] as number;
-              const currentVal = overrides[param.key] ?? baseVal;
-              const isOverridden = overrides[param.key] !== null && overrides[param.key] !== undefined;
-              return (
-                <div key={param.key} className={`slider-row ${isOverridden ? "overridden" : ""}`}>
-                  <div className="slider-header">
-                    <span className="slider-label">{param.label}</span>
-                    <span className="slider-value">{param.max > 100 ? currentVal.toLocaleString() : currentVal.toFixed(1)}<span className="slider-unit">{param.unit}</span></span>
-                  </div>
-                  <input type="range" min={param.min} max={param.max} step={param.step} value={currentVal} onChange={(e) => setOverride(param.key, parseFloat(e.target.value))} onDoubleClick={() => setOverride(param.key, null)} />
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      {/* What-if sliders removed from left — now inside right panel */}
 
       {/* Tour button */}
       {tourStep === null && (
@@ -255,18 +244,7 @@ function App() {
         </div>
       )}
 
-      {/* Bottom-center: Data strip (fee buckets + pools) */}
-      <div className="hud hud-bottom-center">
-        <div className="hud-data-strip">
-          {effectiveSnapshot.feeBuckets.map((b) => (
-            <div className="strip-item" key={b.id}><span className="strip-label">{b.feeRateLabel}</span><span className="strip-value">{formatPct(b.txShare)}</span></div>
-          ))}
-          <div className="strip-divider" />
-          {effectiveSnapshot.miningPools.map((p) => (
-            <div className={`strip-item ${selectedPool === p.id ? "highlighted" : ""}`} key={p.id}><span className="strip-label">{p.name}</span><span className="strip-value">{formatPct(p.sharePct)}</span></div>
-          ))}
-        </div>
-      </div>
+      {/* Bottom strip removed — data is in the 3D scene tooltips */}
     </div>
   );
 }
@@ -287,12 +265,13 @@ function MetricCard({ label, value, severity }: { label: string; value: string; 
 interface SceneProps {
   snapshot: NetworkSnapshot;
   selectedLayer: string | null;
+  selectedPool: string | null;
   onSelectLayer: (layer: string) => void;
   onSelectPool: (pool: string) => void;
   onDeselect: () => void;
 }
 
-function PrimeRadiantScene({ snapshot, selectedLayer, onSelectLayer, onSelectPool, onDeselect }: SceneProps) {
+function PrimeRadiantScene({ snapshot, selectedLayer, selectedPool, onSelectLayer, onSelectPool, onDeselect }: SceneProps) {
   return (
     <group position={[0, -0.15, 0]} scale={0.78}>
       {/* Lighting */}
@@ -332,7 +311,7 @@ function PrimeRadiantScene({ snapshot, selectedLayer, onSelectLayer, onSelectPoo
       <MiningConstellation
         pools={snapshot.miningPools}
         hashrate={snapshot.networkHashrateEh}
-        selectedPool={null}
+        selectedPool={selectedPool}
         onSelectPool={onSelectPool}
       />
 
