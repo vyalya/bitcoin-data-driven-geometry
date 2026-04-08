@@ -22,6 +22,9 @@ export type RingBand = {
   activeShare: number;
 };
 
+/** Per-block data: [height, sizeBytes, weight, txCount] */
+export type BlockTuple = [number, number, number, number];
+
 export type NetworkSnapshot = {
   id: string;
   label: string;
@@ -41,4 +44,5 @@ export type NetworkSnapshot = {
   feeBuckets: FeeBucket[];
   ringBands: RingBand[];
   notes: string[];
+  blocks?: BlockTuple[];
 };

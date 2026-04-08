@@ -4,6 +4,7 @@
  * 25 historically significant events, all data queried via Mosaic MCP.
  */
 import type { NetworkSnapshot } from "../types";
+import { blockData } from "./blockData";
 
 /* ─── Ring band derivation from metrics ─── */
 
@@ -71,6 +72,7 @@ function mk(
     feeBuckets: bkt(0.334, 0.295, 0.207, 0.164),
     ringBands: deriveRingBands(s),
     notes,
+    blocks: blockData[date] ?? [],
   };
 }
 
