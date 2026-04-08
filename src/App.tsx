@@ -216,7 +216,7 @@ function App() {
 
       {/* Top-left: Title + key metrics */}
       <div className="hud hud-top-left">
-        <h1 className="hud-title">Visualizing the Bitcoin Network as a Digital Twin</h1>
+        <h1 className="hud-title">Visualizing the Bitcoin Network</h1>
         <p className="hud-powered">Powered by Strategy Mosaic</p>
         <p className="hud-datasource">
           Raw blockchain data published in-memory through a universal semantic layer — every metric traceable, every visual accountable.
