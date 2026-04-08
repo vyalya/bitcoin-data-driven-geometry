@@ -393,11 +393,12 @@ function PrimeRadiantScene({ snapshot, selectedLayer, selectedPool, onSelectLaye
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
 
-      <ReferenceGrid />
-      <RadiantCore healthScore={snapshot.networkHealthScore} />
+      {/* Every element below is rooted in real data with a tooltip */}
+
+      <RadiantCore healthScore={snapshot.networkHealthScore} snapshot={snapshot} />
       <BlockSpine snapshot={snapshot} />
 
-      {/* Clickable data rings */}
+      {/* 4 data rings — each segment is a unique data point */}
       {snapshot.ringBands.map((band, i) => (
         <SegmentedDataRing
           key={band.id}
@@ -410,9 +411,10 @@ function PrimeRadiantScene({ snapshot, selectedLayer, selectedPool, onSelectLaye
         />
       ))}
 
+      {/* Fee tier orbital paths */}
       <FeeOrbitRings feeBuckets={snapshot.feeBuckets} />
-      <OuterSweepRings />
-      <ParticleNebula snapshot={snapshot} />
+
+      {/* Mining pool constellation */}
       <MiningConstellation
         pools={snapshot.miningPools}
         hashrate={snapshot.networkHashrateEh}
@@ -420,11 +422,16 @@ function PrimeRadiantScene({ snapshot, selectedLayer, selectedPool, onSelectLaye
         onSelectPool={onSelectPool}
       />
 
+      {/* Mempool strata — per-tier pending tx layers */}
       <MempoolStrata snapshot={snapshot} />
-      <EpochMarkers snapshot={snapshot} />
-      <InterRingFilaments snapshot={snapshot} />
-      <TransactionDust snapshot={snapshot} />
 
+      {/* Difficulty epoch markers */}
+      <EpochMarkers snapshot={snapshot} />
+
+      {/* Fee flow arcs between rings */}
+      <InterRingFilaments snapshot={snapshot} />
+
+      {/* Floating data labels */}
       <DataInscriptions snapshot={snapshot} />
     </group>
   );
@@ -432,11 +439,12 @@ function PrimeRadiantScene({ snapshot, selectedLayer, selectedPool, onSelectLaye
 
 /* ─── RADIANT CORE ─── */
 
-function RadiantCore({ healthScore }: { healthScore: number }) {
+function RadiantCore({ healthScore, snapshot }: { healthScore: number; snapshot: NetworkSnapshot }) {
   const innerRef = useRef<THREE.Mesh>(null);
   const midRef = useRef<THREE.Mesh>(null);
   const outerRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
+  const [hovered, setHovered] = useState(false);
   const scale = 0.3 + (healthScore / 10) * 0.2;
 
   useFrame((state) => {
@@ -453,10 +461,13 @@ function RadiantCore({ healthScore }: { healthScore: number }) {
   });
 
   return (
-    <group>
+    <group
+      onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
+      onPointerOut={() => setHovered(false)}
+    >
       <mesh ref={innerRef} scale={scale * 0.5}>
         <dodecahedronGeometry args={[1, 0]} />
-        <meshStandardMaterial color="#FF8C3A" emissive="#FA660F" emissiveIntensity={1.6} metalness={0.5} roughness={0.05} />
+        <meshStandardMaterial color="#FF8C3A" emissive="#FA660F" emissiveIntensity={hovered ? 2.2 : 1.6} metalness={0.5} roughness={0.05} />
       </mesh>
       <mesh ref={midRef} scale={scale}>
         <icosahedronGeometry args={[1, 1]} />
@@ -471,6 +482,17 @@ function RadiantCore({ healthScore }: { healthScore: number }) {
         <sphereGeometry args={[1, 48, 48]} />
         <meshBasicMaterial color="#FA660F" transparent opacity={0.025} side={THREE.BackSide} />
       </mesh>
+      {hovered && (
+        <Html position={[0, scale * 1.8, 0]} center style={{ pointerEvents: "none" }}>
+          <div className="scene-tooltip">
+            <strong>Protocol Core — Health {healthScore.toFixed(1)}/10</strong>
+            Size = Network Health Score
+            {healthScore > 8 ? "\nHealthy — all systems nominal" : healthScore > 6 ? "\nModerate stress detected" : "\nSignificant stress — check rings"}
+            {"\n"}Hashrate: {snapshot.networkHashrateEh.toFixed(0)} EH/s
+            {"\n"}Block interval: {snapshot.avgBlockIntervalSeconds}s avg
+          </div>
+        </Html>
+      )}
     </group>
   );
 }
@@ -839,127 +861,10 @@ function FeeOrbitRings({ feeBuckets }: { feeBuckets: FeeBucket[] }) {
 
 /* ─── OUTER SWEEP RINGS ─── */
 
-function OuterSweepRings() {
-  const [hovered, setHovered] = useState(false);
-  const rings = useMemo(() => {
-    const r: Array<{ radius: number; segCount: number; tiltX: number; tiltZ: number }> = [];
-    for (let i = 0; i < 3; i++) r.push({ radius: 5.5 + i * 0.65, segCount: 48 - i * 8, tiltX: Math.PI / 2 + (i - 1) * 0.1, tiltZ: i * 0.2 });
-    return r;
-  }, []);
+/* OuterSweepRings removed — decorative, not rooted in data */
+/* ParticleNebula removed — individual particles not traceable to data points */
 
-  return (
-    <group
-      onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
-      onPointerOut={() => setHovered(false)}
-    >
-      {rings.map((ring, ri) =>
-        Array.from({ length: ring.segCount }).map((_, i) => {
-          const angle = (i / ring.segCount) * Math.PI * 2;
-          const arcLen = (2 * Math.PI * ring.radius) / ring.segCount;
-          return (
-            <mesh key={`${ri}-${i}`} position={[Math.cos(angle) * ring.radius, Math.sin(angle) * ring.radius, 0]} rotation={[ring.tiltX - Math.PI / 2, 0, angle + ring.tiltZ]}>
-              <boxGeometry args={[arcLen * 0.4, 0.01, 0.015]} />
-              <meshStandardMaterial color="#FA660F" emissive="#FA660F" emissiveIntensity={hovered ? 0.4 : 0.15} transparent opacity={hovered ? 0.1 : 0.05 - ri * 0.012} />
-            </mesh>
-          );
-        })
-      )}
-      {hovered && (
-        <Html position={[0, 6, 0.3]} center style={{ pointerEvents: "none" }}>
-          <div className="scene-tooltip">
-            <strong>Network Perimeter</strong><br />
-            3 structural boundary rings<br />
-            Scaffold for outer data layers
-          </div>
-        </Html>
-      )}
-    </group>
-  );
-}
-
-/* ─── PARTICLE NEBULA ─── density driven by actual mempool count */
-
-function ParticleNebula({ snapshot }: { snapshot: NetworkSnapshot }) {
-  const layer1Ref = useRef<THREE.Group>(null);
-  const layer2Ref = useRef<THREE.Group>(null);
-  const layer3Ref = useRef<THREE.Group>(null);
-
-  const pressure = snapshot.feePressureIndex / 10;
-  const congestion = snapshot.congestionScore / 10;
-  const mempoolNorm = Math.min(snapshot.mempoolTxCount / 400000, 1);
-
-  // Particle counts scale with real mempool — empty mempool = sparse field
-  const innerCount = Math.max(50, Math.round(mempoolNorm * 600));
-  const midCount = Math.max(30, Math.round(mempoolNorm * 400));
-  const outerCount = Math.max(20, Math.round(mempoolNorm * 250));
-
-  const innerPos = useMemo(() => {
-    const pos = new Float32Array(innerCount * 3);
-    for (let i = 0; i < innerCount; i++) {
-      const r = 1.2 + Math.random() * (2.5 + congestion * 2);
-      const a = (i / innerCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-      pos[i * 3] = Math.cos(a) * r;
-      pos[i * 3 + 1] = Math.sin(a) * r * (0.7 + Math.random() * 0.5);
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 1.8;
-    }
-    return pos;
-  }, [innerCount, congestion]);
-
-  const midPos = useMemo(() => {
-    const pos = new Float32Array(midCount * 3);
-    for (let i = 0; i < midCount; i++) {
-      const r = 2.8 + Math.random() * 3;
-      pos[i * 3] = Math.cos(Math.random() * Math.PI * 2) * r;
-      pos[i * 3 + 1] = Math.sin(Math.random() * Math.PI * 2) * r;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 2.8;
-    }
-    return pos;
-  }, [midCount]);
-
-  const outerPos = useMemo(() => {
-    const pos = new Float32Array(outerCount * 3);
-    for (let i = 0; i < outerCount; i++) {
-      const r = 4.5 + Math.random() * 4;
-      pos[i * 3] = Math.cos(Math.random() * Math.PI * 2) * r;
-      pos[i * 3 + 1] = Math.sin(Math.random() * Math.PI * 2) * r;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 4;
-    }
-    return pos;
-  }, [outerCount]);
-
-  // Gentle drift — particles float slowly, not spin
-  useFrame((_, delta) => {
-    if (layer1Ref.current) layer1Ref.current.rotation.z += delta * 0.003;
-    if (layer2Ref.current) layer2Ref.current.rotation.z -= delta * 0.002;
-    if (layer3Ref.current) layer3Ref.current.rotation.z += delta * 0.001;
-  });
-
-  const baseSize = 0.012 + pressure * 0.01;
-  const baseOpacity = 0.3 + pressure * 0.4;
-
-  return (
-    <group>
-      <group ref={layer1Ref}>
-        <points>
-          <bufferGeometry><bufferAttribute attach="attributes-position" args={[innerPos, 3]} /></bufferGeometry>
-          <pointsMaterial color="#FA660F" size={baseSize * 1.2} sizeAttenuation transparent opacity={baseOpacity} />
-        </points>
-      </group>
-      <group ref={layer2Ref}>
-        <points>
-          <bufferGeometry><bufferAttribute attach="attributes-position" args={[midPos, 3]} /></bufferGeometry>
-          <pointsMaterial color="#FF8C3A" size={baseSize} sizeAttenuation transparent opacity={baseOpacity * 0.5} />
-        </points>
-      </group>
-      <group ref={layer3Ref}>
-        <points>
-          <bufferGeometry><bufferAttribute attach="attributes-position" args={[outerPos, 3]} /></bufferGeometry>
-          <pointsMaterial color="#FF6B00" size={baseSize * 0.6} sizeAttenuation transparent opacity={baseOpacity * 0.2} />
-        </points>
-      </group>
-    </group>
-  );
-}
+/* ParticleNebula function removed — replaced by MempoolStrata (data-rooted per-tier particles) */
 
 /* ─── MINING CONSTELLATION ─── with hover tooltips, dramatic size differences */
 
@@ -1114,15 +1019,14 @@ function MempoolStrata({ snapshot }: { snapshot: NetworkSnapshot }) {
 
 function EpochMarkers({ snapshot }: { snapshot: NetworkSnapshot }) {
   const epochCount = Math.floor(snapshot.blockHeight / 2016);
-  // Show last 24 epochs (≈ 1 year of difficulty adjustments)
   const visibleEpochs = Math.min(epochCount, 24);
+  const [hoveredEpoch, setHoveredEpoch] = useState<number | null>(null);
 
   const markers = useMemo(() => {
-    const result: Array<{ angle: number; height: number; isHalving: boolean }> = [];
+    const result: Array<{ angle: number; height: number; isHalving: boolean; epochNum: number; blockStart: number }> = [];
     for (let i = 0; i < visibleEpochs; i++) {
       const epoch = epochCount - visibleEpochs + i;
       const blockAtEpoch = epoch * 2016;
-      // Is this epoch near a halving?
       const isHalving = [210000, 420000, 630000, 840000].some(
         (h) => Math.abs(blockAtEpoch - h) < 2016
       );
@@ -1130,34 +1034,50 @@ function EpochMarkers({ snapshot }: { snapshot: NetworkSnapshot }) {
         angle: (i / visibleEpochs) * Math.PI * 2 - Math.PI / 2,
         height: isHalving ? 0.25 : 0.08 + (i / visibleEpochs) * 0.06,
         isHalving,
+        epochNum: epoch,
+        blockStart: blockAtEpoch,
       });
     }
     return result;
   }, [epochCount, visibleEpochs]);
 
+  useEffect(() => { setHoveredEpoch(null); }, [snapshot.id]);
+
   return (
     <group position={[0, 0, -0.5]}>
       {markers.map((m, i) => {
         const r = 6.0;
+        const isHovered = hoveredEpoch === i;
         return (
-          <mesh
-            key={i}
-            position={[Math.cos(m.angle) * r, Math.sin(m.angle) * r, 0]}
-            rotation={[0, 0, m.angle]}
-          >
-            <boxGeometry args={[0.005, m.height, 0.03]} />
-            <meshStandardMaterial
-              color={m.isHalving ? "#FFCC00" : "#FA660F"}
-              emissive={m.isHalving ? "#FFCC00" : "#FA660F"}
-              emissiveIntensity={m.isHalving ? 1.2 : 0.3}
-              transparent
-              opacity={m.isHalving ? 0.9 : 0.25}
-            />
-          </mesh>
+          <group key={i}>
+            <mesh
+              position={[Math.cos(m.angle) * r, Math.sin(m.angle) * r, 0]}
+              rotation={[0, 0, m.angle]}
+              onPointerOver={(e) => { e.stopPropagation(); setHoveredEpoch(i); }}
+              onPointerOut={() => setHoveredEpoch(null)}
+            >
+              <boxGeometry args={[0.005, isHovered ? m.height * 1.5 : m.height, 0.03]} />
+              <meshStandardMaterial
+                color={m.isHalving ? "#FFCC00" : "#FA660F"}
+                emissive={m.isHalving ? "#FFCC00" : "#FA660F"}
+                emissiveIntensity={isHovered ? 1.8 : m.isHalving ? 1.2 : 0.3}
+                transparent
+                opacity={isHovered ? 1 : m.isHalving ? 0.9 : 0.25}
+              />
+            </mesh>
+            {isHovered && (
+              <Html position={[Math.cos(m.angle) * 6.5, Math.sin(m.angle) * 6.5, 0.2]} center style={{ pointerEvents: "none" }}>
+                <div className="scene-tooltip">
+                  <strong>{m.isHalving ? "Halving Epoch" : `Difficulty Epoch #${m.epochNum}`}</strong>
+                  Block {m.blockStart.toLocaleString()}–{(m.blockStart + 2015).toLocaleString()}
+                  {m.isHalving ? "\nBlock subsidy was halved at this epoch" : "\nDifficulty adjusted every 2,016 blocks (~2 weeks)"}
+                </div>
+              </Html>
+            )}
+          </group>
         );
       })}
 
-      {/* Halving labels */}
       {markers.filter((m) => m.isHalving).map((m, i) => (
         <Text
           key={`h-${i}`}
@@ -1230,109 +1150,8 @@ function InterRingFilaments({ snapshot }: { snapshot: NetworkSnapshot }) {
   );
 }
 
-/* ─── CONFIRMED TX FRAGMENTS ───
-   Each micro-octahedron = ~1,000 confirmed transactions from blocks
-   mined that day. Total count = blocks_mined (from Mosaic).
-   Scattered around the spine at distances proportional to their
-   block's position. Zero blocks = no fragments.
-*/
-
-function TransactionDust({ snapshot }: { snapshot: NetworkSnapshot }) {
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
-  const blocksMined = Math.max(0, Math.round(144)); // 144 blocks per day
-  const fragmentCount = Math.min(blocksMined, 144); // one fragment per block
-  if (fragmentCount < 1) return null;
-
-  const fragments = useMemo(() => {
-    const result: Array<{ x: number; y: number; z: number; scale: number; blockNum: number }> = [];
-    let seed = snapshot.blockHeight * 3 + 777;
-    for (let i = 0; i < fragmentCount; i++) {
-      seed = (seed * 16807) % 2147483647;
-      const angle = (seed / 2147483647) * Math.PI * 2;
-      seed = (seed * 16807) % 2147483647;
-      const radius = 1.0 + (seed / 2147483647) * 6;
-      seed = (seed * 16807) % 2147483647;
-      const z = ((seed / 2147483647) - 0.5) * 2.5;
-      seed = (seed * 16807) % 2147483647;
-      const scale = 0.01 + (seed / 2147483647) * 0.02;
-      result.push({
-        x: Math.cos(angle) * radius,
-        y: Math.sin(angle) * radius,
-        z, scale,
-        blockNum: snapshot.blockHeight - fragmentCount + i,
-      });
-    }
-    return result;
-  }, [fragmentCount, snapshot.blockHeight]);
-
-  return (
-    <group>
-      {fragments.map((f, i) => (
-        <mesh
-          key={i}
-          position={[f.x, f.y, f.z]}
-          onPointerOver={(e) => { e.stopPropagation(); setHoveredIdx(i); }}
-          onPointerOut={() => setHoveredIdx(null)}
-        >
-          <octahedronGeometry args={[f.scale, 0]} />
-          <meshStandardMaterial
-            color="#FA660F"
-            emissive="#FA660F"
-            emissiveIntensity={hoveredIdx === i ? 1.5 : 0.3}
-            transparent
-            opacity={hoveredIdx === i ? 0.9 : 0.08}
-          />
-        </mesh>
-      ))}
-      {hoveredIdx !== null && hoveredIdx < fragments.length && (
-        <group position={[fragments[hoveredIdx].x, fragments[hoveredIdx].y, fragments[hoveredIdx].z]}>
-          <Html center style={{ pointerEvents: "none" }}>
-            <div className="scene-tooltip">
-              <strong>Block #{fragments[hoveredIdx].blockNum.toLocaleString()}</strong><br />
-              Confirmed block fragment
-            </div>
-          </Html>
-        </group>
-      )}
-    </group>
-  );
-}
-
-/* ─── REFERENCE GRID ─── */
-
-function ReferenceGrid() {
-  const compassMarks = useMemo(() => {
-    const marks: Array<{ angle: number; innerR: number; outerR: number; isMajor: boolean }> = [];
-    for (let i = 0; i < 72; i++) {
-      const angle = (i / 72) * Math.PI * 2;
-      const isMajor = i % 6 === 0;
-      const isMid = i % 3 === 0 && !isMajor;
-      marks.push({ angle, innerR: 6.6, outerR: isMajor ? 7.0 : isMid ? 6.82 : 6.72, isMajor });
-    }
-    return marks;
-  }, []);
-
-  return (
-    <group position={[0, 0, -0.8]}>
-      {[1.5, 2.3, 3.2, 4.3, 5.5].map((r) => (
-        <mesh key={r}><ringGeometry args={[r, r + 0.003, 320]} /><meshBasicMaterial color="#FFFFFF" transparent opacity={0.015} /></mesh>
-      ))}
-      <Line points={[[-8, 0, 0], [8, 0, 0]]} color="#FFFFFF" lineWidth={0.3} transparent opacity={0.02} />
-      <Line points={[[0, -8, 0], [0, 8, 0]]} color="#FFFFFF" lineWidth={0.3} transparent opacity={0.02} />
-      <Line points={[[-6, -6, 0], [6, 6, 0]]} color="#FFFFFF" lineWidth={0.2} transparent opacity={0.008} />
-      <Line points={[[-6, 6, 0], [6, -6, 0]]} color="#FFFFFF" lineWidth={0.2} transparent opacity={0.008} />
-      {[1, 2, 4, 5, 7, 8, 10, 11].map((i) => {
-        const a = (i / 12) * Math.PI * 2;
-        return <Line key={i} points={[[0, 0, 0], [Math.cos(a) * 6.6, Math.sin(a) * 6.6, 0]]} color="#FFFFFF" lineWidth={0.15} transparent opacity={0.006} />;
-      })}
-      {compassMarks.map((m, i) => (
-        <Line key={i} points={[[Math.cos(m.angle) * m.innerR, Math.sin(m.angle) * m.innerR, 0], [Math.cos(m.angle) * m.outerR, Math.sin(m.angle) * m.outerR, 0]]} color="#FA660F" lineWidth={m.isMajor ? 0.45 : 0.2} transparent opacity={m.isMajor ? 0.09 : 0.035} />
-      ))}
-      <mesh><ringGeometry args={[6.85, 6.87, 320]} /><meshBasicMaterial color="#FA660F" transparent opacity={0.06} /></mesh>
-      <mesh><ringGeometry args={[6.58, 6.6, 320]} /><meshBasicMaterial color="#FA660F" transparent opacity={0.035} /></mesh>
-    </group>
-  );
-}
+/* TransactionDust removed — redundant with BlockSpine */
+/* ReferenceGrid removed — decorative lines not rooted in data */
 
 /* ─── DATA INSCRIPTIONS ─── */
 
