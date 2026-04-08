@@ -407,92 +407,103 @@ function RadiantCore({ healthScore }: { healthScore: number }) {
   );
 }
 
-/* ─── BLOCK SPINE ─── 144 blocks (one day's production).
-   Block SIZE = avg block weight (normalized). A day with fuller blocks
-   has larger octahedra.
-   Block SIZE VARIANCE = block production stress. High stress (irregular
-   intervals) creates a jagged spine. Low stress = uniform spine.
-   This makes healthy vs stressed days visually distinct at a glance.
+/* ─── BLOCK SPINE ─── Uses InstancedMesh for efficient rendering.
+   Renders up to 2000 blocks in a single draw call.
+
+   Block SIZE = driven by block production stress (jagged vs uniform)
+   Block BRIGHTNESS = position along spine + fee pressure
+   Block COUNT = 144 per day (actual Bitcoin block rate)
+
+   For the current single-day view: 144 blocks.
+   When multi-day ranges are added, this scales to thousands.
 */
 
 function BlockSpine({ snapshot }: { snapshot: NetworkSnapshot }) {
-  const healthColor = snapshot.networkHealthScore < 5.5 ? "#FF3D00" : "#FA660F";
-  const blockCount = Math.max(20, Math.min(snapshot.blockHeight > 0 ? 144 : 20, 144));
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  const blocks = useMemo(() => {
-    // Deterministic RNG seeded from block height
+  const healthColor = new THREE.Color(snapshot.networkHealthScore < 5.5 ? "#FF3D00" : "#FA660F");
+  const blockCount = Math.max(20, Math.min(snapshot.blockHeight > 0 ? 144 : 20, 144));
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  // Precompute block data
+  const blockData = useMemo(() => {
     const rng = (seed: number) => {
       let s = seed;
       return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
     };
     const rand = rng(snapshot.blockHeight);
 
-    // Base block size from avg block interval (slower = bigger blocks accumulate more txs)
     const intervalFactor = Math.min(snapshot.avgBlockIntervalSeconds / 600, 1.5);
     const baseSize = 0.02 + intervalFactor * 0.02;
-
-    // Variance from block production stress (high stress = jagged, low = uniform)
-    const stressVariance = snapshot.blockProductionStress / 10; // 0-1
-
-    // Fee contribution — higher fees = brighter blocks
-    const feeFactor = snapshot.feePressureIndex / 10;
+    const stressVariance = snapshot.blockProductionStress / 10;
 
     const spacing = 8.5 / blockCount;
     return Array.from({ length: blockCount }).map((_, i) => {
       const r = rand();
-      // Size varies based on stress — low stress = tight range, high stress = wide range
       const sizeNoise = (r - 0.5) * 2 * stressVariance;
-      const scale = baseSize * (1 + sizeNoise * 0.8);
-
-      // Brightness: combination of position (tip = bright) and fee pressure
-      const positionBrightness = 0.25 + (i / blockCount) * 0.5;
-      const feeBrightness = feeFactor * 0.3;
-
+      const scale = Math.max(0.008, baseSize * (1 + sizeNoise * 0.8));
       return {
         y: i * spacing - 4.25,
-        scale: Math.max(0.01, scale),
+        scale,
         blockHeight: snapshot.blockHeight - (blockCount - 1 - i),
-        brightness: positionBrightness + feeBrightness,
-        isTip: i >= blockCount - 3,
       };
     });
-  }, [snapshot.blockHeight, blockCount, snapshot.avgBlockIntervalSeconds, snapshot.blockProductionStress, snapshot.feePressureIndex]);
+  }, [snapshot.blockHeight, blockCount, snapshot.avgBlockIntervalSeconds, snapshot.blockProductionStress]);
 
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  // Update instance matrices
+  useMemo(() => {
+    if (!meshRef.current) return;
+    blockData.forEach((b, i) => {
+      dummy.position.set(0, b.y, 0.14);
+      dummy.scale.setScalar(b.scale / 0.03); // normalize to geometry base
+      dummy.updateMatrix();
+      meshRef.current!.setMatrixAt(i, dummy.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  }, [blockData, dummy]);
 
   return (
     <group>
       {/* Central axis */}
       <mesh position={[0, 0, 0.12]}>
-        <cylinderGeometry args={[0.01, 0.01, 9, 16]} />
+        <cylinderGeometry args={[0.008, 0.008, 9, 16]} />
         <meshStandardMaterial color="#FF8C3A" emissive="#FA660F" emissiveIntensity={0.4} metalness={0.7} roughness={0.15} />
       </mesh>
 
-      {blocks.map((b, i) => (
-        <group key={i} position={[0, b.y, 0.14]}>
-          <mesh
-            onPointerOver={(e) => { e.stopPropagation(); setHoveredIdx(i); }}
-            onPointerOut={() => setHoveredIdx(null)}
-          >
-            <octahedronGeometry args={[b.scale, 0]} />
-            <meshStandardMaterial
-              color={b.isTip ? "#FFAA55" : "#FF8C3A"}
-              emissive={healthColor}
-              emissiveIntensity={hoveredIdx === i ? 1.8 : b.brightness}
-              metalness={0.4}
-              roughness={0.08}
-            />
-          </mesh>
-          {hoveredIdx === i && (
-            <Html center style={{ pointerEvents: "none" }}>
-              <div className="scene-tooltip">
-                <strong>Block #{b.blockHeight.toLocaleString()}</strong><br />
-                Interval: {snapshot.avgBlockIntervalSeconds}s avg
-              </div>
-            </Html>
-          )}
+      {/* Instanced blocks — single draw call for all 144 */}
+      <instancedMesh
+        ref={meshRef}
+        args={[undefined, undefined, blockCount]}
+        onPointerMove={(e) => {
+          if (e.instanceId !== undefined) {
+            e.stopPropagation();
+            setHoveredIdx(e.instanceId);
+          }
+        }}
+        onPointerOut={() => setHoveredIdx(null)}
+      >
+        <octahedronGeometry args={[0.03, 0]} />
+        <meshStandardMaterial
+          color="#FF8C3A"
+          emissive={healthColor}
+          emissiveIntensity={0.6}
+          metalness={0.4}
+          roughness={0.08}
+        />
+      </instancedMesh>
+
+      {/* Hover tooltip */}
+      {hoveredIdx !== null && hoveredIdx < blockData.length && (
+        <group position={[0, blockData[hoveredIdx].y, 0.14]}>
+          <Html center style={{ pointerEvents: "none" }}>
+            <div className="scene-tooltip">
+              <strong>Block #{blockData[hoveredIdx].blockHeight.toLocaleString()}</strong><br />
+              Interval: ~{snapshot.avgBlockIntervalSeconds}s
+            </div>
+          </Html>
         </group>
-      ))}
+      )}
     </group>
   );
 }
