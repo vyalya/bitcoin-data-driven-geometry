@@ -113,11 +113,26 @@ function App() {
     return s;
   }, [baseSnapshot, overrides, hasOverrides]);
 
-  // Interactive selection state — driven by clicking elements in the 3D scene
-  const [selectedLayer, setSelectedLayer] = useState<string | null>(null);
-  const [selectedPool, setSelectedPool] = useState<string | null>(null);
+  // Unified interaction: hover = highlight + dim others, click = lock + show detail panel
+  const [hoveredGroup, setHoveredGroup] = useState<string | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [detailText, setDetailText] = useState<{ title: string; body: string } | null>(null);
   const [showDataInfo, setShowDataInfo] = useState(false);
-  const clearSelection = () => { setSelectedLayer(null); setSelectedPool(null); };
+
+  const handleGroupClick = (groupId: string, title: string, body: string) => {
+    if (selectedGroup === groupId) {
+      setSelectedGroup(null);
+      setDetailText(null);
+    } else {
+      setSelectedGroup(groupId);
+      setDetailText({ title, body });
+    }
+  };
+
+  const clearSelection = () => { setSelectedGroup(null); setDetailText(null); setHoveredGroup(null); };
+
+  // The active group is either the clicked (locked) or hovered one
+  const activeGroup = selectedGroup ?? hoveredGroup;
 
   // Guided tour
   const [tourStep, setTourStep] = useState<number | null>(null);
@@ -200,10 +215,9 @@ function App() {
         <fog attach="fog" args={["#000000", 25, 55]} />
         <PrimeRadiantScene
           snapshot={effectiveSnapshot}
-          selectedLayer={selectedLayer}
-          selectedPool={selectedPool}
-          onSelectLayer={(layer) => { setSelectedLayer(layer); setSelectedPool(null); }}
-          onSelectPool={(pool) => { setSelectedPool(pool); setSelectedLayer(null); }}
+          activeGroup={activeGroup}
+          onHover={setHoveredGroup}
+          onClick={handleGroupClick}
           onDeselect={clearSelection}
         />
         <EffectComposer>
@@ -275,7 +289,16 @@ function App() {
         {/* Legend removed — rings have their own labels in the scene */}
       </div>
 
-      {/* What-if sliders removed from left — now inside right panel */}
+      {/* Fixed detail panel — appears on click */}
+      {detailText && (
+        <div className="hud hud-detail-panel">
+          <div className="detail-header">
+            <strong>{detailText.title}</strong>
+            <button onClick={clearSelection} type="button">x</button>
+          </div>
+          <p>{detailText.body}</p>
+        </div>
+      )}
 
       {/* Data source info modal */}
       {showDataInfo && (
@@ -364,14 +387,13 @@ function MetricCard({ label, value, severity }: { label: string; value: string; 
 
 interface SceneProps {
   snapshot: NetworkSnapshot;
-  selectedLayer: string | null;
-  selectedPool: string | null;
-  onSelectLayer: (layer: string) => void;
-  onSelectPool: (pool: string) => void;
+  activeGroup: string | null;
+  onHover: (groupId: string | null) => void;
+  onClick: (groupId: string, title: string, body: string) => void;
   onDeselect: () => void;
 }
 
-function PrimeRadiantScene({ snapshot, selectedLayer, selectedPool, onSelectLayer, onSelectPool, onDeselect }: SceneProps) {
+function PrimeRadiantScene({ snapshot, activeGroup, onHover, onClick, onDeselect }: SceneProps) {
   return (
     <group position={[0, -0.15, 0]} scale={0.78}>
       {/* Lighting */}
@@ -392,29 +414,35 @@ function PrimeRadiantScene({ snapshot, selectedLayer, selectedPool, onSelectLaye
 
       <BlockSpine key={`spine-${snapshot.id}`} snapshot={snapshot} />
 
-      {/* 4 data rings — key includes snapshot.id to force remount on switch */}
-      {snapshot.ringBands.map((band, i) => (
-        <SegmentedDataRing
-          key={`${snapshot.id}-${band.id}`}
-          band={band}
-          index={i}
-          snapshot={snapshot}
-          isSelected={selectedLayer === String(i)}
-          isDimmed={selectedLayer !== null && selectedLayer !== String(i)}
-          onSelect={() => onSelectLayer(String(i))}
-        />
-      ))}
+      {/* 4 data rings */}
+      {snapshot.ringBands.map((band, i) => {
+        const gid = `ring-${i}`;
+        return (
+          <SegmentedDataRing
+            key={`${snapshot.id}-${band.id}`}
+            band={band}
+            index={i}
+            snapshot={snapshot}
+            isDimmed={activeGroup !== null && activeGroup !== gid}
+            isHighlighted={activeGroup === gid}
+            groupId={gid}
+            onHover={onHover}
+            onClick={onClick}
+          />
+        );
+      })}
 
       {/* Fee tier orbital paths */}
-      <FeeOrbitRings key={`fee-${snapshot.id}`} feeBuckets={snapshot.feeBuckets} />
+      <FeeOrbitRings key={`fee-${snapshot.id}`} feeBuckets={snapshot.feeBuckets} activeGroup={activeGroup} onHover={onHover} onClick={onClick} />
 
       {/* Mining pool constellation */}
       <MiningConstellation
         key={`mining-${snapshot.id}`}
         pools={snapshot.miningPools}
         hashrate={snapshot.networkHashrateEh}
-        selectedPool={selectedPool}
-        onSelectPool={onSelectPool}
+        activeGroup={activeGroup}
+        onHover={onHover}
+        onClick={onClick}
       />
 
       <MempoolStrata key={`strata-${snapshot.id}`} snapshot={snapshot} />
@@ -516,17 +544,17 @@ function BlockSpine({ snapshot }: { snapshot: NetworkSnapshot }) {
    Every segment is individually hoverable with a unique tooltip.
 */
 
-function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSelect }: {
+function SegmentedDataRing({ band, index, snapshot, isDimmed, isHighlighted, groupId, onHover, onClick }: {
   band: RingBand; index: number; snapshot: NetworkSnapshot;
-  isSelected?: boolean; isDimmed?: boolean; onSelect?: () => void;
+  isDimmed?: boolean; isHighlighted?: boolean;
+  groupId: string;
+  onHover: (id: string | null) => void;
+  onClick: (id: string, title: string, body: string) => void;
 }) {
   const color = RING_COLORS[index] || "#FA660F";
   const label = RING_LABELS[index] || "";
-  const dimFactor = isDimmed ? 0.15 : 1;
-  const [hoveredSeg, setHoveredSeg] = useState<number | null>(null);
-
-  // Reset hover when snapshot changes
-  useEffect(() => { setHoveredSeg(null); }, [snapshot.id]);
+  const dimFactor = isDimmed ? 0.12 : 1;
+  const brightFactor = isHighlighted ? 1.4 : 1;
 
   // Build segments based on ring type — each segment is a UNIQUE data point
   const segments = useMemo(() => {
@@ -616,18 +644,23 @@ function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSele
     return result;
   }, [index, snapshot]);
 
-  // Render segments as arc-shaped box groups
+  // Build detail text for click panel
+  const detailBody = segments.map((s) => `${s.tooltipTitle}\n${s.tooltipDetail}`).join("\n\n");
+
   return (
-    <group onClick={(e) => { e.stopPropagation(); onSelect?.(); }}>
+    <group
+      onPointerOver={(e) => { e.stopPropagation(); onHover(groupId); }}
+      onPointerOut={() => onHover(null)}
+      onClick={(e) => { e.stopPropagation(); onClick(groupId, `${label} Ring`, detailBody); }}
+    >
       {/* Track ring */}
       <mesh>
         <ringGeometry args={[band.radius - 0.008, band.radius + 0.008, 256]} />
-        <meshBasicMaterial color={color} transparent opacity={(isSelected ? 0.06 : 0.02) * dimFactor} />
+        <meshBasicMaterial color={color} transparent opacity={(isHighlighted ? 0.06 : 0.02) * dimFactor} />
       </mesh>
 
-      {/* Data segments — each is a unique data point */}
+      {/* Data segments */}
       {segments.map((seg, si) => {
-        const isHovered = hoveredSeg === si;
         const arcLen = seg.endAngle - seg.startAngle;
         if (!arcLen || arcLen < 0.001 || !isFinite(arcLen)) return null;
         const subCount = Math.max(2, Math.round(arcLen / (Math.PI * 2) * 48));
@@ -646,39 +679,20 @@ function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSele
               const w = Math.max(0.005, (usableArc / subCount) * band.radius * 0.85);
 
               return (
-                <mesh
-                  key={j}
-                  position={[x, y, 0]}
-                  rotation={[0, 0, angle]}
-                  onPointerOver={(e) => { e.stopPropagation(); setHoveredSeg(si); }}
-                  onPointerOut={() => setHoveredSeg(null)}
-                >
-                  <boxGeometry args={[w, seg.height * (isHovered ? 1.3 : 1), seg.depth]} />
+                <mesh key={j} position={[x, y, 0]} rotation={[0, 0, angle]}>
+                  <boxGeometry args={[w, seg.height, seg.depth]} />
                   <meshStandardMaterial
                     color={color}
                     emissive={color}
-                    emissiveIntensity={(isHovered ? seg.emIntensity * 1.5 : seg.emIntensity) * dimFactor}
+                    emissiveIntensity={seg.emIntensity * dimFactor * brightFactor}
                     metalness={0.3}
                     roughness={0.3}
                     transparent
-                    opacity={(isHovered ? 0.95 : 0.7) * dimFactor}
+                    opacity={0.7 * dimFactor * brightFactor}
                   />
                 </mesh>
               );
             })}
-
-            {/* Per-segment tooltip */}
-            {isHovered && (
-              <Html
-                position={[Math.cos(seg.midAngle) * (band.radius + 0.4), Math.sin(seg.midAngle) * (band.radius + 0.4), 0.2]}
-                center
-                style={{ pointerEvents: "none" }}
-              >
-                <div className="scene-tooltip" style={{ whiteSpace: "pre-line" }}>
-                  <strong>{seg.tooltipTitle}</strong><br />{seg.tooltipDetail}
-                </div>
-              </Html>
-            )}
           </group>
         );
       })}
@@ -690,7 +704,7 @@ function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSele
         color={color}
         anchorX="center"
         anchorY="bottom"
-        fillOpacity={isSelected ? 0.6 : 0.3 * dimFactor}
+        fillOpacity={isHighlighted ? 0.6 : 0.3 * dimFactor}
         font={undefined}
       >
         {label}
@@ -712,10 +726,9 @@ function SegmentedDataRing({ band, index, snapshot, isSelected, isDimmed, onSele
 
 /* ─── FEE ORBIT RINGS ─── */
 
-function FeeOrbitRings({ feeBuckets }: { feeBuckets: FeeBucket[] }) {
+function FeeOrbitRings({ feeBuckets, activeGroup, onHover, onClick }: { feeBuckets: FeeBucket[]; activeGroup: string | null; onHover: (id: string | null) => void; onClick: (id: string, title: string, body: string) => void }) {
   const feeColors = ["#FFAA44", "#FF8833", "#FF5500", "#FF3300"];
   const feeLabels = ["1-10 sat/vB", "11-30 sat/vB", "31-80 sat/vB", "81+ sat/vB"];
-  const [hoveredTier, setHoveredTier] = useState<number | null>(null);
 
   return (
     <group>
@@ -730,8 +743,9 @@ function FeeOrbitRings({ feeBuckets }: { feeBuckets: FeeBucket[] }) {
           <group
             key={bucket.id}
             rotation={[tiltX, 0, Math.PI * 0.12 + i * 0.18]}
-            onPointerOver={(e) => { e.stopPropagation(); setHoveredTier(i); }}
-            onPointerOut={() => setHoveredTier(null)}
+            onPointerOver={(e) => { e.stopPropagation(); onHover(`fee-${i}`); }}
+            onPointerOut={() => onHover(null)}
+            onClick={(e) => { e.stopPropagation(); onClick(`fee-${i}`, `Fee Tier: ${feeLabels[i]}`, `${(bucket.txShare * 100).toFixed(1)}% of transactions\nIntensity: ${(bucket.intensity * 100).toFixed(0)}/100`); }}
           >
             {Array.from({ length: segCount }).map((_, j) => {
               const angle = (j / segCount) * Math.PI * 2;
@@ -744,22 +758,14 @@ function FeeOrbitRings({ feeBuckets }: { feeBuckets: FeeBucket[] }) {
                 <mesh key={j} position={[Math.cos(angle) * radius, Math.sin(angle) * radius, 0]} rotation={[0, 0, angle]}>
                   <boxGeometry args={[arcLen * 0.55, h, 0.02]} />
                   {isActive ? (
-                    <meshStandardMaterial color={color} emissive={color} emissiveIntensity={(hoveredTier === i ? 1.5 : 0.3) + bucket.intensity * 0.8} metalness={0.2} roughness={0.4} transparent opacity={hoveredTier === i ? 0.9 : 0.4 + bucket.intensity * 0.4} />
+                    <meshStandardMaterial color={color} emissive={color} emissiveIntensity={(activeGroup === `fee-${i}` ? 1.5 : 0.3) + bucket.intensity * 0.8} metalness={0.2} roughness={0.4} transparent opacity={(activeGroup !== null && activeGroup !== `fee-${i}`) ? 0.1 : 0.4 + bucket.intensity * 0.4} />
                   ) : (
                     <meshBasicMaterial color="#0D0800" transparent opacity={0.015} />
                   )}
                 </mesh>
               );
             })}
-            {hoveredTier === i && (
-              <Html position={[radius * 0.5, radius * 0.5, 0.3]} center style={{ pointerEvents: "none" }}>
-                <div className="scene-tooltip">
-                  <strong>Fee Tier: {feeLabels[i]}</strong><br />
-                  {(bucket.txShare * 100).toFixed(1)}% of transactions<br />
-                  Intensity: {(bucket.intensity * 100).toFixed(0)}/100
-                </div>
-              </Html>
-            )}
+            {/* Tooltip removed — shown in fixed detail panel on click */}
           </group>
         );
       })}
@@ -776,19 +782,19 @@ function FeeOrbitRings({ feeBuckets }: { feeBuckets: FeeBucket[] }) {
 
 /* ─── MINING CONSTELLATION ─── with hover tooltips, dramatic size differences */
 
-function MiningConstellation({ pools, hashrate, selectedPool, onSelectPool }: { pools: MiningPoolSnapshot[]; hashrate: number; selectedPool: string | null; onSelectPool: (id: string) => void }) {
+function MiningConstellation({ pools, hashrate, activeGroup, onHover, onClick }: { pools: MiningPoolSnapshot[]; hashrate: number; activeGroup: string | null; onHover: (id: string | null) => void; onClick: (id: string, title: string, body: string) => void }) {
   return (
     <group>
       {pools.map((pool, i) => (
-        <MiningNode key={pool.id} pool={pool} index={i} total={pools.length} networkHashrate={hashrate} isHighlighted={selectedPool === pool.id} onSelect={() => onSelectPool(pool.id)} />
+        <MiningNode key={pool.id} pool={pool} index={i} total={pools.length} networkHashrate={hashrate} activeGroup={activeGroup} onHover={onHover} onClick={onClick} />
       ))}
     </group>
   );
 }
 
-function MiningNode({ pool, index, total, networkHashrate, isHighlighted, onSelect }: { pool: MiningPoolSnapshot; index: number; total: number; networkHashrate: number; isHighlighted?: boolean; onSelect?: () => void }) {
+function MiningNode({ pool, index, total, networkHashrate, activeGroup, onHover, onClick }: { pool: MiningPoolSnapshot; index: number; total: number; networkHashrate: number; activeGroup: string | null; onHover: (id: string | null) => void; onClick: (id: string, title: string, body: string) => void }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const [hovered, setHovered] = useState(false);
+  const gid = `pool-${pool.id}`;
 
   const angle = (index / total) * Math.PI * 2 - Math.PI / 2;
   const r = 5.8;
@@ -805,47 +811,39 @@ function MiningNode({ pool, index, total, networkHashrate, isHighlighted, onSele
     }
   });
 
+  const isActive = activeGroup === gid;
+  const isDimmed = activeGroup !== null && activeGroup !== gid;
+  const dim = isDimmed ? 0.12 : 1;
+  const bright = isActive ? 1.4 : 1;
+
   return (
-    <group position={[x, y, 0]}>
-      <mesh
-        ref={meshRef}
-        onClick={(e) => { e.stopPropagation(); onSelect?.(); }}
-        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
-        onPointerOut={() => setHovered(false)}
-      >
+    <group
+      position={[x, y, 0]}
+      onPointerOver={(e) => { e.stopPropagation(); onHover(gid); }}
+      onPointerOut={() => onHover(null)}
+      onClick={(e) => { e.stopPropagation(); onClick(gid, pool.name, `${(pool.sharePct * 100).toFixed(1)}% hashrate share\n${pool.hashRateEh} EH/s of ${networkHashrate.toFixed(0)} EH/s total`); }}
+    >
+      <mesh ref={meshRef}>
         <octahedronGeometry args={[nodeSize, 0]} />
         <meshStandardMaterial
-          color={hovered || isHighlighted ? "#FFCC66" : "#FF8C3A"}
+          color={isActive ? "#FFCC66" : "#FF8C3A"}
           emissive="#FA660F"
-          emissiveIntensity={hovered || isHighlighted ? 1.5 : 0.7 + pool.sharePct * 1.5}
+          emissiveIntensity={(0.7 + pool.sharePct * 1.5) * dim * bright}
           metalness={0.4}
           roughness={0.1}
         />
       </mesh>
       <mesh>
         <octahedronGeometry args={[nodeSize * 1.7, 0]} />
-        <meshBasicMaterial color="#FA660F" wireframe transparent opacity={0.05} />
+        <meshBasicMaterial color="#FA660F" wireframe transparent opacity={0.05 * dim} />
       </mesh>
-      <Line points={[[0, 0, 0], [-x, -y, 0]]} color="#FA660F" lineWidth={0.3} transparent opacity={0.03} dashed dashSize={0.12} gapSize={0.06} />
-
-      {/* Always-visible pool label */}
-      <Text position={[x > 0 ? 0.3 : -0.3, 0.22, 0]} fontSize={0.075} color="#FFFFFF" anchorX={x > 0 ? "left" : "right"} anchorY="middle" fillOpacity={0.4} font={undefined}>
+      <Line points={[[0, 0, 0], [-x, -y, 0]]} color="#FA660F" lineWidth={0.3} transparent opacity={0.03 * dim} dashed dashSize={0.12} gapSize={0.06} />
+      <Text position={[x > 0 ? 0.3 : -0.3, 0.22, 0]} fontSize={0.075} color="#FFFFFF" anchorX={x > 0 ? "left" : "right"} anchorY="middle" fillOpacity={0.4 * dim * bright} font={undefined}>
         {pool.name}
       </Text>
-      <Text position={[x > 0 ? 0.3 : -0.3, 0.1, 0]} fontSize={0.055} color="#FA660F" anchorX={x > 0 ? "left" : "right"} anchorY="middle" fillOpacity={0.3} font={undefined}>
+      <Text position={[x > 0 ? 0.3 : -0.3, 0.1, 0]} fontSize={0.055} color="#FA660F" anchorX={x > 0 ? "left" : "right"} anchorY="middle" fillOpacity={0.3 * dim * bright} font={undefined}>
         {(pool.sharePct * 100).toFixed(1)}%
       </Text>
-
-      {/* Hover tooltip with full detail */}
-      {hovered && (
-        <Html center style={{ pointerEvents: "none" }}>
-          <div className="scene-tooltip">
-            <strong>{pool.name}</strong><br />
-            {(pool.sharePct * 100).toFixed(1)}% hashrate share<br />
-            ~{pool.hashRateEh} EH/s of {networkHashrate.toFixed(0)} EH/s
-          </div>
-        </Html>
-      )}
     </group>
   );
 }
