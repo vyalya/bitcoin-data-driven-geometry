@@ -979,12 +979,12 @@ def main() -> pd.DataFrame:
     return result
 
 
-# ── Entry point ─────────────────────────────────────────────────────────
-# Works as both `python extract_btc_data.py` (CLI) and as an embedded
-# script in Strategy Mosaic (which executes the file directly).
+# ── Entry points ────────────────────────────────────────────────────────
+
+def get_data() -> pd.DataFrame:
+    """Strategy Mosaic entry point. Must be named get_data()."""
+    return main()
+
 
 if __name__ == "__main__":
     main()
-else:
-    # Mosaic embedded mode — execute and expose result as `df`
-    df = main()
