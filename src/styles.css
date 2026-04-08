@@ -1,26 +1,38 @@
+/* ─── Strategy Brand System ─── */
 :root {
-  color: #ffe4bf;
-  background:
-    radial-gradient(circle at top left, rgba(255, 120, 38, 0.24), transparent 24%),
-    radial-gradient(circle at top right, rgba(255, 186, 92, 0.12), transparent 22%),
-    radial-gradient(circle at center, rgba(116, 33, 4, 0.2), transparent 36%),
-    linear-gradient(180deg, #090403 0%, #140805 45%, #090403 100%);
-  font-family: "SF Pro Display", "Avenir Next", "Segoe UI", sans-serif;
+  --bg: #000000;
+  --surface: #0A0A0A;
+  --surface-elevated: #141414;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.16);
+  --border-active: rgba(250, 102, 15, 0.45);
+  --text: #FFFFFF;
+  --text-secondary: #999999;
+  --text-tertiary: #666666;
+  --accent: #FA660F;
+  --accent-hover: #FF8C3A;
+  --accent-dim: rgba(250, 102, 15, 0.08);
+
+  color: var(--text);
+  background: var(--bg);
+  font-family: "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
 }
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html,
 body,
 #root {
-  margin: 0;
-  min-height: 100%;
+  height: 100%;
 }
 
 body {
   min-height: 100vh;
+  background: #000;
 }
 
 button,
@@ -29,254 +41,366 @@ textarea {
   font: inherit;
 }
 
+/* ─── App Shell ─── */
 .app-shell {
   min-height: 100vh;
-  padding: 24px;
+  padding: 20px 24px;
 }
 
+/* ─── Top Bar ─── */
 .topbar {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 20px;
-}
-
-.topbar h1,
-.panel h2 {
-  margin: 0;
-  font-weight: 600;
-  letter-spacing: -0.03em;
+  margin-bottom: 16px;
 }
 
 .topbar h1 {
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
-  max-width: 820px;
-}
-
-.subhead {
-  margin: 10px 0 0;
-  max-width: 760px;
-  color: #d7b994;
-  line-height: 1.5;
+  margin: 0;
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  max-width: 680px;
 }
 
 .eyebrow {
   margin: 0 0 6px;
-  color: #d9a76e;
-  font-size: 0.78rem;
-  letter-spacing: 0.16em;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 500;
 }
 
+.subhead {
+  margin: 8px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  max-width: 620px;
+}
+
+/* ─── Status Cluster ─── */
 .status-cluster {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
 }
 
-.status-pill,
-.panel,
-.metric-card,
-.hud-card,
-.scenario-button {
-  border: 1px solid rgba(255, 166, 76, 0.24);
-  background:
-    linear-gradient(180deg, rgba(45, 18, 8, 0.78), rgba(17, 7, 5, 0.82)),
-    rgba(9, 20, 35, 0.72);
-  box-shadow: 0 18px 60px rgba(2, 8, 17, 0.45), inset 0 1px 0 rgba(255, 193, 117, 0.08);
-  backdrop-filter: blur(22px);
-}
-
 .status-pill {
-  min-width: 138px;
-  padding: 12px 14px;
-  border-radius: 16px;
+  min-width: 116px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
 }
 
-.status-pill span,
-.metric-card span,
-.hud-card span,
-.pool-row span,
-.bucket-row span {
+.status-pill span {
   display: block;
-  color: #d7af82;
-  font-size: 0.82rem;
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
-.status-pill strong,
-.metric-card strong,
-.hud-card strong,
-.pool-row strong,
-.bucket-row strong {
-  font-weight: 600;
+.status-pill strong {
+  display: block;
+  font-weight: 500;
+  margin-top: 2px;
+  font-size: 0.92rem;
 }
 
+/* ─── Workspace ─── */
 .workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(340px, 420px);
-  gap: 20px;
-  min-height: calc(100vh - 120px);
+  grid-template-columns: minmax(0, 1.6fr) minmax(310px, 390px);
+  gap: 16px;
+  min-height: calc(100vh - 100px);
 }
 
+/* ─── Canvas Panel ─── */
 .canvas-panel {
   position: relative;
   overflow: hidden;
-  border-radius: 28px;
-  min-height: 720px;
-  border: 1px solid rgba(255, 166, 76, 0.18);
-  background: radial-gradient(circle at center, rgba(255, 123, 0, 0.08), transparent 36%);
+  border-radius: 12px;
+  min-height: 700px;
+  background: #000;
+  border: 1px solid var(--border);
 }
 
 .canvas-panel canvas {
   display: block;
 }
 
+/* ─── HUD Overlay ─── */
+.canvas-overlay {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.hud-card {
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  backdrop-filter: blur(12px);
+}
+
+.hud-card span {
+  display: block;
+  font-size: 0.66rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.hud-card strong {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* ─── Scene Intro ─── */
 .scene-intro {
   position: absolute;
-  left: 18px;
-  bottom: 22px;
+  left: 14px;
+  bottom: 14px;
   z-index: 10;
-  max-width: 420px;
-  border-radius: 22px;
-  padding: 18px 20px;
-  border: 1px solid rgba(255, 166, 76, 0.22);
-  background: linear-gradient(180deg, rgba(37, 14, 7, 0.76), rgba(17, 7, 5, 0.82));
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+  max-width: 340px;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.78);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
 }
 
 .scene-intro h2 {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
 .scene-intro p:last-child {
   margin: 0;
-  line-height: 1.55;
-  color: #ddc09c;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.5;
 }
 
-.canvas-overlay {
-  position: absolute;
-  top: 18px;
-  left: 18px;
-  right: 18px;
-  z-index: 10;
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  pointer-events: none;
-}
-
+/* ─── Analysis Ribbon ─── */
 .analysis-ribbon {
   position: absolute;
-  right: 18px;
-  bottom: 22px;
+  right: 14px;
+  bottom: 14px;
   z-index: 10;
-  padding: 14px 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 166, 76, 0.22);
-  background: rgba(24, 10, 6, 0.76);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.78);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  backdrop-filter: blur(12px);
 }
 
 .analysis-ribbon span {
   display: block;
-  color: #d09f72;
-  font-size: 0.78rem;
+  font-size: 0.66rem;
+  color: var(--text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
 }
 
 .analysis-ribbon strong {
   display: block;
-  margin-top: 4px;
+  margin-top: 2px;
+  font-weight: 500;
+  font-size: 0.88rem;
 }
 
-.hud-card {
-  padding: 12px 14px;
-  border-radius: 16px;
-}
-
+/* ─── Sidebar ─── */
 .sidebar {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
+  overflow-y: auto;
+  max-height: calc(100vh - 100px);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
 }
 
 .panel {
-  border-radius: 24px;
-  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
 }
 
 .panel h2 {
-  font-size: 1.85rem;
+  margin: 0 0 12px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
+/* ─── Chat Bubbles ─── */
 .chat-bubble {
-  border-radius: 18px;
-  padding: 14px 16px;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 0.85rem;
   line-height: 1.5;
 }
 
 .chat-bubble + .chat-bubble {
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .chat-bubble.user {
-  background: rgba(255, 153, 76, 0.1);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  color: var(--text);
 }
 
 .chat-bubble.system {
-  background: rgba(255, 114, 35, 0.12);
+  background: var(--accent-dim);
+  border: 1px solid rgba(250, 102, 15, 0.1);
+  color: var(--text-secondary);
 }
 
+/* ─── Scenario Buttons ─── */
 .button-stack {
   display: grid;
-  gap: 10px;
+  gap: 6px;
 }
 
 .scenario-button {
   width: 100%;
-  border-radius: 18px;
-  padding: 14px 16px;
-  color: inherit;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
   cursor: pointer;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  text-align: left;
+  align-items: center;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.scenario-button:hover {
+  border-color: var(--border-hover);
+  background: var(--surface-elevated);
+}
+
+.scenario-button span {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.scenario-button strong {
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
 }
 
 .scenario-button.active {
-  border-color: rgba(255, 186, 92, 0.45);
-  background: linear-gradient(180deg, rgba(72, 28, 12, 0.92), rgba(41, 16, 8, 0.92));
+  border-color: var(--accent);
+  background: rgba(250, 102, 15, 0.04);
 }
 
+.scenario-button.active strong {
+  color: var(--accent);
+}
+
+/* ─── Metrics Grid ─── */
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0;
+  background: transparent;
+  border: none;
 }
 
 .metric-card {
-  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
   padding: 14px;
+  border-left: 2px solid rgba(255, 255, 255, 0.12);
 }
 
-.pool-list {
+.metric-card span {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.metric-card strong {
+  display: block;
+  font-size: 1.7rem;
+  font-weight: 400;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Threshold severity indicators */
+.metric-card[data-severity="normal"] {
+  border-left-color: rgba(255, 255, 255, 0.15);
+}
+
+.metric-card[data-severity="normal"] strong {
+  color: var(--text);
+}
+
+.metric-card[data-severity="elevated"] {
+  border-left-color: var(--accent);
+}
+
+.metric-card[data-severity="elevated"] strong {
+  color: var(--accent);
+}
+
+.metric-card[data-severity="critical"] {
+  border-left-color: #FF3D00;
+}
+
+.metric-card[data-severity="critical"] strong {
+  color: #FF3D00;
+}
+
+/* ─── Pool / Bucket Lists ─── */
+.pool-list,
+.bucket-list {
   display: grid;
-  gap: 10px;
+  gap: 0;
 }
 
 .pool-row,
 .bucket-row {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   gap: 16px;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(154, 190, 221, 0.12);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
 }
 
 .pool-row:last-child,
@@ -290,18 +414,60 @@ textarea {
   text-align: right;
 }
 
-.bucket-list {
-  display: grid;
-  gap: 8px;
+.pool-row span,
+.bucket-row span {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--text-tertiary);
 }
 
+.pool-row strong,
+.bucket-row strong {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* ─── Simulation Badge ─── */
+.simulation-badge {
+  background: rgba(250, 102, 15, 0.08);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+.simulation-badge span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* ─── Panel Title / Subtitle ─── */
+.panel-title {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.panel-subtitle {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.82rem;
+  color: var(--accent);
+}
+
+/* ─── Interpretation Notes ─── */
 .notes-list {
   margin: 0;
-  padding-left: 18px;
-  line-height: 1.5;
-  color: #eccca3;
+  padding-left: 16px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 0.85rem;
 }
 
+/* ─── Responsive ─── */
 @media (max-width: 1080px) {
   .workspace {
     grid-template-columns: 1fr;
@@ -310,11 +476,15 @@ textarea {
   .canvas-panel {
     min-height: 560px;
   }
+
+  .sidebar {
+    max-height: none;
+  }
 }
 
 @media (max-width: 720px) {
   .app-shell {
-    padding: 16px;
+    padding: 12px;
   }
 
   .topbar {
