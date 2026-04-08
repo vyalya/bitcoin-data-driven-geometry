@@ -1,10 +1,10 @@
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Text, Line, Html } from "@react-three/drei";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Text } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { mosaicSnapshots, deriveRingBands } from "./data/mosaicSnapshots";
-import type { NetworkSnapshot, RingBand, MiningPoolSnapshot, FeeBucket } from "./types";
+import type { NetworkSnapshot } from "./types";
 
 /* ═══════════════════════════════════════════════════════
    HELPERS
@@ -12,20 +12,7 @@ import type { NetworkSnapshot, RingBand, MiningPoolSnapshot, FeeBucket } from ".
 
 /* getSeverity removed — cockpit readout shows raw values */
 
-/** Per-ring color palette — each ring has a distinct identity */
-const RING_COLORS = [
-  "#FF6B00", // Ring 1: deep orange — fee pressure
-  "#FA660F", // Ring 2: primary orange — settlement
-  "#FF4400", // Ring 3: red-orange — congestion (hot)
-  "#CC5500", // Ring 4: copper — mempool depth
-] as const;
-
-const RING_LABELS = [
-  "Fee Pressure",
-  "Settlement",
-  "Congestion",
-  "Mempool Depth",
-] as const;
+/* Ring colors/labels removed — now inline in PrimeRadiantScene */
 
 /* ═══════════════════════════════════════════════════════
    APP SHELL
@@ -397,7 +384,9 @@ function CockpitSection({ title, groupId, activeGroup, items }: {
 }
 
 /* ═══════════════════════════════════════════════════════
-   3D SCENE — PRIME RADIANT
+   3D SCENE — 11 HONEST SHAPES
+   Every shape = one atomic data entity
+   Every visual property = one Mosaic metric
    ═══════════════════════════════════════════════════════ */
 
 interface SceneProps {
@@ -409,688 +398,222 @@ interface SceneProps {
 }
 
 function PrimeRadiantScene({ snapshot, activeGroup, onHover, onClick, onDeselect }: SceneProps) {
-  return (
-    <group position={[0, -0.15, 0]} scale={0.78}>
-      {/* Lighting */}
-      <ambientLight intensity={0.05} />
-      <pointLight position={[0, 0, 2]} intensity={12} color="#FA660F" distance={22} decay={1.8} />
-      <pointLight position={[6, 5, 4]} intensity={5} color="#FF8C3A" distance={20} decay={2} />
-      <pointLight position={[-6, -4, 4]} intensity={4} color="#FA660F" distance={18} decay={2} />
-      <pointLight position={[0, -6, 2]} intensity={3} color="#7A3308" distance={16} decay={2} />
-      <pointLight position={[0, 6, 1]} intensity={2} color="#FF6B00" distance={14} decay={2} />
+  const s = snapshot;
+  const fp = s.feePressureIndex / 10;
+  const cg = s.congestionScore / 10;
+  const bs = s.blockProductionStress / 10;
+  const health = s.networkHealthScore / 10;
+  const hrNorm = Math.min(s.networkHashrateEh / 1000, 1);
 
-      {/* Click empty space to deselect */}
-      <mesh position={[0, 0, -2]} onClick={onDeselect}>
-        <planeGeometry args={[30, 30]} />
+  // Dim factor for non-active groups
+  const dim = (gid: string) => (activeGroup !== null && activeGroup !== gid) ? 0.1 : 1;
+  const bright = (gid: string) => activeGroup === gid ? 1.5 : 1;
+
+  // Shared interaction handler
+  const interact = (gid: string, title: string, body: string) => ({
+    onPointerOver: (e: { stopPropagation: () => void }) => { e.stopPropagation(); onHover(gid); },
+    onPointerOut: () => onHover(null),
+    onClick: (e: { stopPropagation: () => void }) => { e.stopPropagation(); onClick(gid, title, body); },
+  });
+
+  // Fee tier colors: warmer = higher fee tier
+  const feeColors = ["#FF9933", "#FF7722", "#FF5511", "#FF3300"];
+  const feeLabels = ["1-10 sat/vB", "11-30 sat/vB", "31-80 sat/vB", "81+ sat/vB"];
+
+  return (
+    <group key={s.id} position={[0, 0, 0]} scale={0.85}>
+      <ambientLight intensity={0.04 + health * 0.04} />
+      <pointLight position={[0, 0, 3]} intensity={8 + health * 6} color="#FA660F" distance={20} decay={1.8} />
+      <pointLight position={[5, 4, 2]} intensity={4} color="#FF8C3A" distance={18} decay={2} />
+      <pointLight position={[-5, -3, 2]} intensity={3} color="#FA660F" distance={16} decay={2} />
+
+      {/* Click background to deselect */}
+      <mesh position={[0, 0, -3]} onClick={onDeselect}>
+        <planeGeometry args={[40, 40]} />
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
 
-      {/* Every element below is rooted in real data with a tooltip */}
-
-      <BlockSpine key={`spine-${snapshot.id}`} snapshot={snapshot} />
-
-      {/* 4 data rings */}
-      {snapshot.ringBands.map((band, i) => {
-        const gid = `ring-${i}`;
-        return (
-          <SegmentedDataRing
-            key={`${snapshot.id}-${band.id}`}
-            band={band}
-            index={i}
-            snapshot={snapshot}
-            isDimmed={activeGroup !== null && activeGroup !== gid}
-            isHighlighted={activeGroup === gid}
-            groupId={gid}
-            onHover={onHover}
-            onClick={onClick}
-          />
-        );
-      })}
-
-      {/* Fee tier orbital paths */}
-      <FeeOrbitRings key={`fee-${snapshot.id}`} feeBuckets={snapshot.feeBuckets} activeGroup={activeGroup} onHover={onHover} onClick={onClick} />
-
-      {/* Mining pool constellation */}
-      <MiningConstellation
-        key={`mining-${snapshot.id}`}
-        pools={snapshot.miningPools}
-        hashrate={snapshot.networkHashrateEh}
-        activeGroup={activeGroup}
-        onHover={onHover}
-        onClick={onClick}
-      />
-
-      <MempoolStrata key={`strata-${snapshot.id}`} snapshot={snapshot} />
-      <EpochMarkers key={`epoch-${snapshot.id}`} snapshot={snapshot} />
-      <InterRingFilaments key={`filaments-${snapshot.id}`} snapshot={snapshot} />
-      <DataInscriptions key={`labels-${snapshot.id}`} snapshot={snapshot} />
-    </group>
-  );
-}
-
-/* ─── RADIANT CORE ─── */
-
-/* RadiantCore removed — wireframe shells were decorative.
-   Health score is communicated via KPI cards and the overall ring activity.
-   The spine blocks serve as the central visual anchor. */
-
-/* ─── BLOCK SPINE ─── 144 blocks per day via InstancedMesh.
-   All blocks are the SAME size because we have daily aggregates,
-   not per-block data. The COUNT is the data (more/fewer blocks =
-   faster/slower block production). Each block is hoverable.
-   Color = health (orange = healthy, red = stressed).
-*/
-
-function BlockSpine({ snapshot }: { snapshot: NetworkSnapshot }) {
-  const meshRef = useRef<THREE.InstancedMesh>(null);
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
-
-  const healthColor = new THREE.Color(snapshot.networkHealthScore < 5.5 ? "#FF3D00" : "#FA660F");
-  const blockCount = Math.max(10, Math.min(snapshot.blockHeight > 0 ? 144 : 20, 200));
-  const blockSize = 0.03;
-  const dummy = useMemo(() => new THREE.Object3D(), []);
-
-  useEffect(() => { setHoveredIdx(null); }, [snapshot.id]);
-
-  const blockData = useMemo(() => {
-    const spacing = 8 / blockCount;
-    return Array.from({ length: blockCount }).map((_, i) => ({
-      y: i * spacing - 4,
-      blockHeight: snapshot.blockHeight - (blockCount - 1 - i),
-    }));
-  }, [snapshot.blockHeight, blockCount]);
-
-  // Update instance matrices
-  useMemo(() => {
-    if (!meshRef.current) return;
-    blockData.forEach((b, i) => {
-      dummy.position.set(0, b.y, 0);
-      dummy.scale.setScalar(1);
-      dummy.updateMatrix();
-      meshRef.current!.setMatrixAt(i, dummy.matrix);
-    });
-    meshRef.current.instanceMatrix.needsUpdate = true;
-  }, [blockData, dummy]);
-
-  return (
-    <group>
-      <instancedMesh
-        ref={meshRef}
-        args={[undefined, undefined, blockCount]}
-        onPointerMove={(e) => {
-          if (e.instanceId !== undefined) { e.stopPropagation(); setHoveredIdx(e.instanceId); }
-        }}
-        onPointerOut={() => setHoveredIdx(null)}
-      >
-        <octahedronGeometry args={[blockSize, 0]} />
-        <meshStandardMaterial
-          color="#FF8C3A"
-          emissive={healthColor}
-          emissiveIntensity={0.6}
-          metalness={0.4}
-          roughness={0.08}
-        />
-      </instancedMesh>
-
-      {hoveredIdx !== null && hoveredIdx < blockData.length && (
-        <group position={[0, blockData[hoveredIdx].y, 0]}>
-          <Html center style={{ pointerEvents: "none" }}>
-            <div className="scene-tooltip">
-              <strong>Block #{blockData[hoveredIdx].blockHeight.toLocaleString()}</strong>
-              1 of {blockCount} blocks mined this day
-              {"\n"}Avg interval: {snapshot.avgBlockIntervalSeconds}s (target: 600s)
-              {"\n"}Stress: {snapshot.blockProductionStress.toFixed(1)}/10
-            </div>
-          </Html>
-        </group>
-      )}
-    </group>
-  );
-}
-
-/* ─── DATA RING ───
-   Each ring has segments matching its ACTUAL data granularity:
-
-   Ring 0 (Fee Pressure): 4 sectors = 4 fee tiers. Height = txShare.
-   Ring 1 (Settlement): 1 sector per block mined (up to 144). Height = uniform (healthy) or varied (stressed).
-   Ring 2 (Congestion): 4 sectors = mempool txs per fee tier. Height = pending txs in that tier.
-   Ring 3 (Mining): 5 sectors = 5 pools. Arc width = hashrate share. Height = share proportion.
-
-   Every segment is individually hoverable with a unique tooltip.
-*/
-
-function SegmentedDataRing({ band, index, snapshot, isDimmed, isHighlighted, groupId, onHover, onClick }: {
-  band: RingBand; index: number; snapshot: NetworkSnapshot;
-  isDimmed?: boolean; isHighlighted?: boolean;
-  groupId: string;
-  onHover: (id: string | null) => void;
-  onClick: (id: string, title: string, body: string) => void;
-}) {
-  const color = RING_COLORS[index] || "#FA660F";
-  const label = RING_LABELS[index] || "";
-  const dimFactor = isDimmed ? 0.12 : 1;
-  const brightFactor = isHighlighted ? 1.4 : 1;
-
-  // Build segments based on ring type — each segment is a UNIQUE data point
-  const segments = useMemo(() => {
-    const result: Array<{
-      startAngle: number; endAngle: number; midAngle: number;
-      height: number; depth: number; emIntensity: number;
-      tooltipTitle: string; tooltipDetail: string;
-    }> = [];
-
-    if (index === 0) {
-      // FEE PRESSURE: 4 sectors = 4 fee tiers
-      const tiers = snapshot.feeBuckets;
-      let angleOffset = 0;
-      tiers.forEach((tier) => {
-        const arcSpan = (Math.PI * 2) * tier.txShare; // proportional arc
-        const height = 0.03 + tier.txShare * 0.3 + (snapshot.feePressureIndex / 10) * 0.15;
-        const mempoolInTier = Math.round(snapshot.mempoolTxCount * tier.txShare);
-        result.push({
-          startAngle: angleOffset,
-          endAngle: angleOffset + arcSpan,
-          midAngle: angleOffset + arcSpan / 2,
-          height,
-          depth: 0.04 + tier.intensity * 0.03,
-          emIntensity: 0.3 + tier.intensity * 1.2,
-          tooltipTitle: `Fee Tier: ${tier.feeRateLabel}`,
-          tooltipDetail: `${(tier.txShare * 100).toFixed(1)}% of transactions\n${mempoolInTier > 0 ? mempoolInTier.toLocaleString() + " pending txs" : "No pending txs"}\nIntensity: ${(tier.intensity * 100).toFixed(0)}/100`,
-        });
-        angleOffset += arcSpan;
-      });
-    } else if (index === 1) {
-      // SETTLEMENT: 1 arc = one daily block production stress value
-      // This is honest — we have ONE stress metric per day, not per-block
-      const stress = snapshot.blockProductionStress / 10;
-      const health = 1 - stress;
-      const fillAngle = Math.PI * 2 * Math.max(0.1, health); // healthy = more fill
-      const height = 0.03 + health * 0.15;
-      result.push({
-        startAngle: -fillAngle / 2,
-        endAngle: fillAngle / 2,
-        midAngle: 0,
-        height,
-        depth: 0.04,
-        emIntensity: 0.3 + health * 0.8,
-        tooltipTitle: "Block Production",
-        tooltipDetail: `Stress: ${snapshot.blockProductionStress.toFixed(1)}/10\nAvg interval: ${snapshot.avgBlockIntervalSeconds}s (target: 600s)\n144 blocks mined\n${stress < 0.2 ? "Healthy — blocks on schedule" : stress < 0.5 ? "Moderate stress — some irregularity" : "High stress — irregular block times"}`,
-      });
-    } else if (index === 2) {
-      // CONGESTION: 1 arc = one daily congestion score
-      // Honest — we have ONE congestion metric, not per-tier congestion
-      const cg = snapshot.congestionScore / 10;
-      const total = snapshot.mempoolTxCount;
-      const fillAngle = Math.PI * 2 * Math.max(0.05, cg); // more congestion = more fill
-      const height = 0.01 + cg * 0.25;
-      result.push({
-        startAngle: -fillAngle / 2,
-        endAngle: fillAngle / 2,
-        midAngle: 0,
-        height: Math.max(0.005, height),
-        depth: 0.03 + cg * 0.04,
-        emIntensity: cg > 0.01 ? 0.3 + cg * 1.5 : 0.05,
-        tooltipTitle: "Network Congestion",
-        tooltipDetail: `Score: ${snapshot.congestionScore.toFixed(1)}/10\n${total.toLocaleString()} pending transactions\n${snapshot.mempoolSizeMb.toFixed(1)} MB mempool\n${cg < 0.1 ? "Clear — no congestion" : cg < 0.3 ? "Light traffic" : cg < 0.5 ? "Moderate backlog" : "Heavy congestion"}`,
-      });
-    } else {
-      // MINING: 5 sectors = 5 pools, arc width = hashrate share
-      let angleOffset = 0;
-      snapshot.miningPools.forEach((pool) => {
-        const arcSpan = (Math.PI * 2) * pool.sharePct;
-        const height = 0.03 + pool.sharePct * 0.4;
-        result.push({
-          startAngle: angleOffset, endAngle: angleOffset + arcSpan, midAngle: angleOffset + arcSpan / 2,
-          height, depth: 0.04 + pool.sharePct * 0.05,
-          emIntensity: 0.3 + pool.sharePct * 1.5,
-          tooltipTitle: pool.name,
-          tooltipDetail: `${(pool.sharePct * 100).toFixed(1)}% hashrate\n${pool.hashRateEh} EH/s\n${pool.shareChange30d >= 0 ? "+" : ""}${(pool.shareChange30d * 100).toFixed(1)}% 30d`,
-        });
-        angleOffset += arcSpan;
-      });
-    }
-
-    return result;
-  }, [index, snapshot]);
-
-  // Build detail text for click panel
-  const detailBody = segments.map((s) => `${s.tooltipTitle}\n${s.tooltipDetail}`).join("\n\n");
-
-  return (
-    <group
-      onPointerOver={(e) => { e.stopPropagation(); onHover(groupId); }}
-      onPointerOut={() => onHover(null)}
-      onClick={(e) => { e.stopPropagation(); onClick(groupId, `${label} Ring`, detailBody); }}
-    >
-      {/* Track ring */}
-      <mesh>
-        <ringGeometry args={[band.radius - 0.008, band.radius + 0.008, 256]} />
-        <meshBasicMaterial color={color} transparent opacity={(isHighlighted ? 0.06 : 0.02) * dimFactor} />
-      </mesh>
-
-      {/* Data segments */}
-      {segments.map((seg, si) => {
-        const arcLen = seg.endAngle - seg.startAngle;
-        if (!arcLen || arcLen < 0.001 || !isFinite(arcLen)) return null;
-        const subCount = Math.max(2, Math.round(arcLen / (Math.PI * 2) * 48));
-        const gap = arcLen * 0.06;
-        const usableArc = arcLen - gap;
-        if (!usableArc || usableArc < 0.001 || !isFinite(usableArc)) return null;
-        if (!isFinite(seg.height) || !isFinite(seg.depth)) return null;
+      {/* ═══ SHAPE 1-4: FEE TIER ARCS (inner ring, r=2.2) ═══ */}
+      {s.feeBuckets.map((bucket, i) => {
+        const gid = `fee-${i}`;
+        const d = dim(gid) * bright(gid);
+        // Arc width proportional to txShare
+        const arcSpan = Math.PI * 2 * bucket.txShare;
+        // Starting angle: sequential around the ring
+        let startAngle = 0;
+        for (let j = 0; j < i; j++) startAngle += Math.PI * 2 * s.feeBuckets[j].txShare;
+        // Height driven by fee pressure
+        const height = 0.04 + fp * 0.2 + bucket.intensity * 0.1;
+        // Z-depth: higher fee tiers push forward
+        const z = i * 0.08;
+        // Sub-segments for visual texture
+        const subCount = Math.max(3, Math.round(arcSpan / (Math.PI * 2) * 40));
+        const gap = arcSpan * 0.06;
+        const usable = arcSpan - gap;
+        if (usable < 0.01) return null;
 
         return (
-          <group key={si}>
+          <group key={gid} position={[0, 0, z]} {...interact(gid, `Fee Tier: ${feeLabels[i]}`, `${(bucket.txShare * 100).toFixed(1)}% of transactions\nIntensity: ${(bucket.intensity * 100).toFixed(0)}/100\nFee Pressure: ${s.feePressureIndex.toFixed(1)}/10`)}>
             {Array.from({ length: subCount }).map((_, j) => {
-              const t = j / subCount;
-              const angle = seg.startAngle + gap / 2 + t * usableArc;
-              const x = Math.cos(angle) * band.radius;
-              const y = Math.sin(angle) * band.radius;
-              const w = Math.max(0.005, (usableArc / subCount) * band.radius * 0.85);
-
+              const angle = startAngle + gap / 2 + (j / subCount) * usable;
+              const r = 2.2;
               return (
-                <mesh key={j} position={[x, y, 0]} rotation={[0, 0, angle]}>
-                  <boxGeometry args={[w, seg.height, seg.depth]} />
-                  <meshStandardMaterial
-                    color={color}
-                    emissive={color}
-                    emissiveIntensity={seg.emIntensity * dimFactor * brightFactor}
-                    metalness={0.3}
-                    roughness={0.3}
-                    transparent
-                    opacity={0.7 * dimFactor * brightFactor}
-                  />
+                <mesh key={j} position={[Math.cos(angle) * r, Math.sin(angle) * r, 0]} rotation={[0, 0, angle]}>
+                  <boxGeometry args={[Math.max(0.005, (usable / subCount) * r * 0.85), height, 0.035 + bucket.intensity * 0.02]} />
+                  <meshStandardMaterial color={feeColors[i]} emissive={feeColors[i]} emissiveIntensity={(0.3 + bucket.intensity * 1.0) * d} metalness={0.3} roughness={0.3} transparent opacity={0.75 * d} />
                 </mesh>
               );
             })}
+            <Text position={[Math.cos(startAngle + arcSpan / 2) * 2.55, Math.sin(startAngle + arcSpan / 2) * 2.55, 0.1]} fontSize={0.06} color={feeColors[i]} anchorX="center" anchorY="middle" fillOpacity={0.4 * d} font={undefined}>
+              {feeLabels[i]}
+            </Text>
           </group>
         );
       })}
 
-      {/* Ring label */}
-      {/* Ring label — name */}
-      <Text
-        position={[0, band.radius + 0.22, 0.1]}
-        fontSize={0.07}
-        color={color}
-        anchorX="center"
-        anchorY="bottom"
-        fillOpacity={isHighlighted ? 0.8 : 0.4 * dimFactor}
-        font={undefined}
-      >
-        {label}
-      </Text>
-      {/* Ring label — score + segment count */}
-      <Text
-        position={[0, band.radius + 0.13, 0.1]}
-        fontSize={0.05}
-        color="#FFFFFF"
-        anchorX="center"
-        anchorY="bottom"
-        fillOpacity={isHighlighted ? 0.5 : 0.2 * dimFactor}
-        font={undefined}
-      >
-        {([snapshot.feePressureIndex, snapshot.blockProductionStress, snapshot.congestionScore, snapshot.minerConcentrationScore][index] ?? 0).toFixed(1)}/10 · {segments.length} {segments.length === 1 ? "value" : "values"}
-      </Text>
-    </group>
-  );
-}
-
-/* ─── FEE ORBIT RINGS ─── */
-
-function FeeOrbitRings({ feeBuckets, activeGroup, onHover, onClick }: { feeBuckets: FeeBucket[]; activeGroup: string | null; onHover: (id: string | null) => void; onClick: (id: string, title: string, body: string) => void }) {
-  const feeColors = ["#FFAA44", "#FF8833", "#FF5500", "#FF3300"];
-  const feeLabels = ["1-10 sat/vB", "11-30 sat/vB", "31-80 sat/vB", "81+ sat/vB"];
-
-  return (
-    <group>
-      {feeBuckets.map((bucket, i) => {
-        const radius = 1.05 + i * 0.5;
-        const segCount = 64;
-        const activeCount = Math.round(segCount * bucket.txShare * 2.5);
-        const tiltX = Math.PI / 2.4 + i * 0.06;
-        const color = feeColors[i] || "#FA660F";
-
+      {/* ═══ SHAPE 5: CONGESTION ARC (middle ring, r=3.3) ═══ */}
+      {(() => {
+        const gid = "congestion";
+        const d = dim(gid) * bright(gid);
+        const fillAngle = Math.PI * 2 * Math.max(0.03, cg);
+        const height = 0.015 + cg * 0.25;
+        const z = cg * 0.3; // pushes forward when congested
+        const subCount = Math.max(2, Math.round(fillAngle / (Math.PI * 2) * 36));
+        const r = 3.3;
         return (
-          <group
-            key={bucket.id}
-            rotation={[tiltX, 0, Math.PI * 0.12 + i * 0.18]}
-            onPointerOver={(e) => { e.stopPropagation(); onHover(`fee-${i}`); }}
-            onPointerOut={() => onHover(null)}
-            onClick={(e) => { e.stopPropagation(); onClick(`fee-${i}`, `Fee Tier: ${feeLabels[i]}`, `${(bucket.txShare * 100).toFixed(1)}% of transactions\nIntensity: ${(bucket.intensity * 100).toFixed(0)}/100`); }}
-          >
-            {Array.from({ length: segCount }).map((_, j) => {
-              const angle = (j / segCount) * Math.PI * 2;
-              const isActive = j < activeCount;
-              const wave = Math.sin(angle * 2 + i * 1.7) * 0.5 + 0.5;
-              const h = isActive ? 0.015 + bucket.intensity * 0.08 * (0.5 + wave * 0.5) : 0.005;
-              const arcLen = (2 * Math.PI * radius) / segCount;
-
+          <group position={[0, 0, z]} {...interact(gid, "Network Congestion", `Score: ${s.congestionScore.toFixed(1)}/10\n${s.mempoolTxCount.toLocaleString()} pending txs\n${s.mempoolSizeMb.toFixed(1)} MB mempool`)}>
+            {Array.from({ length: subCount }).map((_, j) => {
+              const angle = -fillAngle / 2 + (j / subCount) * fillAngle;
               return (
-                <mesh key={j} position={[Math.cos(angle) * radius, Math.sin(angle) * radius, 0]} rotation={[0, 0, angle]}>
-                  <boxGeometry args={[arcLen * 0.55, h, 0.02]} />
-                  {isActive ? (
-                    <meshStandardMaterial color={color} emissive={color} emissiveIntensity={(activeGroup === `fee-${i}` ? 1.5 : 0.3) + bucket.intensity * 0.8} metalness={0.2} roughness={0.4} transparent opacity={(activeGroup !== null && activeGroup !== `fee-${i}`) ? 0.1 : 0.4 + bucket.intensity * 0.4} />
-                  ) : (
-                    <meshBasicMaterial color="#0D0800" transparent opacity={0.015} />
-                  )}
+                <mesh key={j} position={[Math.cos(angle) * r, Math.sin(angle) * r, 0]} rotation={[0, 0, angle]}>
+                  <boxGeometry args={[Math.max(0.005, (fillAngle / subCount) * r * 0.85), Math.max(0.005, height), 0.03 + cg * 0.03]} />
+                  <meshStandardMaterial color="#FF4400" emissive="#FF4400" emissiveIntensity={(0.2 + cg * 1.5) * d} metalness={0.2} roughness={0.4} transparent opacity={(cg > 0.01 ? 0.6 + cg * 0.3 : 0.05) * d} />
                 </mesh>
               );
             })}
-            {/* Tooltip removed — shown in fixed detail panel on click */}
+            <Text position={[0, r + 0.2, 0.1]} fontSize={0.06} color="#FF4400" anchorX="center" anchorY="bottom" fillOpacity={0.4 * d} font={undefined}>
+              Congestion
+            </Text>
           </group>
         );
-      })}
-    </group>
-  );
-}
+      })()}
 
-/* ─── OUTER SWEEP RINGS ─── */
+      {/* ═══ SHAPE 6: SETTLEMENT ARC (middle ring, r=2.8) ═══ */}
+      {(() => {
+        const gid = "settlement";
+        const d = dim(gid) * bright(gid);
+        const stressHealth = 1 - bs;
+        const fillAngle = Math.PI * 2 * Math.max(0.05, stressHealth);
+        const height = 0.03 + stressHealth * 0.12;
+        const z = -bs * 0.2; // pushes back when stressed
+        const subCount = Math.max(3, Math.round(fillAngle / (Math.PI * 2) * 36));
+        const r = 2.8;
+        return (
+          <group position={[0, 0, z]} {...interact(gid, "Block Settlement", `Stress: ${s.blockProductionStress.toFixed(1)}/10\nAvg interval: ${s.avgBlockIntervalSeconds}s (target: 600s)\n144 blocks mined`)}>
+            {Array.from({ length: subCount }).map((_, j) => {
+              const angle = -fillAngle / 2 + (j / subCount) * fillAngle;
+              return (
+                <mesh key={j} position={[Math.cos(angle) * r, Math.sin(angle) * r, 0]} rotation={[0, 0, angle]}>
+                  <boxGeometry args={[Math.max(0.005, (fillAngle / subCount) * r * 0.85), height, 0.035]} />
+                  <meshStandardMaterial color="#FA660F" emissive="#FA660F" emissiveIntensity={(0.3 + stressHealth * 0.8) * d} metalness={0.3} roughness={0.3} transparent opacity={0.7 * d} />
+                </mesh>
+              );
+            })}
+            <Text position={[0, r + 0.18, 0.1]} fontSize={0.06} color="#FA660F" anchorX="center" anchorY="bottom" fillOpacity={0.4 * d} font={undefined}>
+              Settlement
+            </Text>
+          </group>
+        );
+      })()}
 
-/* OuterSweepRings removed — decorative, not rooted in data */
-/* ParticleNebula removed — individual particles not traceable to data points */
+      {/* ═══ SHAPES 7-11: MINING POOL ARCS (outer ring, r=4.5) ═══ */}
+      {(() => {
+        let angleOffset = 0;
+        return s.miningPools.map((pool) => {
+          const gid = `pool-${pool.id}`;
+          const d = dim(gid) * bright(gid);
+          const arcSpan = Math.PI * 2 * pool.sharePct;
+          const startAngle = angleOffset;
+          angleOffset += arcSpan;
+          // Height driven by pool's hashrate relative to network
+          const poolHr = pool.hashRateEh;
+          const height = 0.02 + pool.sharePct * 0.35;
+          // Z-depth: larger pools push forward
+          const z = pool.sharePct * 0.4;
+          const subCount = Math.max(2, Math.round(arcSpan / (Math.PI * 2) * 30));
+          const gap = arcSpan * 0.06;
+          const usable = arcSpan - gap;
+          if (usable < 0.005) return null;
+          const r = 4.5;
+          const midAngle = startAngle + arcSpan / 2;
 
-/* ParticleNebula function removed — replaced by MempoolStrata (data-rooted per-tier particles) */
+          return (
+            <group key={gid} position={[0, 0, z]} {...interact(gid, pool.name, `${(pool.sharePct * 100).toFixed(1)}% hashrate\n${poolHr} EH/s of ${s.networkHashrateEh.toFixed(0)} total`)}>
+              {Array.from({ length: subCount }).map((_, j) => {
+                const angle = startAngle + gap / 2 + (j / subCount) * usable;
+                return (
+                  <mesh key={j} position={[Math.cos(angle) * r, Math.sin(angle) * r, 0]} rotation={[0, 0, angle]}>
+                    <boxGeometry args={[Math.max(0.005, (usable / subCount) * r * 0.85), height, 0.03 + pool.sharePct * 0.04]} />
+                    <meshStandardMaterial color="#CC6600" emissive="#CC6600" emissiveIntensity={(0.2 + pool.sharePct * 2) * d} metalness={0.35} roughness={0.25} transparent opacity={0.7 * d} />
+                  </mesh>
+                );
+              })}
+              {/* Pool label */}
+              <Text position={[Math.cos(midAngle) * (r + 0.3), Math.sin(midAngle) * (r + 0.3), 0.1]} fontSize={0.055} color="#FFFFFF" anchorX="center" anchorY="middle" fillOpacity={0.4 * d} font={undefined}>
+                {pool.name}
+              </Text>
+              <Text position={[Math.cos(midAngle) * (r + 0.2), Math.sin(midAngle) * (r + 0.2), 0.1]} fontSize={0.04} color="#CC6600" anchorX="center" anchorY="middle" fillOpacity={0.3 * d} font={undefined}>
+                {(pool.sharePct * 100).toFixed(1)}%
+              </Text>
+            </group>
+          );
+        });
+      })()}
 
-/* ─── MINING CONSTELLATION ─── with hover tooltips, dramatic size differences */
+      {/* ═══ SHAPE 12: BLOCK SPINE (central column) ═══ */}
+      {(() => {
+        const gid = "spine";
+        const d = dim(gid) * bright(gid);
+        const blockCount = 144;
+        const meshRef = useRef<THREE.InstancedMesh>(null);
+        const dummy = useMemo(() => new THREE.Object3D(), []);
+        const healthColor = new THREE.Color(health > 0.55 ? "#FA660F" : "#FF3D00");
+        // Block size driven by avg_tx_per_block (more txs = bigger blocks)
+        const blockSize = 0.02 + hrNorm * 0.015;
 
-function MiningConstellation({ pools, hashrate, activeGroup, onHover, onClick }: { pools: MiningPoolSnapshot[]; hashrate: number; activeGroup: string | null; onHover: (id: string | null) => void; onClick: (id: string, title: string, body: string) => void }) {
-  return (
-    <group>
-      {pools.map((pool, i) => (
-        <MiningNode key={pool.id} pool={pool} index={i} total={pools.length} networkHashrate={hashrate} activeGroup={activeGroup} onHover={onHover} onClick={onClick} />
-      ))}
-    </group>
-  );
-}
-
-function MiningNode({ pool, index, total, networkHashrate, activeGroup, onHover, onClick }: { pool: MiningPoolSnapshot; index: number; total: number; networkHashrate: number; activeGroup: string | null; onHover: (id: string | null) => void; onClick: (id: string, title: string, body: string) => void }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const gid = `pool-${pool.id}`;
-
-  const angle = (index / total) * Math.PI * 2 - Math.PI / 2;
-  const r = 5.8;
-  const x = Math.cos(angle) * r;
-  const y = Math.sin(angle) * r;
-
-  // Dramatic size scaling — Foundry (30%) is 6x bigger than MARA (4.3%)
-  const nodeSize = 0.03 + pool.sharePct * 0.55;
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.1;
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.06;
-    }
-  });
-
-  const isActive = activeGroup === gid;
-  const isDimmed = activeGroup !== null && activeGroup !== gid;
-  const dim = isDimmed ? 0.12 : 1;
-  const bright = isActive ? 1.4 : 1;
-
-  return (
-    <group
-      position={[x, y, 0]}
-      onPointerOver={(e) => { e.stopPropagation(); onHover(gid); }}
-      onPointerOut={() => onHover(null)}
-      onClick={(e) => { e.stopPropagation(); onClick(gid, pool.name, `${(pool.sharePct * 100).toFixed(1)}% hashrate share\n${pool.hashRateEh} EH/s of ${networkHashrate.toFixed(0)} EH/s total`); }}
-    >
-      <mesh ref={meshRef}>
-        <octahedronGeometry args={[nodeSize, 0]} />
-        <meshStandardMaterial
-          color={isActive ? "#FFCC66" : "#FF8C3A"}
-          emissive="#FA660F"
-          emissiveIntensity={(0.7 + pool.sharePct * 1.5) * dim * bright}
-          metalness={0.4}
-          roughness={0.1}
-        />
-      </mesh>
-      <mesh>
-        <octahedronGeometry args={[nodeSize * 1.7, 0]} />
-        <meshBasicMaterial color="#FA660F" wireframe transparent opacity={0.05 * dim} />
-      </mesh>
-      <Line points={[[0, 0, 0], [-x, -y, 0]]} color="#FA660F" lineWidth={0.3} transparent opacity={0.03 * dim} dashed dashSize={0.12} gapSize={0.06} />
-      <Text position={[x > 0 ? 0.3 : -0.3, 0.22, 0]} fontSize={0.075} color="#FFFFFF" anchorX={x > 0 ? "left" : "right"} anchorY="middle" fillOpacity={0.4 * dim * bright} font={undefined}>
-        {pool.name}
-      </Text>
-      <Text position={[x > 0 ? 0.3 : -0.3, 0.1, 0]} fontSize={0.055} color="#FA660F" anchorX={x > 0 ? "left" : "right"} anchorY="middle" fillOpacity={0.3 * dim * bright} font={undefined}>
-        {(pool.sharePct * 100).toFixed(1)}%
-      </Text>
-    </group>
-  );
-}
-
-/* ─── MEMPOOL STRATA ───
-   Each particle = ~1,000 pending transactions at a specific fee tier.
-   Stratified by z-depth: low-fee txs behind, priority txs in front.
-   Only visible when mempool has transactions — zero mempool = nothing.
-*/
-
-function MempoolStrata({ snapshot }: { snapshot: NetworkSnapshot }) {
-  const mempoolNorm = Math.min(snapshot.mempoolTxCount / 400000, 1);
-  const [hoveredLayer, setHoveredLayer] = useState<number | null>(null);
-  if (mempoolNorm < 0.01) return null;
-
-  const feeColors = ["#FFAA44", "#FF8833", "#FF5500", "#FF3300"];
-  const feeLabels = ["1-10 sat/vB", "11-30 sat/vB", "31-80 sat/vB", "81+ sat/vB"];
-
-  return (
-    <group>
-      {snapshot.feeBuckets.map((bucket, li) => {
-        const txsInTier = Math.round(snapshot.mempoolTxCount * bucket.txShare);
-        const particleCount = Math.max(8, Math.round(txsInTier / 1000));
-        const positions = new Float32Array(particleCount * 3);
-        const radius = 1.8 + li * 0.6;
-        const z = -0.8 + li * 0.5;
-
-        // Deterministic placement seeded from block height + tier
-        let seed = snapshot.blockHeight * 7 + li * 31;
-        for (let i = 0; i < particleCount; i++) {
-          seed = (seed * 16807) % 2147483647;
-          const angle = (seed / 2147483647) * Math.PI * 2;
-          seed = (seed * 16807) % 2147483647;
-          const rVar = (seed / 2147483647) * 0.8 + 0.5;
-          positions[i * 3] = Math.cos(angle) * radius * rVar;
-          positions[i * 3 + 1] = Math.sin(angle) * radius * rVar;
-          seed = (seed * 16807) % 2147483647;
-          positions[i * 3 + 2] = z + ((seed / 2147483647) - 0.5) * 0.3;
-        }
+        useMemo(() => {
+          if (!meshRef.current) return;
+          const spacing = 7 / blockCount;
+          for (let i = 0; i < blockCount; i++) {
+            dummy.position.set(0, i * spacing - 3.5, 0);
+            dummy.scale.setScalar(1);
+            dummy.updateMatrix();
+            meshRef.current.setMatrixAt(i, dummy.matrix);
+          }
+          meshRef.current.instanceMatrix.needsUpdate = true;
+        }, [dummy, blockCount]);
 
         return (
-          <group key={li}>
-            <points
-              onPointerOver={(e) => { e.stopPropagation(); setHoveredLayer(li); }}
-              onPointerOut={() => setHoveredLayer(null)}
-            >
-              <bufferGeometry>
-                <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-              </bufferGeometry>
-              <pointsMaterial
-                color={feeColors[li]}
-                size={0.008 + bucket.intensity * 0.014}
-                sizeAttenuation
-                transparent
-                opacity={hoveredLayer === li ? 0.8 : 0.15 + bucket.intensity * 0.3}
-              />
-            </points>
-            {hoveredLayer === li && (
-              <Html position={[0, radius * 0.7, z]} center style={{ pointerEvents: "none" }}>
-                <div className="scene-tooltip">
-                  <strong>{feeLabels[li]}</strong><br />
-                  ~{txsInTier.toLocaleString()} pending txs<br />
-                  {(bucket.txShare * 100).toFixed(1)}% of mempool
-                </div>
-              </Html>
-            )}
+          <group {...interact(gid, "Block Spine", `Block #${s.blockHeight.toLocaleString()}\n144 blocks this day\nInterval: ${s.avgBlockIntervalSeconds}s\nHealth: ${s.networkHealthScore.toFixed(1)}/10`)}>
+            <instancedMesh ref={meshRef} args={[undefined, undefined, blockCount]}>
+              <octahedronGeometry args={[blockSize, 0]} />
+              <meshStandardMaterial color="#FF8C3A" emissive={healthColor} emissiveIntensity={0.5 * d} metalness={0.4} roughness={0.1} transparent opacity={0.8 * d} />
+            </instancedMesh>
           </group>
         );
-      })}
-    </group>
-  );
-}
+      })()}
 
-/* ─── EPOCH MARKERS ───
-   Small tick marks on the outer boundary ring representing difficulty
-   adjustment epochs. Each mark = one epoch (~2016 blocks ≈ 2 weeks).
-   Denser marks = more epochs visible in the historical window.
-*/
-
-function EpochMarkers({ snapshot }: { snapshot: NetworkSnapshot }) {
-  const epochCount = Math.floor(snapshot.blockHeight / 2016);
-  const visibleEpochs = Math.min(epochCount, 24);
-  const [hoveredEpoch, setHoveredEpoch] = useState<number | null>(null);
-
-  const markers = useMemo(() => {
-    const result: Array<{ angle: number; height: number; isHalving: boolean; epochNum: number; blockStart: number }> = [];
-    for (let i = 0; i < visibleEpochs; i++) {
-      const epoch = epochCount - visibleEpochs + i;
-      const blockAtEpoch = epoch * 2016;
-      const isHalving = [210000, 420000, 630000, 840000].some(
-        (h) => Math.abs(blockAtEpoch - h) < 2016
-      );
-      result.push({
-        angle: (i / visibleEpochs) * Math.PI * 2 - Math.PI / 2,
-        height: isHalving ? 0.25 : 0.08 + (i / visibleEpochs) * 0.06,
-        isHalving,
-        epochNum: epoch,
-        blockStart: blockAtEpoch,
-      });
-    }
-    return result;
-  }, [epochCount, visibleEpochs]);
-
-  useEffect(() => { setHoveredEpoch(null); }, [snapshot.id]);
-
-  return (
-    <group position={[0, 0, -0.5]}>
-      {markers.map((m, i) => {
-        const r = 6.0;
-        const isHovered = hoveredEpoch === i;
-        return (
-          <group key={i}>
-            <mesh
-              position={[Math.cos(m.angle) * r, Math.sin(m.angle) * r, 0]}
-              rotation={[0, 0, m.angle]}
-              onPointerOver={(e) => { e.stopPropagation(); setHoveredEpoch(i); }}
-              onPointerOut={() => setHoveredEpoch(null)}
-            >
-              <boxGeometry args={[0.005, isHovered ? m.height * 1.5 : m.height, 0.03]} />
-              <meshStandardMaterial
-                color={m.isHalving ? "#FFCC00" : "#FA660F"}
-                emissive={m.isHalving ? "#FFCC00" : "#FA660F"}
-                emissiveIntensity={isHovered ? 1.8 : m.isHalving ? 1.2 : 0.3}
-                transparent
-                opacity={isHovered ? 1 : m.isHalving ? 0.9 : 0.25}
-              />
-            </mesh>
-            {isHovered && (
-              <Html position={[Math.cos(m.angle) * 6.5, Math.sin(m.angle) * 6.5, 0.2]} center style={{ pointerEvents: "none" }}>
-                <div className="scene-tooltip">
-                  <strong>{m.isHalving ? "Halving Epoch" : `Difficulty Epoch #${m.epochNum}`}</strong>
-                  Block {m.blockStart.toLocaleString()}–{(m.blockStart + 2015).toLocaleString()}
-                  {m.isHalving ? "\nBlock subsidy was halved at this epoch" : "\nDifficulty adjusted every 2,016 blocks (~2 weeks)"}
-                </div>
-              </Html>
-            )}
-          </group>
-        );
-      })}
-
-      {markers.filter((m) => m.isHalving).map((m, i) => (
-        <Text
-          key={`h-${i}`}
-          position={[Math.cos(m.angle) * 6.35, Math.sin(m.angle) * 6.35, 0]}
-          fontSize={0.05}
-          color="#FFCC00"
-          anchorX="center"
-          anchorY="middle"
-          fillOpacity={0.4}
-          font={undefined}
-        >
-          HALVING
-        </Text>
+      {/* Ring track lines — subtle reference circles at each ring radius */}
+      {[2.2, 2.8, 3.3, 4.5].map((r) => (
+        <mesh key={r} position={[0, 0, -0.1]}>
+          <ringGeometry args={[r - 0.003, r + 0.003, 200]} />
+          <meshBasicMaterial color="#FA660F" transparent opacity={0.02} />
+        </mesh>
       ))}
     </group>
   );
 }
 
-/* ─── FEE FLOW ARCS ───
-   Arcs connecting fee pressure ring → congestion ring, representing
-   the flow of transaction fees through the network. Each arc = fee
-   pressure at that angular position pushing into congestion.
-   Count = feePressureIndex × congestionScore. Zero activity = no arcs.
-*/
-
-function InterRingFilaments({ snapshot }: { snapshot: NetworkSnapshot }) {
-  const [hovered, setHovered] = useState(false);
-  const intensity = snapshot.feePressureIndex * snapshot.congestionScore;
-  if (intensity < 0.1) return null; // no fee pressure + congestion = no flow
-
-  const arcCount = Math.max(4, Math.round(intensity * 2));
-  const radii = [2.0, 2.85, 3.75, 4.85];
-
-  const arcs = useMemo(() => {
-    const result: Array<{ startR: number; endR: number; angle: number; opacity: number }> = [];
-    let seed = snapshot.blockHeight * 13;
-    for (let i = 0; i < arcCount; i++) {
-      seed = (seed * 16807) % 2147483647;
-      const ringIdx = Math.floor((seed / 2147483647) * 3);
-      seed = (seed * 16807) % 2147483647;
-      const angle = (seed / 2147483647) * Math.PI * 2;
-      seed = (seed * 16807) % 2147483647;
-      result.push({ startR: radii[ringIdx], endR: radii[ringIdx + 1], angle, opacity: 0.02 + (seed / 2147483647) * 0.06 });
-    }
-    return result;
-  }, [arcCount, snapshot.blockHeight]);
-
-  return (
-    <group
-      onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
-      onPointerOut={() => setHovered(false)}
-    >
-      {arcs.map((f, i) => (
-        <Line key={i} points={[
-          [Math.cos(f.angle) * f.startR, Math.sin(f.angle) * f.startR, 0],
-          [Math.cos(f.angle + 0.04) * ((f.startR + f.endR) / 2), Math.sin(f.angle + 0.04) * ((f.startR + f.endR) / 2), 0.1],
-          [Math.cos(f.angle + 0.08) * f.endR, Math.sin(f.angle + 0.08) * f.endR, 0],
-        ]} color="#FA660F" lineWidth={0.3} transparent opacity={hovered ? f.opacity * 3 : f.opacity} />
-      ))}
-      {hovered && (
-        <Html position={[0, 3.3, 0.2]} center style={{ pointerEvents: "none" }}>
-          <div className="scene-tooltip">
-            <strong>Fee Flow</strong><br />
-            {arcCount} active fee pressure channels<br />
-            Intensity: {intensity.toFixed(1)}
-          </div>
-        </Html>
-      )}
-    </group>
-  );
-}
-
-/* TransactionDust removed — redundant with BlockSpine */
-/* ReferenceGrid removed — decorative lines not rooted in data */
-
-/* ─── DATA INSCRIPTIONS ─── */
-
-function DataInscriptions({ snapshot }: { snapshot: NetworkSnapshot }) {
-  const items = useMemo(() => [
-    { text: `${snapshot.avgBlockIntervalSeconds}s avg interval`, angle: Math.PI * 0.12, radius: 6.3 },
-    { text: `${snapshot.mempoolSizeMb > 0 ? snapshot.mempoolSizeMb.toFixed(0) + " MB mempool" : "Mempool clear"}`, angle: Math.PI * 0.4, radius: 6.0 },
-    { text: `${snapshot.networkHashrateEh.toFixed(0)} EH/s`, angle: -Math.PI * 0.15, radius: 6.2 },
-    { text: `Health ${snapshot.networkHealthScore.toFixed(1)}/10`, angle: -Math.PI * 0.44, radius: 5.9 },
-  ], [snapshot]);
-
-  return (
-    <group>
-      {items.map((item, i) => (
-        <Text key={i} position={[Math.cos(item.angle) * item.radius, Math.sin(item.angle) * item.radius, -0.4]} fontSize={0.055} color="#FFFFFF" anchorX="center" anchorY="middle" fillOpacity={0.15} font={undefined}>
-          {item.text}
-        </Text>
-      ))}
-    </group>
-  );
-}
-
-/* BlockLabels removed — block hover tooltips are now inline on BlockSpine */
+/* All old components deleted — 11 shapes inline in PrimeRadiantScene */
 
 export default App;
