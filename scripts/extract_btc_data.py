@@ -702,7 +702,7 @@ def add_dimensions(df: pd.DataFrame) -> pd.DataFrame:
     if "block_height_end" not in df.columns:
         genesis = pd.Timestamp("2009-01-03")
         days = (df["date"] - genesis).dt.days
-        df["block_height_start"] = (days * 144 / 365.25 * 0.97).clip(lower=0).astype(int)
+        df["block_height_start"] = (days * 144 * 0.97).clip(lower=0).astype(int)
         df["block_height_end"] = df["block_height_start"] + df.get("blocks_mined", pd.Series(144, index=df.index)).fillna(144).astype(int)
 
     heights = df["block_height_end"].fillna(0).astype(int)

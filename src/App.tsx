@@ -3,7 +3,7 @@ import { OrbitControls, Text, Line } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { mockNetworkSnapshots } from "./data/mockNetworkSnapshots";
+import { mosaicSnapshots } from "./data/mosaicSnapshots";
 import type { NetworkSnapshot, RingBand, MiningPoolSnapshot, FeeBucket } from "./types";
 
 /* ═══════════════════════════════════════════════════════
@@ -25,9 +25,9 @@ function getSeverity(value: number): "normal" | "elevated" | "critical" {
    ═══════════════════════════════════════════════════════ */
 
 function App() {
-  const [activeId, setActiveId] = useState(mockNetworkSnapshots[0].id);
+  const [activeId, setActiveId] = useState(mosaicSnapshots[0].id);
   const activeSnapshot = useMemo(
-    () => mockNetworkSnapshots.find((s) => s.id === activeId) ?? mockNetworkSnapshots[0],
+    () => mosaicSnapshots.find((s) => s.id === activeId) ?? mosaicSnapshots[0],
     [activeId]
   );
 
@@ -119,7 +119,7 @@ function App() {
           <section className="panel">
             <p className="eyebrow">Scenario Presets</p>
             <div className="button-stack">
-              {mockNetworkSnapshots.map((snapshot) => (
+              {mosaicSnapshots.map((snapshot) => (
                 <button
                   key={snapshot.id}
                   className={snapshot.id === activeSnapshot.id ? "scenario-button active" : "scenario-button"}
