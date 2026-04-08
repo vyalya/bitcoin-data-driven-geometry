@@ -245,7 +245,6 @@ function App() {
       <div className="hud hud-left-center">
         <div className="hud-whatif-header">
           <p className="eyebrow">What-If Simulation</p>
-          <p className="hud-whatif-note">Client-side model using Mosaic base data</p>
           {hasOverrides && <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>}
         </div>
         {WHAT_IF_PARAMS.map((param) => {
@@ -272,12 +271,7 @@ function App() {
           <MetricCard label="Block Stress" value={effectiveSnapshot.blockProductionStress.toFixed(1)} severity={getSeverity(effectiveSnapshot.blockProductionStress)} />
           <MetricCard label="Health" value={effectiveSnapshot.networkHealthScore.toFixed(1)} severity={getSeverity(10 - effectiveSnapshot.networkHealthScore)} />
         </div>
-        <div className="hud-legend">
-          {RING_LABELS.map((label, i) => (
-            <div key={i} className="legend-item" onClick={() => { setSelectedLayer(String(i)); setSelectedPool(null); }}><span className="legend-dot" style={{ background: RING_COLORS[i] }} /><span>{label}</span></div>
-          ))}
-          <div className="legend-item"><span className="legend-dot" style={{ background: "#FF8C3A" }} /><span>Mining Pools</span></div>
-        </div>
+        {/* Legend removed — rings have their own labels in the scene */}
       </div>
 
       {/* What-if sliders removed from left — now inside right panel */}
