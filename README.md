@@ -1,61 +1,123 @@
-# Bitcoin Network Digital Twin
+# The Bitcoin Network as Data Driven Geometry
 
-An AI-assisted digital twin for Bitcoin network technical analysis and simulation, rooted in real historical data.
+A real-time interactive 3D visualization of the Bitcoin network across 25 historically significant dates, from Genesis (January 2009) through the 2025 market correction. Every shape, ring, particle, and block maps to real on-chain data — nothing is decorative.
 
-## Current Documentation
+**Powered by Strategy Mosaic**
 
-- [User Interaction and Flow Spec](./specs/user-interaction-flow.md)
-- [Technical Spec](./specs/technical-spec.md)
-- [Data Design](./docs/data-design.md)
-- [Data Source Strategy](./docs/data-sources.md)
-- [Visual Direction](./docs/visual-direction.md)
-- [Visual-to-Data Mapping](./docs/visual-data-mapping.md)
-- [Implementation Status](./docs/implementation-status.md)
+## Live Demo
 
-## Product Direction
+Build and serve locally, or deploy via Cloudflare Tunnel for temporary public access (see below).
 
-This project is focused on:
+## What You're Looking At
 
-- Bitcoin network technical analysis
-- historical and interval-based network intelligence
-- high-fidelity WebGL visualization
-- explainable scenario simulation
-- Strategy Mosaic as a semantic intelligence layer where appropriate
+### Center Spine — Blocks
+Each cuboid is one real Bitcoin block mined that day. Width = block weight (wider = fuller block, up to 4 MWU). Brightness = transaction count (brighter gold/white = more transactions, dimmer amber = fewer). Hover to highlight individual blocks at 2.5x scale. Click to pin and inspect.
 
-This project is not focused on:
+### Horizontal Rings — Transaction Metrics
+- **Fee Tiers** (r=2.2): Four arc segments showing fee distribution across sat/vB tiers. Thickness scales with fee pressure.
+- **Settlement** (r=2.8): Arc length represents block production health. Full circle = blocks arriving on schedule. Shrinks under stress.
+- **Congestion** (r=3.3): Red arc. Length and intensity scale with network congestion score. Barely visible when mempool is clear, expands during heavy load.
+- **BTC Volume** (r=3.8): Gold arc proportional to daily BTC transferred relative to the 4.6M BTC/day peak (2021 ATH).
 
-- price prediction
-- day trading
-- trading signals
-- investment advice
+### Vertical Rings — Security Metrics
+- **Hashrate** (YZ plane, r=2.5): Arc proportional to network hashrate vs 906 EH/s peak. Grows from invisible at Genesis to nearly full circle at peak security.
+- **Difficulty** (XZ plane, r=3.0): Log-scaled arc representing mining difficulty (1 to 150 trillion). Adjusts every 2,016 blocks.
 
-## Initial Build Shape
+### Floating Particles — Active Addresses
+Each particle represents ~1,000 unique active addresses on that day. Genesis = zero particles. Bull market peaks = over 1,400 glowing dots. Larger particles indicate whale activity (outputs over 100 BTC).
 
-- WebGL visualization on the left
-- AI orchestrator/chat on the right
-- historical playback and comparison
-- bounded network simulations
-- provenance-aware, real-data-driven scene updates
+## Data Architecture
 
-## Local App
+```
+Google BigQuery (crypto_bitcoin)     Blockchain & Mempool Extracts
+       |                                       |
+       |   blocks, transactions, addresses,    |   hashrate, difficulty, fee pressure,
+       |   outputs, fees, transfer volumes     |   congestion, mempool, mining pools
+       |                                       |
+       +-------------------+-------------------+
+                           |
+                  Strategy Mosaic
+                  (Semantic Layer)
+                           |
+            Aggregations, joins, relationships
+            Single unified model for all metrics
+                           |
+                    Visualization
+```
 
-The first implementation phase is mock-first and does not require Strategy Mosaic connectivity yet.
+All data flows through Strategy Mosaic's universal semantic layer, which sits on top of the raw sources and defines consistent aggregations, joins, and relationships. Every metric in this visualization is queried from a single Mosaic model.
 
-### Run
+## Features
+
+- **25 Historical Snapshots**: Genesis Era, Pizza Day, 2011 Bubble, Mt. Gox Collapse, halvings, bull runs, COVID crash, ETF approval, and more
+- **7 What-If Sliders**: Hashrate, Difficulty, Active Addresses, Mempool Depth, Fee Pressure, Congestion, Block Stress — all drive visual changes in real time
+- **Click-to-Pin**: Click any shape to freeze the scene. KPIs lock, rotation pauses, particles stop. Adjust What-If sliders freely, then click again to resume.
+- **Animated Transitions**: Ring parameters smoothly lerp between snapshots (~3s). Blocks fade in. Particles adjust count.
+- **Ambient Rotation**: Slow orbital rotation (~78s per revolution) with toggle control
+- **Per-Snapshot Narration**: Historical context appears as a narration bubble for each event
+- **Legend**: Top-right legend explains every visual element
+
+## Visual Effects
+
+- Bloom with mipmap blur (6 levels)
+- Chromatic aberration (subtle, radially modulated)
+- Vignette (cinematic edge darkening)
+- Beveled arc geometry for ring depth
+- Cinematic 4-point lighting (key, fill, rim, core)
+- Health-driven core light pulse
+- Full retina rendering (DPR 2x)
+
+## Tech Stack
+
+- **React 19** + **TypeScript 5.9**
+- **React Three Fiber 9** (Three.js declarative)
+- **drei 10** (OrbitControls)
+- **postprocessing** (Bloom, Vignette, ChromaticAberration)
+- **Vite 7** (build tooling)
+
+## Run Locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-### Current Scope
+## Build & Deploy
 
-- split-screen application shell
-- mocked network snapshots
-- lightweight WebGL scene
-- scenario switching
-- analysis-oriented side panel
+```bash
+# Production build
+npm run build
 
-## Notes
+# Serve locally
+npx serve dist
 
-The specs in `specs/` are intended to evolve as implementation begins.
+# Temporary public URL via Cloudflare Tunnel
+npx serve dist -l 4999 &
+cloudflared tunnel --url http://localhost:4999
+```
+
+## Design Principles
+
+1. **Every shape = real data** — No decorative geometry. If it renders, it maps to a metric from Mosaic.
+2. **Honest granularity** — Don't subdivide beyond the data. Don't interpolate where there are no values.
+3. **Orange/amber palette only** — Brand consistency across all visual elements.
+4. **Elegant, Accurate, Usable, Insightful, Immersive** — The five pillars guiding every design decision.
+
+## What This Is Not
+
+- Not price prediction or trading signals
+- Not investment advice
+- Not a real-time feed (historical snapshots only)
+- Not decorative data art — every pixel traces to a number
+
+## Project Structure
+
+```
+src/
+  App.tsx              — Full application (~1050 lines): 3D scene, UI panels, narration
+  types.ts             — NetworkSnapshot type with all data fields
+  styles.css           — Complete styling
+  data/
+    blockData.ts       — Per-block arrays for all 25 dates (from GBQ)
+    mosaicSnapshots.ts — 25 snapshots with network metrics + GBQ address/value data
+```
