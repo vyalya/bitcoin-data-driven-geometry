@@ -40,6 +40,17 @@ export type NetworkSnapshot = {
   blockProductionStress: number;
   minerConcentrationScore: number;
   networkHealthScore: number;
+  difficulty: number;
+  activeAddresses: number;
+  uniqueSenders: number;
+  uniqueReceivers: number;
+  btcTransferred: number;
+  totalFeesBtc: number;
+  totalOutputs: number;
+  whaleOutputs1000: number;
+  whaleOutputs100: number;
+  midOutputs10: number;
+  retailOutputs: number;
   miningPools: MiningPoolSnapshot[];
   feeBuckets: FeeBucket[];
   ringBands: RingBand[];

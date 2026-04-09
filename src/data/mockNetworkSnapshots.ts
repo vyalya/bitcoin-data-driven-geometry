@@ -15,6 +15,10 @@ export const mockNetworkSnapshots: NetworkSnapshot[] = [
     congestionScore: 5.8,
     blockProductionStress: 4.1,
     minerConcentrationScore: 5.4,
+    difficulty: 0,
+    activeAddresses: 0, uniqueSenders: 0, uniqueReceivers: 0,
+    btcTransferred: 0, totalFeesBtc: 0, totalOutputs: 0,
+    whaleOutputs1000: 0, whaleOutputs100: 0, midOutputs10: 0, retailOutputs: 0,
     networkHealthScore: 7.8,
     miningPools: [
       { id: "foundry", name: "Foundry", sharePct: 0.29, hashRateEh: 178, shareChange30d: 0.02 },
@@ -54,6 +58,10 @@ export const mockNetworkSnapshots: NetworkSnapshot[] = [
     congestionScore: 9.4,
     blockProductionStress: 6.0,
     minerConcentrationScore: 5.5,
+    difficulty: 0,
+    activeAddresses: 0, uniqueSenders: 0, uniqueReceivers: 0,
+    btcTransferred: 0, totalFeesBtc: 0, totalOutputs: 0,
+    whaleOutputs1000: 0, whaleOutputs100: 0, midOutputs10: 0, retailOutputs: 0,
     networkHealthScore: 5.3,
     miningPools: [
       { id: "foundry", name: "Foundry", sharePct: 0.29, hashRateEh: 176, shareChange30d: 0.02 },
@@ -93,6 +101,10 @@ export const mockNetworkSnapshots: NetworkSnapshot[] = [
     congestionScore: 7.1,
     blockProductionStress: 8.8,
     minerConcentrationScore: 6.6,
+    difficulty: 0,
+    activeAddresses: 0, uniqueSenders: 0, uniqueReceivers: 0,
+    btcTransferred: 0, totalFeesBtc: 0, totalOutputs: 0,
+    whaleOutputs1000: 0, whaleOutputs100: 0, midOutputs10: 0, retailOutputs: 0,
     networkHealthScore: 4.9,
     miningPools: [
       { id: "foundry", name: "Foundry", sharePct: 0.34, hashRateEh: 159, shareChange30d: 0.05 },
