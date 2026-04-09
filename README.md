@@ -1,6 +1,6 @@
 # The Bitcoin Network as Data Driven Geometry
 
-A real-time interactive 3D visualization of the Bitcoin network across 25 historically significant dates, from Genesis (January 2009) through the 2025 market correction. Every shape, ring, particle, and block maps to real on-chain data queried in real time through Strategy Mosaic — nothing is decorative.
+An interactive 3D visualization of the Bitcoin network across 25 historically significant snapshot dates, from Genesis (January 2009) through the 2025 market correction. Every shape, ring, particle, and block maps to real on-chain data published through Strategy Mosaic — nothing is decorative.
 
 **Powered by Strategy Mosaic**
 
