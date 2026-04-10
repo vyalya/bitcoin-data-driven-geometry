@@ -1,5 +1,5 @@
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { TrackballControls } from "@react-three/drei";
 import { EffectComposer, Bloom, Vignette, ChromaticAberration } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 import { useMemo, useRef, useState, useCallback, useEffect, useLayoutEffect } from "react";
@@ -103,6 +103,8 @@ function App() {
   const [showDataInfo, setShowDataInfo] = useState(false);
   const [showLegend, setShowLegend] = useState(false);
   const [legendHover, setLegendHover] = useState<string | null>(null);
+  const [view, setView] = useState<"grid" | "detail">("grid");
+  const [gridHoverIdx, setGridHoverIdx] = useState<number | null>(null);
   const [showGuideTab, setShowGuideTab] = useState<"source" | "visual">("source");
 
   const [pinnedGroup, setPinnedGroup] = useState<string | null>(null);
@@ -184,41 +186,52 @@ function App() {
   return (
     <div className="hud-shell">
       <Canvas
-        camera={{ position: [0, 1.5, 11], fov: 36 }}
+        camera={{ position: [0, 0, 22], fov: 42 }}
         gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0, powerPreference: "high-performance" }}
         dpr={[1, 2]}
         style={{ position: "fixed", inset: 0 }}
-        onPointerMissed={() => { setPinnedGroup(null); setActiveGroup(null); }}
+        onPointerMissed={() => { if (view === "detail") { setPinnedGroup(null); setActiveGroup(null); } }}
       >
         <color attach="background" args={["#020202"]} />
-        <fog attach="fog" args={["#010101", 20, 45]} />
-        <PrimeRadiantScene
-          snapshot={s}
-          blocks={currentBlocks}
-          activeGroup={displayGroup}
-          frozen={!!pinnedGroup || showLegend}
-          legendView={showLegend}
-          onHover={onHover}
-          onClick={onClick}
-          rotationEnabled={rotationEnabled}
-          onDeselect={clearSelection}
-          onBlockHover={(block, index) => { setHoverCtx(block ? { type: "block", block, index } : { type: "none" }); }}
-          onRingHover={(type, idx) => {
-            if (!type) { if (!pinnedGroup) setHoverCtx({ type: "none" }); return; }
-            if (type === "fee") setHoverCtx({ type: "fee", tierIndex: idx ?? 0 });
-            else if (type === "congestion") setHoverCtx({ type: "congestion" });
-            else if (type === "settlement") setHoverCtx({ type: "settlement" });
-            else if (type === "hashrate") setHoverCtx({ type: "hashrate" });
-            else if (type === "difficulty") setHoverCtx({ type: "difficulty" });
-            else if (type === "volume") setHoverCtx({ type: "volume" });
-          }}
-        />
+        {view === "detail" && <fog attach="fog" args={["#010101", 20, 45]} />}
+        <CameraRig view={view} />
+        {view === "grid" ? (
+          <GridScene
+            snapshots={mosaicSnapshots}
+            hoverIdx={gridHoverIdx}
+            legendHover={legendHover}
+            onHover={setGridHoverIdx}
+            onSelect={(i) => { setActiveIdx(i); setView("detail"); setGridHoverIdx(null); }}
+          />
+        ) : (
+          <PrimeRadiantScene
+            snapshot={s}
+            blocks={currentBlocks}
+            activeGroup={displayGroup}
+            frozen={!!pinnedGroup || showLegend}
+            legendView={showLegend}
+            onHover={onHover}
+            onClick={onClick}
+            rotationEnabled={rotationEnabled}
+            onDeselect={clearSelection}
+            onBlockHover={(block, index) => { setHoverCtx(block ? { type: "block", block, index } : { type: "none" }); }}
+            onRingHover={(type, idx) => {
+              if (!type) { if (!pinnedGroup) setHoverCtx({ type: "none" }); return; }
+              if (type === "fee") setHoverCtx({ type: "fee", tierIndex: idx ?? 0 });
+              else if (type === "congestion") setHoverCtx({ type: "congestion" });
+              else if (type === "settlement") setHoverCtx({ type: "settlement" });
+              else if (type === "hashrate") setHoverCtx({ type: "hashrate" });
+              else if (type === "difficulty") setHoverCtx({ type: "difficulty" });
+              else if (type === "volume") setHoverCtx({ type: "volume" });
+            }}
+          />
+        )}
         <EffectComposer multisampling={0}>
-          <Bloom luminanceThreshold={0.3} luminanceSmoothing={0.4} intensity={0.8} mipmapBlur levels={6} />
+          <Bloom luminanceThreshold={view === "grid" ? 0.5 : 0.3} luminanceSmoothing={0.4} intensity={view === "grid" ? 0.4 : 0.8} mipmapBlur levels={6} />
           <ChromaticAberration blendFunction={BlendFunction.NORMAL} offset={new THREE.Vector2(0.0008, 0.0008)} radialModulation modulationOffset={0.2} />
           <Vignette eskil={false} offset={0.25} darkness={0.7} />
         </EffectComposer>
-        <OrbitControls enablePan enableZoom minDistance={1.5} maxDistance={45} />
+        {view === "detail" && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={0.3} maxDistance={60} rotateSpeed={2} zoomSpeed={1.5} panSpeed={0.8} />}
       </Canvas>
 
       {/* ═══ TOP BANNER ═══ */}
@@ -227,12 +240,44 @@ function App() {
         <p className="hud-powered">Powered by Strategy Mosaic</p>
       </div>
 
+      {/* ═══ GRID VIEW SUBTITLE ═══ */}
+      {view === "grid" && (
+        <div className="hud grid-subtitle">
+          25 historical snapshots · hover any in the timeline or click to explore
+        </div>
+      )}
+
       {/* ═══ LEFT PANEL: Timeline ═══ */}
       <div className="hud hud-left-panel">
         <div className="left-panel-controls">
+          {/* Grid button — left */}
+          <button
+            className={`grid-return-btn ${view === "grid" ? "active" : ""}`}
+            onClick={() => {
+              if (view === "detail") {
+                setView("grid");
+                setPinnedGroup(null);
+                setActiveGroup(null);
+                setPlaying(false);
+              }
+            }}
+            type="button"
+            title="Grid view"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+          </button>
+
+          {/* Play button — middle */}
           <button
             className="timeline-play-btn"
+            disabled={view === "grid"}
             onClick={() => {
+              if (view === "grid") return;
               if (playing) {
                 setPlaying(false);
                 setRotationEnabled(false);
@@ -248,15 +293,24 @@ function App() {
           >
             {playing ? "❚❚" : "▶"} {playing ? "Pause" : "Play"}
           </button>
-          <button className={`rotate-toggle ${rotationEnabled && !pinnedGroup ? "active" : ""}`} onClick={() => {
-            if (rotationEnabled && !pinnedGroup) {
-              setRotationEnabled(false);
-            } else {
-              setPinnedGroup(null);
-              setActiveGroup(null);
-              setRotationEnabled(true);
-            }
-          }} type="button" title="Toggle rotation">
+
+          {/* Rotate button — right */}
+          <button
+            className={`rotate-toggle ${view === "detail" && rotationEnabled && !pinnedGroup ? "active" : ""}`}
+            disabled={view === "grid"}
+            onClick={() => {
+              if (view === "grid") return;
+              if (rotationEnabled && !pinnedGroup) {
+                setRotationEnabled(false);
+              } else {
+                setPinnedGroup(null);
+                setActiveGroup(null);
+                setRotationEnabled(true);
+              }
+            }}
+            type="button"
+            title="Toggle rotation"
+          >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-20 12 12)" />
               <circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none" />
@@ -267,12 +321,22 @@ function App() {
 
         <div className="timeline-vertical">
           {mosaicSnapshots.map((snap, i) => {
-            const isActive = i === activeIdx;
+            const isActive = view === "grid" ? gridHoverIdx === i : i === activeIdx;
             return (
               <button
                 key={snap.id}
                 className={`tl-item ${isActive ? "active" : ""}`}
-                onClick={() => { setActiveIdx(i); resetOverrides(); clearSelection(); setPlaying(false); }}
+                onMouseEnter={() => { if (view === "grid") setGridHoverIdx(i); }}
+                onMouseLeave={() => { if (view === "grid") setGridHoverIdx(null); }}
+                onClick={() => {
+                  if (view === "grid") {
+                    setActiveIdx(i);
+                    setView("detail");
+                    setGridHoverIdx(null);
+                  } else {
+                    setActiveIdx(i); resetOverrides(); clearSelection(); setPlaying(false);
+                  }
+                }}
                 type="button"
               >
                 <span className="tl-dot" />
@@ -336,34 +400,42 @@ function App() {
             <span className="info-icon">i</span> Info
           </button>
         </div>
-        <div className="context-panel">
-          <ContextPanel snapshot={s} hoverCtx={hoverCtx} blocks={currentBlocks} />
+        <div className={`context-panel ${view === "grid" ? "context-full" : ""}`}>
+          <ContextPanel
+            snapshot={view === "grid" && gridHoverIdx !== null ? mosaicSnapshots[gridHoverIdx] : s}
+            hoverCtx={view === "grid" ? { type: "none" } : hoverCtx}
+            blocks={view === "grid" && gridHoverIdx !== null ? (mosaicSnapshots[gridHoverIdx].blocks ?? []) : currentBlocks}
+          />
         </div>
-        <div className="right-divider" />
-        <div className="whatif-section">
-          <div className="hud-whatif-header">
-            <span className="whatif-title">What-If Simulation</span>
-            {hasOverrides && <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>}
-          </div>
-          {WHAT_IF_PARAMS.map((param) => {
-            const baseVal = baseSnapshot[param.snapshotField] as number;
-            const currentVal = overrides[param.key] ?? baseVal;
-            const isOverridden = overrides[param.key] !== null && overrides[param.key] !== undefined;
-            return (
-              <div key={param.key} className={`slider-row ${isOverridden ? "overridden" : ""}`}>
-                <div className="slider-header">
-                  <span className="slider-label">{param.label}</span>
-                  <span className="slider-value">{param.key === "difficulty" ? formatDifficulty(currentVal) : param.max > 100 ? currentVal.toLocaleString() : currentVal.toFixed(1)}<span className="slider-unit">{param.unit}</span></span>
-                </div>
-                <input type="range" min={param.min} max={param.max} step={param.step} value={currentVal} onChange={(e) => setOverride(param.key, parseFloat(e.target.value))} onDoubleClick={() => setOverride(param.key, null)} />
+        {view === "detail" && (
+          <>
+            <div className="right-divider" />
+            <div className="whatif-section">
+              <div className="hud-whatif-header">
+                <span className="whatif-title">What-If Simulation</span>
+                {hasOverrides && <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>}
               </div>
-            );
-          })}
-        </div>
+              {WHAT_IF_PARAMS.map((param) => {
+                const baseVal = baseSnapshot[param.snapshotField] as number;
+                const currentVal = overrides[param.key] ?? baseVal;
+                const isOverridden = overrides[param.key] !== null && overrides[param.key] !== undefined;
+                return (
+                  <div key={param.key} className={`slider-row ${isOverridden ? "overridden" : ""}`}>
+                    <div className="slider-header">
+                      <span className="slider-label">{param.label}</span>
+                      <span className="slider-value">{param.key === "difficulty" ? formatDifficulty(currentVal) : param.max > 100 ? currentVal.toLocaleString() : currentVal.toFixed(1)}<span className="slider-unit">{param.unit}</span></span>
+                    </div>
+                    <input type="range" min={param.min} max={param.max} step={param.step} value={currentVal} onChange={(e) => setOverride(param.key, parseFloat(e.target.value))} onDoubleClick={() => setOverride(param.key, null)} />
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
 
       {/* ═══ NARRATION BUBBLE ═══ */}
-      {showNarration && NARRATION[baseSnapshot.id] && (
+      {view === "detail" && showNarration && NARRATION[baseSnapshot.id] && (
         <div className="narration-bar">
           <div className="narration-content">
             <span className="narration-label">{baseSnapshot.label}</span>
@@ -585,6 +657,347 @@ interface SceneProps {
   onDeselect?: () => void;
   onBlockHover: (block: BlockTuple | null, index: number) => void;
   onRingHover: (type: string | null, idx?: number) => void;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CAMERA RIG — smoothly animates camera between grid and detail views
+   ═══════════════════════════════════════════════════════ */
+
+function CameraRig({ view }: { view: "grid" | "detail" }) {
+  const { camera } = useThree();
+  const targetPos = useRef(new THREE.Vector3(0, 0, 22));
+  const targetFov = useRef(42);
+  const transitioning = useRef(false);
+  const transitionStart = useRef(0);
+
+  useEffect(() => {
+    if (view === "grid") {
+      targetPos.current.set(0, 0, 22);
+      targetFov.current = 42;
+      // Reset up vector — TrackballControls modifies it during free rotation
+      camera.up.set(0, 1, 0);
+    } else {
+      targetPos.current.set(0, 1.5, 11);
+      targetFov.current = 36;
+      camera.up.set(0, 1, 0);
+    }
+    transitioning.current = true;
+    transitionStart.current = performance.now();
+  }, [view, camera]);
+
+  useFrame((_, delta) => {
+    if (!transitioning.current) return;
+    const elapsed = (performance.now() - transitionStart.current) / 1000;
+    // Transition for max 1 second — after that, stop fighting the user controls
+    if (elapsed > 1.0) {
+      transitioning.current = false;
+      return;
+    }
+    const t = 1 - Math.pow(0.001, delta);
+    camera.position.lerp(targetPos.current, t);
+    const persp = camera as THREE.PerspectiveCamera;
+    if (persp.fov !== undefined) {
+      persp.fov += (targetFov.current - persp.fov) * t;
+      persp.updateProjectionMatrix();
+    }
+    if (view === "grid") {
+      camera.lookAt(0, 0, 0);
+    }
+  });
+
+  return null;
+}
+
+/* ═══════════════════════════════════════════════════════
+   GRID SCENE — 5x5 landing page with simplified mini snapshots
+   ═══════════════════════════════════════════════════════ */
+
+function GridScene({ snapshots, hoverIdx, legendHover, onHover, onSelect }: {
+  snapshots: NetworkSnapshot[];
+  hoverIdx: number | null;
+  legendHover: string | null;
+  onHover: (i: number | null) => void;
+  onSelect: (i: number) => void;
+}) {
+  const groupRefs = useRef<(THREE.Group | null)[]>([]);
+  const [, forceUpdate] = useState(0);
+
+  // Staggered phase offsets so cells don't rotate in lockstep
+  const phaseOffsets = useMemo(() =>
+    Array.from({ length: snapshots.length }, () => Math.random() * Math.PI * 2),
+  [snapshots.length]);
+
+  useFrame((_, delta) => {
+    groupRefs.current.forEach((g) => {
+      if (g) g.rotation.y += delta * 0.15;
+    });
+    forceUpdate((n) => n + 1);
+  });
+
+  // 5x5 grid layout
+  const COLS = 5;
+  const SPACING_X = 3.6; // world units between cells (horizontal)
+  const SPACING_Y = 3.2; // world units between cells (vertical, tighter)
+
+  return (
+    <group position={[0, -0.3, 0]}>
+      {/* Grid-wide lighting — shared across all cells */}
+      <ambientLight intensity={0.15} />
+      <pointLight position={[0, 10, 15]} intensity={6} color="#FA660F" distance={60} decay={1.5} />
+      <pointLight position={[15, -5, 10]} intensity={4} color="#FF8C3A" distance={50} decay={1.5} />
+      <pointLight position={[-15, 5, 10]} intensity={4} color="#CC5500" distance={50} decay={1.5} />
+
+      {snapshots.map((snap, i) => {
+        const col = i % COLS;
+        const row = Math.floor(i / COLS);
+        const x = (col - (COLS - 1) / 2) * SPACING_X;
+        const y = ((COLS - 1) / 2 - row) * SPACING_Y;
+        const isHovered = hoverIdx === i;
+        const dim = hoverIdx !== null && !isHovered ? 0.25 : 1;
+        const scale = isHovered ? 0.32 : 0.28;
+
+        return (
+          <group
+            key={snap.id}
+            position={[x, y, 0]}
+            rotation={[0, phaseOffsets[i], 0]}
+          >
+            {/* Invisible hit target for reliable hover */}
+            <mesh
+              onPointerOver={(e) => { e.stopPropagation(); onHover(i); }}
+              onPointerOut={() => onHover(null)}
+              onClick={(e) => { e.stopPropagation(); onSelect(i); }}
+            >
+              <sphereGeometry args={[1.5, 12, 10]} />
+              <meshBasicMaterial colorWrite={false} depthWrite={false} />
+            </mesh>
+
+            <group
+              ref={(r) => { groupRefs.current[i] = r; }}
+              scale={scale}
+            >
+              <MiniSnapshot snapshot={snap} opacity={dim} highlighted={isHovered} legendHover={legendHover} />
+            </group>
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   MINI SNAPSHOT — simplified version for grid cells
+   ═══════════════════════════════════════════════════════ */
+
+function MiniSnapshot({ snapshot: s, opacity: dim, highlighted, legendHover }: {
+  snapshot: NetworkSnapshot;
+  opacity: number;
+  highlighted: boolean;
+  legendHover: string | null;
+}) {
+  const fp = s.feePressureIndex / 10;
+  const cg = s.congestionScore / 10;
+  const bs = s.blockProductionStress / 10;
+  const maxHashrate = 906.5;
+  const maxDifficulty = 150839487445892;
+  const maxBtcVolume = 4700000;
+  const hrNorm = Math.min(s.networkHashrateEh / maxHashrate, 1);
+  const diffLog = s.difficulty > 0 ? Math.log10(s.difficulty) / Math.log10(maxDifficulty) : 0;
+  const vol = Math.min(s.btcTransferred / maxBtcVolume, 1);
+  const blocks = s.blocks ?? [];
+
+  const feeColors = ["#FF9933", "#FF7722", "#FF5511", "#FF3300"];
+  const op = dim * (highlighted ? 1 : 0.85);
+
+  // Legend hover glow boost — matches the keys used in the legend overlay
+  const lhGlow = (key: string) => {
+    if (!legendHover) return { mult: 1, extra: 0 };
+    // fee-0 matches any fee tier highlight
+    if (legendHover === "fee-0" && key.startsWith("fee")) return { mult: 1.8, extra: 0.5 };
+    if (legendHover === key) return { mult: 1.8, extra: 0.5 };
+    return { mult: 1, extra: 0 };
+  };
+  const spineHl = legendHover === "spine" || highlighted;
+
+  return (
+    <group>
+      {/* Simplified spine — just a few representative blocks */}
+      <MiniSpine blocks={blocks} opacity={op} highlighted={spineHl} />
+
+      {/* Fee tier arcs */}
+      {s.feeBuckets.map((bucket, i) => {
+        const arcSpan = Math.PI * 2 * bucket.txShare;
+        let startAngle = 0;
+        for (let j = 0; j < i; j++) startAngle += Math.PI * 2 * s.feeBuckets[j].txShare;
+        const thickness = 0.04 + fp * 0.12 + bucket.intensity * 0.08;
+        const gap = arcSpan * 0.04;
+        const usable = arcSpan - gap;
+        if (usable < 0.01) return null;
+        const g = lhGlow(`fee-${i}`);
+        return (
+          <group key={i} position={[0, 0, i * 0.06]}>
+            <ArcBand radius={2.2} thickness={thickness} depth={0.05} startAngle={startAngle + gap / 2} endAngle={startAngle + gap / 2 + usable} color={feeColors[i]} emissiveIntensity={(0.3 + bucket.intensity * 0.5 + g.extra) * g.mult} opacity={0.8 * op * g.mult} />
+          </group>
+        );
+      })}
+
+      {/* Settlement */}
+      {(() => {
+        const stressHealth = 1 - bs;
+        const fillAngle = Math.PI * 2 * Math.max(0.05, stressHealth);
+        const g = lhGlow("settlement");
+        return (
+          <group position={[0, 0, -bs * 0.15]}>
+            <ArcBand radius={2.8} thickness={0.03 + stressHealth * 0.08} depth={0.05} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#FA660F" emissiveIntensity={(0.25 + stressHealth * 0.5 + g.extra) * g.mult} opacity={0.75 * op * g.mult} />
+          </group>
+        );
+      })()}
+
+      {/* Congestion */}
+      {(() => {
+        const fillAngle = Math.PI * 2 * Math.max(0.03, cg);
+        const g = lhGlow("congestion");
+        return (
+          <group position={[0, 0, cg * 0.2]}>
+            <ArcBand radius={3.3} thickness={0.02 + cg * 0.18} depth={0.05} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#FF4400" emissiveIntensity={(0.2 + cg * 0.8 + g.extra) * g.mult} opacity={(cg > 0.01 ? 0.65 + cg * 0.25 : 0.06) * op * g.mult} />
+          </group>
+        );
+      })()}
+
+      {/* BTC Volume */}
+      {(() => {
+        const fillAngle = Math.PI * 2 * Math.max(0.02, vol);
+        const g = lhGlow("volume");
+        return (
+          <group position={[0, 0, vol * 0.15]}>
+            <ArcBand radius={3.8} thickness={0.02 + vol * 0.14} depth={0.05} startAngle={Math.PI - fillAngle / 2} endAngle={Math.PI + fillAngle / 2} color="#FFB040" emissiveIntensity={(0.2 + vol * 0.6 + g.extra) * g.mult} opacity={(0.4 + vol * 0.4) * op * g.mult} />
+          </group>
+        );
+      })()}
+
+      {/* Hashrate vertical */}
+      {(() => {
+        const fillAngle = Math.PI * 2 * Math.max(0.02, hrNorm);
+        const g = lhGlow("hashrate-ring");
+        return (
+          <group rotation={[0, Math.PI / 2, 0]}>
+            <ArcBand radius={2.5} thickness={0.02 + hrNorm * 0.1} depth={0.04} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#FF7722" emissiveIntensity={(0.2 + hrNorm * 0.6 + g.extra) * g.mult} opacity={(0.5 + hrNorm * 0.35) * op * g.mult} />
+          </group>
+        );
+      })()}
+
+      {/* Difficulty vertical */}
+      {(() => {
+        const fillAngle = Math.PI * 2 * Math.max(0.02, diffLog);
+        const g = lhGlow("difficulty-ring");
+        return (
+          <group rotation={[Math.PI / 2, 0, 0]}>
+            <ArcBand radius={3.0} thickness={0.02 + diffLog * 0.08} depth={0.04} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#CC6600" emissiveIntensity={(0.2 + diffLog * 0.5 + g.extra) * g.mult} opacity={(0.4 + diffLog * 0.4) * op * g.mult} />
+          </group>
+        );
+      })()}
+
+      {/* Simplified particles — address count proxy */}
+      <MiniParticles count={Math.min(Math.floor(s.activeAddresses / 8000), 180)} opacity={op} highlighted={legendHover === "particles"} />
+    </group>
+  );
+}
+
+/* Mini particle cloud — reduced count + static positions per cell */
+const MINI_PARTICLE_MAX = 180;
+function MiniParticles({ count, opacity, highlighted = false }: { count: number; opacity: number; highlighted?: boolean }) {
+  const positions = useMemo(() => {
+    const arr = new Float32Array(MINI_PARTICLE_MAX * 3);
+    for (let i = 0; i < MINI_PARTICLE_MAX; i++) {
+      // Distribute around rings — random angle, random radius in 1.8-4.0 range, random y
+      const a = Math.random() * Math.PI * 2;
+      const r = 1.8 + Math.random() * 2.2;
+      arr[i * 3] = Math.cos(a) * r;
+      arr[i * 3 + 1] = (Math.random() - 0.5) * 4;
+      arr[i * 3 + 2] = Math.sin(a) * r;
+    }
+    return arr;
+  }, []);
+
+  const geoRef = useRef<THREE.BufferGeometry>(null);
+  useLayoutEffect(() => {
+    if (geoRef.current) geoRef.current.setDrawRange(0, count);
+  }, [count]);
+
+  if (count === 0) return null;
+
+  return (
+    <points frustumCulled={false}>
+      <bufferGeometry ref={geoRef}>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <pointsMaterial
+        color={highlighted ? "#FFFFFF" : "#FFAA55"}
+        size={highlighted ? 0.14 : 0.08}
+        transparent
+        opacity={(highlighted ? 0.95 : 0.5) * opacity}
+        blending={THREE.AdditiveBlending}
+        depthWrite={false}
+        sizeAttenuation
+      />
+    </points>
+  );
+}
+
+/* Mini spine — reduced instanced mesh for grid cells */
+function MiniSpine({ blocks, opacity: blockOpacity, highlighted }: { blocks: BlockTuple[]; opacity: number; highlighted: boolean }) {
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const count = blocks.length || 1;
+  const maxTxs = useMemo(() => Math.max(...blocks.map(b => b[3]), 1), [blocks]);
+
+  useLayoutEffect(() => {
+    const mesh = meshRef.current;
+    if (!mesh || blocks.length === 0) return;
+    const dummy = new THREE.Object3D();
+    const color = new THREE.Color();
+    const spineH = 4;
+    const slot = spineH / count;
+    const bh = Math.max(0.005, Math.min(0.04, slot * 0.4));
+
+    for (let i = 0; i < count; i++) {
+      const [, size, weight, txs] = blocks[i];
+      const wNorm = Math.min(weight / 4000000, 1);
+      const sNorm = Math.min(size / 2000000, 1);
+      const w = 0.03 + wNorm * 0.18;
+      const dp = 0.02 + sNorm * 0.12;
+      const y = (i - (count - 1) / 2) * slot;
+      dummy.position.set(0, y, 0);
+      dummy.scale.set(w, bh, dp);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+
+      const txNorm = txs / maxTxs;
+      const hue = 0.07 - txNorm * 0.03;
+      const sat = 0.85 - txNorm * 0.45;
+      const light = 0.3 + txNorm * 0.5;
+      color.setHSL(hue, sat, light);
+      mesh.setColorAt(i, color);
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  }, [blocks, count, maxTxs]);
+
+  if (blocks.length === 0) return null;
+
+  return (
+    <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial
+        color={highlighted ? "#FFD080" : "#FF8C3A"}
+        emissive="#FA660F"
+        emissiveIntensity={highlighted ? 0.25 : 0.08}
+        metalness={0.85}
+        roughness={0.15}
+        transparent
+        opacity={blockOpacity * 0.9}
+      />
+    </instancedMesh>
+  );
 }
 
 function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, frozen = false, rotationEnabled = true, legendView = false, onHover, onClick, onBlockHover, onRingHover }: SceneProps) {

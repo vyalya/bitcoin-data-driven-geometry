@@ -735,3 +735,112 @@ button, input, textarea { font: inherit; }
   transition: background 0.15s;
 }
 .guide-close:hover { background: rgba(250, 102, 15, 0.16); }
+
+/* ═══════════════════════════════════════════
+   GRID VIEW — landing page with 25 mini scenes
+   ═══════════════════════════════════════════ */
+
+.grid-subtitle {
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 16px;
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.5;
+  white-space: nowrap;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  backdrop-filter: blur(6px);
+}
+
+.grid-mode-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.grid-hover-label {
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  background: rgba(10, 10, 10, 0.9);
+  border: 1px solid rgba(250, 102, 15, 0.3);
+  border-radius: 8px;
+  text-align: center;
+  pointer-events: none;
+  animation: grid-label-in 0.15s ease-out;
+  backdrop-filter: blur(8px);
+}
+
+@keyframes grid-label-in {
+  from { opacity: 0; transform: translate(-50%, -4px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.grid-hover-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+}
+
+.grid-hover-date {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
+.grid-hover-hint {
+  font-size: 0.6rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+  opacity: 0.7;
+}
+
+/* Grid button — in left panel controls */
+.grid-return-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 0;
+  background: none;
+  border: none;
+  border-right: 1px solid var(--panel-border);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: color 0.12s, background 0.12s;
+}
+.grid-return-btn:hover {
+  color: var(--accent);
+  background: rgba(250, 102, 15, 0.06);
+}
+.grid-return-btn.active {
+  color: var(--accent);
+}
+
+/* Disabled state for play/rotate in grid view */
+.timeline-play-btn:disabled,
+.rotate-toggle:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+.timeline-play-btn:disabled:hover,
+.rotate-toggle:disabled:hover {
+  background: none;
+}
