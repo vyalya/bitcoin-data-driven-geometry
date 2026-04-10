@@ -37,23 +37,24 @@ Google BigQuery (crypto_bitcoin)     Blockchain & Mempool Extracts
                   Strategy Mosaic
                   (Semantic Layer)
                            |
-            Aggregations, joins, relationships
-            Single unified model for all metrics
+            Single certified model —
+            one source of truth
                            |
                     Visualization
 ```
 
-All data flows through Strategy Mosaic's universal semantic layer, which sits on top of the raw sources and defines consistent aggregations, joins, and relationships. Every metric in this visualization is queried from a single Mosaic model.
+**100% Mosaic-sourced.** Every value rendered in this visualization — block heights, hashrate, difficulty, mempool, fee pressure, congestion, block stress, network health, active addresses, BTC transferred, whale concentration, mining pool shares, and per-block spine data — is pulled directly from Strategy Mosaic's unified semantic layer. No hardcoded values. Strategy Mosaic provides a unified semantic layer over these raw sources, delivering a single source of truth and consistent business logic across all 25 historical snapshots.
 
 ## Features
 
 - **25 Historical Snapshots**: Genesis Era, Pizza Day, 2011 Bubble, Mt. Gox Collapse, halvings, bull runs, COVID crash, ETF approval, and more
-- **7 What-If Sliders**: Hashrate, Difficulty, Active Addresses, Mempool Depth, Fee Pressure, Congestion, Block Stress — all drive visual changes in real time
-- **Click-to-Pin**: Click any shape to freeze the scene. KPIs lock, rotation pauses, particles stop. Adjust What-If sliders freely, then click again to resume.
+- **6 What-If Sliders**: Hashrate, Difficulty, Active Addresses, Fee Pressure, Congestion, Block Stress — each maps to a distinct visual element
+- **Click-to-Pin**: Click any shape to freeze the scene. KPIs lock, rotation and playback pause. Adjust What-If sliders freely. Click again (or click empty space) to resume with prior state restored.
 - **Animated Transitions**: Ring parameters smoothly lerp between snapshots (~3s). Blocks fade in. Particles adjust count.
-- **Ambient Rotation**: Slow orbital rotation (~78s per revolution) with toggle control
+- **Ambient Rotation**: Slow orbital rotation (~78s per revolution) with toggle control. Full 360° manual orbit via drag (no polar constraints).
 - **Per-Snapshot Narration**: Historical context appears as a narration bubble for each event
-- **Legend**: Top-right legend explains every visual element
+- **Interactive Legend**: Click the Legend button to open an overlay. Hover any legend row to highlight the matching shape in the 3D scene.
+- **Info Panel**: Data sources and visual guide explaining every ring, particle, and interaction
 
 ## Visual Effects
 

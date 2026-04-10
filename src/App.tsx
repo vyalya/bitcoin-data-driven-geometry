@@ -25,7 +25,6 @@ const WHAT_IF_PARAMS: WhatIfParam[] = [
   { key: "hashrate", label: "Hashrate", min: 0, max: 1000, step: 5, unit: "EH/s", snapshotField: "networkHashrateEh" },
   { key: "difficulty", label: "Difficulty", min: 0, max: 200000000000000, step: 1000000000000, unit: "", snapshotField: "difficulty" },
   { key: "activeAddr", label: "Active Addresses", min: 0, max: 1500000, step: 1000, unit: "", snapshotField: "activeAddresses" },
-  { key: "mempool", label: "Mempool Depth", min: 0, max: 500000, step: 5000, unit: "txs", snapshotField: "mempoolTxCount" },
   { key: "feePressure", label: "Fee Pressure", min: 0, max: 10, step: 0.1, unit: "/10", snapshotField: "feePressureIndex" },
   { key: "congestion", label: "Congestion", min: 0, max: 10, step: 0.1, unit: "/10", snapshotField: "congestionScore" },
   { key: "blockStress", label: "Block Stress", min: 0, max: 10, step: 0.1, unit: "/10", snapshotField: "blockProductionStress" },
@@ -34,7 +33,7 @@ const WHAT_IF_PARAMS: WhatIfParam[] = [
 /* ─── Per-snapshot narration ─── */
 const NARRATION: Record<string, string> = {
   genesis: "January 9, 2009 — six days after the genesis block. Only 14 blocks mined. Each is 215 bytes with a single transaction. Satoshi is mining alone on a CPU. The entire Bitcoin network is one node, one miner, zero real transactions. The spine is sparse and tiny — this is the quietest day in Bitcoin history.",
-  pizza: "May 22, 2010 — Laszlo Hanyecz pays 10,000 BTC for two pizzas, the first real-world Bitcoin purchase. Block heights around 70K. Most blocks still carry just 1 transaction. Those 10,000 BTC would be worth over $700 million in 2024.",
+  pizza: "May 22, 2010 — Laszlo Hanyecz pays 10,000 BTC for two pizzas, the first real-world Bitcoin purchase. Block heights around 57K. Most blocks still carry just 1 transaction. Those 10,000 BTC would be worth over $700 million in 2024.",
   "bubble-2011": "June 19, 2011 — Bitcoin's first major bubble just burst. BTC hit $31, then crashed to $2. Mt. Gox has been hacked for the first time. Blocks are small, transactions few. Early chaos, but the network keeps producing blocks every ~10 minutes.",
   "bubble-2013": "April 10, 2013 — BTC crashed from $266 to $50 in hours. Fast blocks at 452s signal ASICs arriving and hashrate surging. Block sizes vary wildly — some nearly empty, others packed. The network is growing up.",
   mtgox: "February 24, 2014 — Mt. Gox declared bankruptcy. 850,000 BTC lost. Hashrate barely 0.026 EH/s. A dark day for Bitcoin trust, but the blocks keep coming. Block sizes range from tiny coinbase-only to full 1MB. The protocol is indifferent to market panic.",
@@ -92,12 +91,6 @@ function App() {
         (s as Record<string, unknown>)[param.snapshotField] = ov;
       }
     }
-    if (overrides["mempool"] != null && overrides["congestion"] == null) {
-      s.congestionScore = Math.min(10, (s.mempoolTxCount / 400000) * 8 + (s.feePressureIndex / 10) * 2);
-    }
-    if (overrides["mempool"] != null && overrides["feePressure"] == null) {
-      s.feePressureIndex = Math.min(10, 0.5 + (s.mempoolTxCount / 400000) * 6);
-    }
     s.networkHealthScore = Math.max(0, Math.min(10, 10 - (s.feePressureIndex + s.congestionScore + s.blockProductionStress + s.minerConcentrationScore) / 4));
     s.ringBands = deriveRingBands(s);
     s.mempoolSizeMb = s.mempoolTxCount * 0.00028;
@@ -108,28 +101,56 @@ function App() {
   const [hoverCtx, setHoverCtx] = useState<HoverContext>({ type: "none" });
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [showDataInfo, setShowDataInfo] = useState(false);
+  const [showLegend, setShowLegend] = useState(false);
+  const [legendHover, setLegendHover] = useState<string | null>(null);
   const [showGuideTab, setShowGuideTab] = useState<"source" | "visual">("source");
 
   const [pinnedGroup, setPinnedGroup] = useState<string | null>(null);
-  const onHover = useCallback((groupId: string | null) => {
-    setActiveGroup(groupId);
-  }, []);
-  const onClick = useCallback((groupId: string) => {
-    setPinnedGroup(prev => {
-      if (prev === groupId) return null; // unpin
-      setPlaying(false); // pause playback on pin
-      return groupId;
-    });
-  }, []);
-  const clearSelection = useCallback(() => { setPinnedGroup(null); setActiveGroup(null); }, []);
-
-  // The group that drives the right panel KPIs — pinned takes priority over hover
-  const displayGroup = pinnedGroup ?? activeGroup;
-
-  // Timeline playback
+  const preClickState = useRef({ wasPlaying: false, wasRotating: true });
   const [playing, setPlaying] = useState(false);
   const playRef = useRef(playing);
   playRef.current = playing;
+  const [rotationEnabled, setRotationEnabled] = useState(true);
+  const rotationRef = useRef(rotationEnabled);
+  rotationRef.current = rotationEnabled;
+
+  const onHover = useCallback((groupId: string | null) => {
+    setActiveGroup(groupId);
+  }, []);
+
+  const onClick = useCallback((groupId: string) => {
+    setPinnedGroup(prev => {
+      if (prev === groupId) {
+        // Unpin same shape → resume
+        setPlaying(preClickState.current.wasPlaying);
+        setRotationEnabled(preClickState.current.wasRotating);
+        return null;
+      }
+      if (!prev) {
+        // First pin — save current state then pause
+        preClickState.current = { wasPlaying: playRef.current, wasRotating: rotationRef.current };
+        setPlaying(false);
+        setRotationEnabled(false);
+      }
+      // Pin new shape (or switch pin) — stay paused
+      return groupId;
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setPinnedGroup(prev => {
+      if (prev) {
+        // Was pinned → resume
+        setPlaying(preClickState.current.wasPlaying);
+        setRotationEnabled(preClickState.current.wasRotating);
+      }
+      return null;
+    });
+    setActiveGroup(null);
+  }, []);
+
+  // The group that drives the right panel KPIs — legend hover > pinned > hover
+  const displayGroup = legendHover ?? pinnedGroup ?? activeGroup;
 
   useEffect(() => {
     if (!playing) return;
@@ -144,13 +165,9 @@ function App() {
         return next;
       });
       resetOverrides();
-      clearSelection();
     }, 2200);
     return () => clearInterval(timer);
   }, [playing]);
-
-  // Rotation toggle
-  const [rotationEnabled, setRotationEnabled] = useState(true);
 
   // Narration: show on every snapshot change
   const [showNarration, setShowNarration] = useState(true);
@@ -179,15 +196,15 @@ function App() {
           snapshot={s}
           blocks={currentBlocks}
           activeGroup={displayGroup}
-          frozen={!!pinnedGroup}
+          frozen={!!pinnedGroup || showLegend}
+          legendView={showLegend}
           onHover={onHover}
           onClick={onClick}
           rotationEnabled={rotationEnabled}
           onDeselect={clearSelection}
-          onBlockHover={(block, index) => { if (!pinnedGroup) setHoverCtx(block ? { type: "block", block, index } : { type: "none" }); }}
+          onBlockHover={(block, index) => { setHoverCtx(block ? { type: "block", block, index } : { type: "none" }); }}
           onRingHover={(type, idx) => {
-            if (pinnedGroup) return;
-            if (!type) { setHoverCtx({ type: "none" }); return; }
+            if (!type) { if (!pinnedGroup) setHoverCtx({ type: "none" }); return; }
             if (type === "fee") setHoverCtx({ type: "fee", tierIndex: idx ?? 0 });
             else if (type === "congestion") setHoverCtx({ type: "congestion" });
             else if (type === "settlement") setHoverCtx({ type: "settlement" });
@@ -201,7 +218,7 @@ function App() {
           <ChromaticAberration blendFunction={BlendFunction.NORMAL} offset={new THREE.Vector2(0.0008, 0.0008)} radialModulation modulationOffset={0.2} />
           <Vignette eskil={false} offset={0.25} darkness={0.7} />
         </EffectComposer>
-        <OrbitControls enablePan enableZoom minDistance={1.5} maxDistance={45} minPolarAngle={Math.PI / 8} maxPolarAngle={Math.PI / 1.2} />
+        <OrbitControls enablePan enableZoom minDistance={1.5} maxDistance={45} />
       </Canvas>
 
       {/* ═══ TOP BANNER ═══ */}
@@ -216,19 +233,35 @@ function App() {
           <button
             className="timeline-play-btn"
             onClick={() => {
-              if (playing) { setPlaying(false); return; }
-              if (activeIdx >= mosaicSnapshots.length - 1) setActiveIdx(0);
-              setPlaying(true);
+              if (playing) {
+                setPlaying(false);
+                setRotationEnabled(false);
+              } else {
+                setPinnedGroup(null);
+                setActiveGroup(null);
+                if (activeIdx >= mosaicSnapshots.length - 1) setActiveIdx(0);
+                setPlaying(true);
+                setRotationEnabled(true);
+              }
             }}
             type="button"
           >
             {playing ? "❚❚" : "▶"} {playing ? "Pause" : "Play"}
           </button>
-          <button className="info-button" onClick={() => setShowDataInfo(true)} type="button">
-            <span className="info-icon">i</span> Info
-          </button>
-          <button className={`rotate-toggle ${rotationEnabled ? "active" : ""}`} onClick={() => setRotationEnabled(!rotationEnabled)} type="button" title="Toggle rotation">
-            ⟳
+          <button className={`rotate-toggle ${rotationEnabled && !pinnedGroup ? "active" : ""}`} onClick={() => {
+            if (rotationEnabled && !pinnedGroup) {
+              setRotationEnabled(false);
+            } else {
+              setPinnedGroup(null);
+              setActiveGroup(null);
+              setRotationEnabled(true);
+            }
+          }} type="button" title="Toggle rotation">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-20 12 12)" />
+              <circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none" />
+              <circle cx="20" cy="9" r="1.5" fill="currentColor" stroke="none" />
+            </svg>
           </button>
         </div>
 
@@ -253,20 +286,56 @@ function App() {
         </div>
       </div>
 
-      {/* ═══ LEGEND ═══ */}
-      <div className="hud hud-legend">
-        <div className="legend-item"><span className="legend-block" /><span className="legend-label">Block</span></div>
-        <div className="legend-item"><span className="legend-line" style={{ background: "#FF9933" }} /><span className="legend-label">Fee Tiers</span></div>
-        <div className="legend-item"><span className="legend-line" style={{ background: "#FA660F" }} /><span className="legend-label">Settlement</span></div>
-        <div className="legend-item"><span className="legend-line" style={{ background: "#FF4400" }} /><span className="legend-label">Congestion</span></div>
-        <div className="legend-item"><span className="legend-line" style={{ background: "#FFB040" }} /><span className="legend-label">BTC Volume</span></div>
-        <div className="legend-item"><span className="legend-arc" /><span className="legend-label">Hashrate</span></div>
-        <div className="legend-item"><span className="legend-arc dark" /><span className="legend-label">Difficulty</span></div>
-        <div className="legend-item"><span className="legend-dot" /><span className="legend-label">1 particle = 1,000 addresses</span></div>
-      </div>
+      {/* Legend toggle removed — now in right panel header */}
+
+      {showLegend && (
+        <div className="legend-overlay" onClick={() => { setShowLegend(false); setLegendHover(null); }}>
+          <div className="legend-panel" onClick={e => e.stopPropagation()}>
+            <div className="legend-header">
+              <span>Legend</span>
+              <span className="legend-hint">Hover to highlight</span>
+              <button className="legend-close" onClick={() => { setShowLegend(false); setLegendHover(null); }} type="button">✕</button>
+            </div>
+            <div className="legend-grid" onMouseLeave={() => setLegendHover(null)}>
+              {[
+                { id: "spine", icon: <span className="legend-block" />, name: "Block", desc: "Width = weight, brightness = tx count" },
+                { id: "fee-0", icon: <span className="legend-line" style={{ background: "#FF9933" }} />, name: "Fee Tiers", desc: "4 arcs showing fee distribution" },
+                { id: "settlement", icon: <span className="legend-line" style={{ background: "#FA660F" }} />, name: "Settlement", desc: "Block production health" },
+                { id: "congestion", icon: <span className="legend-line" style={{ background: "#FF4400" }} />, name: "Congestion", desc: "Network congestion score" },
+                { id: "volume", icon: <span className="legend-line" style={{ background: "#FFB040" }} />, name: "BTC Volume", desc: "Daily BTC transferred" },
+                { id: "hashrate-ring", icon: <span className="legend-arc" />, name: "Hashrate", desc: "Vertical ring, vs 906 EH/s peak" },
+                { id: "difficulty-ring", icon: <span className="legend-arc dark" />, name: "Difficulty", desc: "Vertical ring, log-scaled" },
+                { id: "particles", icon: <span className="legend-dot" />, name: "Addresses", desc: "1 particle = 1,000 active addresses" },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className={`legend-item ${legendHover === item.id ? "legend-active" : ""}`}
+                  onMouseEnter={() => setLegendHover(item.id)}
+                >
+                  {item.icon}<span>{item.name}</span><span className="legend-desc">{item.desc}</span>
+                </div>
+              ))}
+            </div>
+            <div className="legend-controls">
+              <span>Click shape</span><span className="legend-desc">Pause &amp; inspect</span>
+              <span>Click again</span><span className="legend-desc">Resume</span>
+              <span>Click background</span><span className="legend-desc">Resume</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ═══ RIGHT PANEL: Context + What-If ═══ */}
       <div className="hud hud-right-panel">
+        <div className="right-panel-header">
+          <button className="panel-header-btn" onClick={() => setShowLegend(v => !v)} type="button">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="5" height="3" rx="0.5" fill="#FF8C3A"/><line x1="8" y1="3.5" x2="15" y2="3.5" stroke="#777" strokeWidth="1.2"/><circle cx="3.5" cy="8.5" r="1.8" stroke="#FA660F" strokeWidth="1.2" fill="none"/><line x1="8" y1="8.5" x2="15" y2="8.5" stroke="#777" strokeWidth="1.2"/><circle cx="3.5" cy="13.5" r="1" fill="#FFAA55"/><line x1="8" y1="13.5" x2="15" y2="13.5" stroke="#777" strokeWidth="1.2"/></svg>
+            Legend
+          </button>
+          <button className="panel-header-btn" onClick={() => setShowDataInfo(true)} type="button">
+            <span className="info-icon">i</span> Info
+          </button>
+        </div>
         <div className="context-panel">
           <ContextPanel snapshot={s} hoverCtx={hoverCtx} blocks={currentBlocks} />
         </div>
@@ -321,7 +390,7 @@ function App() {
                 </div>
                 <div className="data-info-section">
                   <h4>Strategy Mosaic — Semantic Layer</h4>
-                  <p>All underlying data flows through Strategy Mosaic's universal semantic layer, which sits on top of these raw sources and defines the aggregations, joins, and relationships between them. Every metric in this visualization is queried from a single unified Mosaic model — ensuring consistent definitions across all 25 historical snapshots.</p>
+                  <p>Strategy Mosaic provides a unified semantic layer over these raw sources. Every metric in this visualization is served from a single certified model — delivering a single source of truth and consistent business logic across all 25 historical snapshots.</p>
                 </div>
                 <div className="data-info-section">
                   <h4>What You're Seeing</h4>
@@ -510,6 +579,7 @@ interface SceneProps {
   activeGroup: string | null;
   frozen?: boolean;
   rotationEnabled?: boolean;
+  legendView?: boolean;
   onHover: (groupId: string | null) => void;
   onClick: (groupId: string) => void;
   onDeselect?: () => void;
@@ -517,7 +587,7 @@ interface SceneProps {
   onRingHover: (type: string | null, idx?: number) => void;
 }
 
-function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, frozen = false, rotationEnabled = true, onHover, onClick, onBlockHover, onRingHover }: SceneProps) {
+function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, frozen = false, rotationEnabled = true, legendView = false, onHover, onClick, onBlockHover, onRingHover }: SceneProps) {
   const s = snapshot;
 
   // Target values from snapshot
@@ -549,13 +619,18 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
     }
   }
 
-  // Slow ambient rotation — pauses when user hovers any shape
+  // Slow ambient rotation — pauses when frozen, snaps to front view for legend
   const sceneRef = useRef<THREE.Group>(null);
   const coreLightRef = useRef<THREE.PointLight>(null);
   const timeRef = useRef(0);
   useFrame((_, delta) => {
-    if (sceneRef.current && rotationEnabled && !frozen) {
-      sceneRef.current.rotation.y += delta * 0.08;
+    if (sceneRef.current) {
+      if (legendView) {
+        // Smoothly lerp to front-facing view (y=0)
+        sceneRef.current.rotation.y += (0 - sceneRef.current.rotation.y) * Math.min(delta * 4, 1);
+      } else if (rotationEnabled && !frozen) {
+        sceneRef.current.rotation.y += delta * 0.08;
+      }
     }
     // Subtle pulse on core light
     timeRef.current += delta;
@@ -614,6 +689,7 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
         blocks={currentBlocks}
         opacity={anim.current.blockAlpha}
         frozen={frozen}
+        highlighted={activeGroup === "spine"}
         onHover={onHover}
         onClick={onClick}
         onBlockHover={onBlockHover}
@@ -637,6 +713,7 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
           <group key={gid} position={[0, 0, z]}
             onPointerOver={(e) => { e.stopPropagation(); onHover(gid); onRingHover("fee", i); }}
             onPointerOut={() => { onHover(null); onRingHover(null); }}
+            onClick={(e) => { e.stopPropagation(); onClick(gid); }}
           >
             <ArcBand radius={r} thickness={thickness} depth={0.05 + bucket.intensity * 0.03} startAngle={startAngle + gap / 2} endAngle={startAngle + gap / 2 + usable} color={feeColors[i]} emissiveIntensity={(0.25 + bucket.intensity * 0.6 + glowExtra(gid)) * g} opacity={0.8 * g} />
           </group>
@@ -914,10 +991,11 @@ function blockColor(txNorm: number, color: THREE.Color) {
   color.setHSL(hue, sat, light);
 }
 
-function BlockSpine({ blocks, opacity: blockOpacity = 1, frozen = false, onHover, onClick, onBlockHover }: {
+function BlockSpine({ blocks, opacity: blockOpacity = 1, frozen = false, highlighted = false, onHover, onClick, onBlockHover }: {
   blocks: BlockTuple[];
   opacity?: number;
   frozen?: boolean;
+  highlighted?: boolean;
   onHover: (gid: string | null) => void;
   onClick: (gid: string) => void;
   onBlockHover: (block: BlockTuple | null, index: number) => void;
@@ -1020,7 +1098,7 @@ function BlockSpine({ blocks, opacity: blockOpacity = 1, frozen = false, onHover
         ref={meshRef}
         args={[undefined, undefined, count]}
         onPointerMove={(e) => {
-          if (!frozen && e.instanceId !== undefined && e.instanceId < blocks.length) {
+          if (e.instanceId !== undefined && e.instanceId < blocks.length) {
             onBlockHover(blocks[e.instanceId], e.instanceId);
             highlightInstance(e.instanceId);
           }
@@ -1028,13 +1106,13 @@ function BlockSpine({ blocks, opacity: blockOpacity = 1, frozen = false, onHover
       >
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial
-          color="#FF8C3A"
-          emissive="#FA660F"
-          emissiveIntensity={0.1}
+          color={highlighted ? "#FFD080" : "#FF8C3A"}
+          emissive={highlighted ? "#FFAA44" : "#FA660F"}
+          emissiveIntensity={highlighted ? 0.4 : 0.1}
           metalness={0.85}
           roughness={0.1}
           transparent
-          opacity={0.95 * blockOpacity}
+          opacity={(highlighted ? 1.0 : 0.95) * blockOpacity}
           envMapIntensity={0.4}
         />
       </instancedMesh>

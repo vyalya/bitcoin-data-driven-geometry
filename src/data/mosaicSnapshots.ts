@@ -83,7 +83,55 @@ function bkt(s0: number, s1: number, s2: number, s3: number) {
   ];
 }
 
-/* GBQ address/value data per snapshot */
+/* ═══════════════════════════════════════════════════════════════════
+   MOSAIC — all network metrics sourced from Strategy Mosaic semantic layer
+   Every value below was pulled via Mosaic MCP queries.
+   ═══════════════════════════════════════════════════════════════════ */
+
+interface MosaicMetrics {
+  blockHeight: number;
+  avgBlockIntervalSeconds: number;
+  networkHashrateEh: number;
+  mempoolTxCount: number;
+  mempoolSizeMb: number;
+  feePressureIndex: number;
+  congestionScore: number;
+  blockProductionStress: number;
+  minerConcentrationScore: number;
+  networkHealthScore: number;
+  difficulty: number;
+}
+
+/* Network metrics keyed by date — all from Mosaic */
+const MOSAIC: Record<string, MosaicMetrics> = {
+  "2009-01-09": { blockHeight: 14, avgBlockIntervalSeconds: 600, networkHashrateEh: 0, mempoolTxCount: 0, mempoolSizeMb: 0, feePressureIndex: 0.87, congestionScore: 0, blockProductionStress: 0.92, minerConcentrationScore: 4.007, networkHealthScore: 8.55, difficulty: 1 },
+  "2010-05-22": { blockHeight: 57093, avgBlockIntervalSeconds: 600, networkHashrateEh: 0, mempoolTxCount: 0, mempoolSizeMb: 0, feePressureIndex: 0.87, congestionScore: 0, blockProductionStress: 0.92, minerConcentrationScore: 4.007, networkHealthScore: 8.55, difficulty: 11.846 },
+  "2011-06-19": { blockHeight: 131934, avgBlockIntervalSeconds: 600, networkHashrateEh: 0, mempoolTxCount: 0, mempoolSizeMb: 0, feePressureIndex: 0.87, congestionScore: 0, blockProductionStress: 0.92, minerConcentrationScore: 4.007, networkHealthScore: 8.55, difficulty: 876954.494 },
+  "2013-04-10": { blockHeight: 230722, avgBlockIntervalSeconds: 452.356, networkHashrateEh: 0, mempoolTxCount: 0, mempoolSizeMb: 0, feePressureIndex: 0.87, congestionScore: 0, blockProductionStress: 2.4, minerConcentrationScore: 4.007, networkHealthScore: 8.18, difficulty: 7672999.92 },
+  "2014-02-24": { blockHeight: 287655, avgBlockIntervalSeconds: 452.356, networkHashrateEh: 0.026, mempoolTxCount: 0, mempoolSizeMb: 0, feePressureIndex: 0.87, congestionScore: 0, blockProductionStress: 2.4, minerConcentrationScore: 4.007, networkHealthScore: 8.18, difficulty: 3129573174.522 },
+  "2015-01-14": { blockHeight: 338981, avgBlockIntervalSeconds: 595.862, networkHashrateEh: 0.358, mempoolTxCount: 0, mempoolSizeMb: 0, feePressureIndex: 0.87, congestionScore: 0, blockProductionStress: 0.96, minerConcentrationScore: 4.007, networkHealthScore: 8.54, difficulty: 43971662056.09 },
+  "2016-07-09": { blockHeight: 420047, avgBlockIntervalSeconds: 600, networkHashrateEh: 1.581, mempoolTxCount: 0, mempoolSizeMb: 0, feePressureIndex: 0.87, congestionScore: 0, blockProductionStress: 0.92, minerConcentrationScore: 4.007, networkHealthScore: 8.55, difficulty: 213398925331 },
+  "2017-12-20": { blockHeight: 500325, avgBlockIntervalSeconds: 600, networkHashrateEh: 13.036, mempoolTxCount: 343354, mempoolSizeMb: 98.101, feePressureIndex: 2.87, congestionScore: 4.68, blockProductionStress: 0.92, minerConcentrationScore: 4.007, networkHealthScore: 6.88, difficulty: 1873105475221 },
+  "2018-12-15": { blockHeight: 554002, avgBlockIntervalSeconds: 600, networkHashrateEh: 40.98, mempoolTxCount: 1909, mempoolSizeMb: 0.546, feePressureIndex: 0.87, congestionScore: 0, blockProductionStress: 0.92, minerConcentrationScore: 4.007, networkHealthScore: 8.55, difficulty: 5646403851535 },
+  "2019-06-26": { blockHeight: 582605, avgBlockIntervalSeconds: 523.636, networkHashrateEh: 65.193, mempoolTxCount: 76318, mempoolSizeMb: 21.805, feePressureIndex: 1.63, congestionScore: 1.06, blockProductionStress: 1.69, minerConcentrationScore: 4.007, networkHealthScore: 7.9, difficulty: 7409399249090 },
+  "2020-03-12": { blockHeight: 621412, avgBlockIntervalSeconds: 572.185, networkHashrateEh: 108.616, mempoolTxCount: 27228, mempoolSizeMb: 7.78, feePressureIndex: 1.06, congestionScore: 0.3, blockProductionStress: 1.2, minerConcentrationScore: 4.007, networkHealthScore: 8.36, difficulty: 16552923967337 },
+  "2020-05-11": { blockHeight: 630023, avgBlockIntervalSeconds: 550.318, networkHashrateEh: 108.878, mempoolTxCount: 4185, mempoolSizeMb: 1.196, feePressureIndex: 0.96, congestionScore: 0, blockProductionStress: 1.42, minerConcentrationScore: 4.007, networkHealthScore: 8.4, difficulty: 16104807485529 },
+  "2021-04-14": { blockHeight: 679250, avgBlockIntervalSeconds: 600, networkHashrateEh: 155.273, mempoolTxCount: 257070, mempoolSizeMb: 73.449, feePressureIndex: 2.58, congestionScore: 3.91, blockProductionStress: 0.92, minerConcentrationScore: 4.007, networkHealthScore: 7.15, difficulty: 23137439666472 },
+  "2021-06-28": { blockHeight: 689078, avgBlockIntervalSeconds: 600, networkHashrateEh: 108.995, mempoolTxCount: 0, mempoolSizeMb: 0, feePressureIndex: 0.87, congestionScore: 0, blockProductionStress: 0.92, minerConcentrationScore: 4.007, networkHealthScore: 8.55, difficulty: 19932791027263 },
+  "2021-11-10": { blockHeight: 709141, avgBlockIntervalSeconds: 579.866, networkHashrateEh: 145.353, mempoolTxCount: 33053, mempoolSizeMb: 9.444, feePressureIndex: 1.22, congestionScore: 0.38, blockProductionStress: 1.12, minerConcentrationScore: 4.007, networkHealthScore: 8.32, difficulty: 21659344833265 },
+  "2022-02-24": { blockHeight: 724805, avgBlockIntervalSeconds: 600, networkHashrateEh: 183.514, mempoolTxCount: 0, mempoolSizeMb: 0, feePressureIndex: 0.87, congestionScore: 0, blockProductionStress: 0.92, minerConcentrationScore: 4.007, networkHealthScore: 8.55, difficulty: 27967152532434 },
+  "2022-11-11": { blockHeight: 762775, avgBlockIntervalSeconds: 600, networkHashrateEh: 244.879, mempoolTxCount: 11692, mempoolSizeMb: 3.341, feePressureIndex: 0.92, congestionScore: 0.09, blockProductionStress: 0.92, minerConcentrationScore: 4.007, networkHealthScore: 8.52, difficulty: 36762198818467 },
+  "2023-01-14": { blockHeight: 771987, avgBlockIntervalSeconds: 600, networkHashrateEh: 289.811, mempoolTxCount: 2533, mempoolSizeMb: 0.724, feePressureIndex: 0.87, congestionScore: 0, blockProductionStress: 0.92, minerConcentrationScore: 4.007, networkHealthScore: 8.55, difficulty: 34093570325204 },
+  "2023-12-16": { blockHeight: 821535, avgBlockIntervalSeconds: 600, networkHashrateEh: 528.36, mempoolTxCount: 346023, mempoolSizeMb: 98.864, feePressureIndex: 2.87, congestionScore: 4.68, blockProductionStress: 0.92, minerConcentrationScore: 4.007, networkHealthScore: 6.88, difficulty: 67305906902031.1 },
+  "2024-01-11": { blockHeight: 825376, avgBlockIntervalSeconds: 499.422, networkHashrateEh: 482.037, mempoolTxCount: 0, mempoolSizeMb: 0, feePressureIndex: 1.41, congestionScore: 0, blockProductionStress: 1.93, minerConcentrationScore: 4.007, networkHealthScore: 8.16, difficulty: 73197634206448 },
+  "2024-03-14": { blockHeight: 834726, avgBlockIntervalSeconds: 600, networkHashrateEh: 630.389, mempoolTxCount: 379934, mempoolSizeMb: 108.553, feePressureIndex: 2.87, congestionScore: 4.76, blockProductionStress: 0.92, minerConcentrationScore: 4.007, networkHealthScore: 6.86, difficulty: 79351228131136.72 },
+  "2024-04-20": { blockHeight: 840128, avgBlockIntervalSeconds: 664.615, networkHashrateEh: 642.272, mempoolTxCount: 0, mempoolSizeMb: 0, feePressureIndex: 2.87, congestionScore: 0, blockProductionStress: 2.62, minerConcentrationScore: 3.899, networkHealthScore: 7.65, difficulty: 86388558925171.28 },
+  "2024-11-10": { blockHeight: 869780, avgBlockIntervalSeconds: 583.784, networkHashrateEh: 700.797, mempoolTxCount: 243425, mempoolSizeMb: 69.55, feePressureIndex: 2.6, congestionScore: 3.69, blockProductionStress: 1.09, minerConcentrationScore: 3.899, networkHealthScore: 7.18, difficulty: 101646843652784.61 },
+  "2025-01-20": { blockHeight: 880139, avgBlockIntervalSeconds: 600, networkHashrateEh: 718.922, mempoolTxCount: 0, mempoolSizeMb: 0, feePressureIndex: 0.87, congestionScore: 0, blockProductionStress: 0.92, minerConcentrationScore: 3.899, networkHealthScore: 8.58, difficulty: 110451907374650 },
+  "2025-10-10": { blockHeight: 918497, avgBlockIntervalSeconds: 600, networkHashrateEh: 906.479, mempoolTxCount: 8688, mempoolSizeMb: 2.482, feePressureIndex: 0.9, congestionScore: 0.05, blockProductionStress: 0.92, minerConcentrationScore: 3.577, networkHealthScore: 8.64, difficulty: 150839487445891.53 },
+};
+
+/* GBQ address/value data per snapshot — from BigQuery crypto_bitcoin via Mosaic */
 interface GbqData {
   activeAddresses: number;
   uniqueSenders: number;
@@ -97,7 +145,6 @@ interface GbqData {
   retailOutputs: number;
 }
 
-/* GBQ data keyed by date — from BigQuery crypto_bitcoin dataset */
 const GBQ: Record<string, GbqData> = {
   "2009-01-09": { activeAddresses: 0, uniqueSenders: 0, uniqueReceivers: 0, btcTransferred: 0, totalFeesBtc: 0, totalOutputs: 0, whaleOutputs1000: 0, whaleOutputs100: 0, midOutputs10: 0, retailOutputs: 0 },
   "2010-05-22": { activeAddresses: 165, uniqueSenders: 137, uniqueReceivers: 28, btcTransferred: 54428, totalFeesBtc: 0, totalOutputs: 233, whaleOutputs1000: 7, whaleOutputs100: 9, midOutputs10: 210, retailOutputs: 7 },
@@ -126,29 +173,18 @@ const GBQ: Record<string, GbqData> = {
   "2025-10-10": { activeAddresses: 1075408, uniqueSenders: 479699, uniqueReceivers: 595709, btcTransferred: 750439, totalFeesBtc: 0, totalOutputs: 1100889, whaleOutputs1000: 38, whaleOutputs100: 911, midOutputs10: 8010, retailOutputs: 1091930 },
 };
 
-function mk(
-  id: string, label: string, date: string,
-  bh: number, intv: number, hr: number,
-  mp: number, mpMb: number,
-  fp: number, cg: number, bs: number, mc: number, nh: number,
-  diff: number,
-  notes: string[]
-): NetworkSnapshot {
-  const s = { feePressureIndex: fp, congestionScore: cg, blockProductionStress: bs, mempoolTxCount: mp, networkHealthScore: nh };
+function mk(id: string, label: string, date: string, notes: string[]): NetworkSnapshot {
+  const m = MOSAIC[date];
   const g = GBQ[date] ?? GBQ["2009-01-09"];
+  if (!m) throw new Error(`Missing Mosaic metrics for ${date}`);
+  const s = { feePressureIndex: m.feePressureIndex, congestionScore: m.congestionScore, blockProductionStress: m.blockProductionStress, mempoolTxCount: m.mempoolTxCount, networkHealthScore: m.networkHealthScore };
   return {
     id, label,
     snapshotTime: `${date}T00:00:00Z`,
     mode: "historical" as const,
-    blockHeight: bh,
-    avgBlockIntervalSeconds: intv,
-    networkHashrateEh: hr,
-    mempoolSizeMb: mpMb,
-    minerConcentrationScore: mc,
-    difficulty: diff,
+    ...m,
     ...g,
-    ...s,
-    miningPools: poolsForDate(date, hr),
+    miningPools: poolsForDate(date, m.networkHashrateEh),
     feeBuckets: bkt(0.334, 0.295, 0.207, 0.164),
     ringBands: deriveRingBands(s),
     notes,
@@ -162,103 +198,54 @@ function mk(
 
 export const mosaicSnapshots: NetworkSnapshot[] = [
   mk("genesis", "Genesis Era", "2009-01-09",
-    982, 600, 0, 0, 0, 0.87, 0, 0.92, 4.0, 8.55, 1,
-    ["6 days after genesis block. Satoshi mining alone on a CPU.", "The entire Bitcoin network: one node, one miner, zero transactions."]),
-
+    ["6 days after genesis block. Satoshi mining alone on a CPU.", "14 blocks mined. One node, one miner, zero real transactions."]),
   mk("pizza", "Pizza Day", "2010-05-22",
-    70542, 600, 0, 0, 0, 0.87, 0, 0.92, 4.0, 8.55, 11.85,
-    ["10,000 BTC for two pizzas — first real-world Bitcoin purchase.", "Block 70K. Worth ~$40 at the time. Worth ~$700M in 2024."]),
-
+    ["10,000 BTC for two pizzas — first real-world Bitcoin purchase.", "Block ~57K. Worth ~$40 at the time. Worth ~$700M in 2024."]),
   mk("bubble-2011", "2011 Bubble Burst", "2011-06-19",
-    125436, 600, 0, 0, 0, 0.87, 0, 0.92, 4.0, 8.55, 876954,
     ["First major bubble — BTC hit $31 then crashed to $2.", "Mt. Gox hacked for the first time. Early chaos."]),
-
   mk("bubble-2013", "2013 Bubble Pop", "2013-04-10",
-    217811, 452, 0, 0, 0, 0.87, 0, 2.4, 4.0, 8.18, 7673000,
     ["BTC fell from $266 to $50 in hours.", "Fast blocks (452s) — ASICs arriving, hashrate surging."]),
-
   mk("mtgox", "Mt. Gox Collapse", "2014-02-24",
-    262509, 452, 0.026, 0, 0, 0.87, 0, 2.4, 4.0, 8.18, 3129573175,
     ["Mt. Gox declared bankruptcy. 850,000 BTC lost.", "Hashrate barely 0.026 EH/s. Dark day for Bitcoin trust."]),
-
   mk("bear-2015", "2015 Bear Bottom", "2015-01-14",
-    307720, 596, 0.358, 0, 0, 0.87, 0, 0.96, 4.0, 8.54, 43971662056,
     ["BTC ~$200. Deepest bear market despair.", "Network quietly building — 0.36 EH/s, steady blocks."]),
-
   mk("halving-2016", "2016 Halving", "2016-07-09",
-    383425, 600, 1.581, 0, 0, 0.87, 0, 0.92, 4.0, 8.55, 213398925331,
-    ["2nd halving — subsidy 25 → 12.5 BTC per block.", "1.6 EH/s. Calm before the 2017 storm."]),
-
+    ["2nd halving — subsidy 25 → 12.5 BTC per block.", "1.6 EH/s. Calm before the 2017 storm. Block 420,000 mined this day."]),
   mk("bull-2017", "2017 Bull Run Peak", "2017-12-20",
-    457316, 600, 13.036, 343354, 98.1, 2.87, 4.68, 0.92, 4.0, 6.88, 1873105475221,
-    ["BTC near $20K. 343K mempool transactions.", "13 EH/s hashrate. Congestion score 4.7 — network stressed."]),
-
+    ["BTC near $20K. 343K mempool transactions.", "13 EH/s hashrate. Congestion score 4.7 — network stressed. Block 500K."]),
   mk("bear-2018", "2018 Capitulation", "2018-12-15",
-    507601, 600, 40.98, 1909, 0.55, 0.87, 0, 0.92, 4.0, 8.55, 5646403851535,
     ["BTC bottomed near $3,200. Blood in the streets.", "Network: 41 EH/s, empty mempool, perfectly healthy."]),
-
   mk("rally-2019", "2019 Mini Rally", "2019-06-26",
-    534579, 524, 65.2, 76318, 21.8, 1.63, 1.06, 1.69, 4.0, 7.9, 7409399249090,
     ["BTC briefly hit $13K. 76K mempool building.", "Fast blocks (524s) — hashrate surging to 65 EH/s."]),
-
   mk("covid", "COVID Black Thursday", "2020-03-12",
-    570882, 572, 108.6, 27228, 7.8, 1.06, 0.3, 1.2, 4.0, 8.36, 16552923967337,
     ["Global pandemic panic. BTC dropped 50% in 24 hours.", "Mempool spiked to 27K. Blocks fast at 572s."]),
-
   mk("halving-2020", "2020 Halving", "2020-05-11",
-    579270, 550, 108.9, 4185, 1.2, 0.96, 0, 1.42, 4.0, 8.4, 16104807485529,
-    ["3rd halving — subsidy 12.5 → 6.25 BTC.", "109 EH/s, clear mempool. Recovery underway."]),
-
+    ["3rd halving — subsidy 12.5 → 6.25 BTC.", "109 EH/s, clear mempool. Block 630,000 mined this day."]),
   mk("coinbase", "Coinbase IPO", "2021-04-14",
-    626469, 600, 155.3, 257070, 73.4, 2.58, 3.91, 0.92, 4.0, 7.15, 23137439666472,
     ["Coinbase went public on NASDAQ. BTC at $64K.", "257K mempool — heavy institutional-driven congestion."]),
-
   mk("china-ban", "China Mining Ban", "2021-06-28",
-    636945, 600, 109.0, 0, 0, 0.87, 0, 0.92, 4.0, 8.55, 19932791027263,
     ["China banned mining. Hashrate crashed from 180→109 EH/s.", "Paradoxically healthy — low fees, clear mempool."]),
-
   mk("ath-2021", "2021 ATH $69K", "2021-11-10",
-    655806, 580, 145.4, 33053, 9.4, 1.22, 0.38, 1.12, 4.0, 8.32, 21659344833265,
     ["Bitcoin hit $69K all-time high.", "Fast blocks (580s), moderate mempool. Bull market peak."]),
-
   mk("ukraine", "Ukraine War Begins", "2022-02-24",
-    670608, 600, 183.5, 0, 0, 0.87, 0, 0.92, 4.0, 8.55, 27967152532434,
     ["Russia invaded Ukraine. BTC used for cross-border aid.", "Network unfazed — 184 EH/s, perfect block intervals."]),
-
   mk("ftx", "FTX Collapse", "2022-11-11",
-    706924, 600, 244.9, 11692, 3.3, 0.92, 0.09, 0.92, 4.0, 8.52, 36762198818467,
     ["FTX and Alameda collapsed. Contagion spread across crypto.", "Bitcoin network: 245 EH/s, normal blocks. Unfazed."]),
-
   mk("recovery-2023", "2023 Recovery", "2023-01-14",
-    715864, 600, 289.8, 2533, 0.72, 0.87, 0, 0.92, 4.0, 8.55, 34093570325204,
     ["Bear market ending. BTC climbing from $16K.", "290 EH/s — hashrate grew through the entire bear."]),
-
   mk("inscriptions", "Inscription Surge", "2023-12-16",
-    762796, 600, 528.4, 346023, 98.9, 2.87, 4.68, 0.92, 4.0, 6.88, 67305906902031,
     ["Ordinals inscriptions flood the network. 346K mempool.", "528 EH/s. Congestion 4.7 — similar to 2017 peak."]),
-
   mk("etf", "BTC ETF Approved", "2024-01-11",
-    766457, 499, 482.0, 0, 0, 1.41, 0, 1.93, 4.0, 8.16, 73197634206448,
     ["SEC approved spot Bitcoin ETFs. Institutional era begins.", "Fast blocks (499s) — miners racing. 482 EH/s."]),
-
   mk("ath-2024", "2024 ATH $73K", "2024-03-14",
-    775228, 600, 630.4, 379934, 108.6, 2.87, 4.76, 0.92, 4.0, 6.86, 79351228131137,
     ["New ATH ~$73K driven by ETF inflows.", "380K mempool — highest congestion in dataset. Health: 6.9."]),
-
   mk("halving-2024", "2024 Halving", "2024-04-20",
-    780382, 665, 642.3, 0, 0, 2.87, 0, 2.62, 3.9, 7.65, 86388558925171,
-    ["4th halving — subsidy 6.25 → 3.125 BTC.", "642 EH/s. Slower blocks (665s). Mempool cleared."]),
-
+    ["4th halving — subsidy 6.25 → 3.125 BTC. Block 840,000 mined this day.", "642 EH/s. Slower blocks (665s). Mempool cleared."]),
   mk("election", "Post-Election Rally", "2024-11-10",
-    808895, 584, 700.8, 243425, 69.6, 2.6, 3.69, 1.09, 3.9, 7.18, 101646843652785,
     ["US election rally toward $90K. Pro-crypto sentiment.", "243K mempool. 701 EH/s — network handling demand."]),
-
   mk("trump", "Trump Inauguration", "2025-01-20",
-    818808, 600, 718.9, 0, 0, 0.87, 0, 0.92, 3.9, 8.58, 110451907374650,
     ["Pro-crypto president inaugurated.", "719 EH/s. Network calm and extremely healthy."]),
-
   mk("correction", "2025 Correction", "2025-10-10",
-    855544, 600, 906.5, 8688, 2.5, 0.9, 0.05, 0.92, 3.6, 8.64, 150839487445892,
     ["Market correction — prices declining.", "907 EH/s all-time high hashrate. Network doesn't care about price."]),
 
 ];
