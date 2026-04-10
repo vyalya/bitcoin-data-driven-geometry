@@ -35,7 +35,7 @@ Therefore:
 
 Local environment:
 
-- Headless Mac mini M4
+- Modest headless workstation
 - 16 GB RAM
 - 256 GB SSD
 
@@ -626,7 +626,7 @@ Ensure every metric used in scene rendering carries provenance and refresh metad
 
 ## 14.2 Resource Guidance
 
-For the Mac mini setup:
+For this local setup:
 
 - Precompute historical scene snapshots
 - Keep default scene compact
