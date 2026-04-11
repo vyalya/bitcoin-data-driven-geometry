@@ -101,11 +101,16 @@ function App() {
   const [hoverCtx, setHoverCtx] = useState<HoverContext>({ type: "none" });
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [showDataInfo, setShowDataInfo] = useState(false);
-  const [showLegend, setShowLegend] = useState(false);
-  const [legendHover, setLegendHover] = useState<string | null>(null);
+  // Legacy legend state — the standalone legend modal was replaced by a tab
+  // in the Info modal, but these values are still referenced by scene props.
+  // Setters are intentionally unused.
+  const [showLegend] = useState(false);
+  const [legendHover] = useState<string | null>(null);
   const [view, setView] = useState<"grid" | "detail">("grid");
   const [gridHoverIdx, setGridHoverIdx] = useState<number | null>(null);
-  const [showGuideTab, setShowGuideTab] = useState<"source" | "visual">("source");
+  // Grid-view selection: first tap previews, second tap (on same cell) enters detail
+  const [gridSelectedIdx, setGridSelectedIdx] = useState<number | null>(null);
+  const [showGuideTab, setShowGuideTab] = useState<"legend" | "source" | "visual">("legend");
 
   const [pinnedGroup, setPinnedGroup] = useState<string | null>(null);
   const preClickState = useRef({ wasPlaying: false, wasRotating: true });
@@ -173,6 +178,53 @@ function App() {
 
   // Narration: show on every snapshot change
   const [showNarration, setShowNarration] = useState(true);
+  const [mobileSheetExpanded, setMobileSheetExpanded] = useState(false);
+  const [whatIfExpanded, setWhatIfExpanded] = useState(false);
+
+  // Viewport width for mobile-specific rendering decisions
+  const [isMobile, setIsMobile] = useState<boolean>(() =>
+    typeof window !== "undefined" ? window.innerWidth <= 640 : false
+  );
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth <= 640);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+
+  // Touch-start Y for swipe-up gesture on the mobile sheet handle
+  const sheetTouchStartY = useRef<number | null>(null);
+
+  // Refs for auto-scrolling the mobile timeline strip to the active item
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const tlItemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  // In grid view the active chip tracks the selected index; in detail view it
+  // tracks activeIdx. Either way we want the strip to center on it.
+  const scrollTargetIdx = view === "grid" ? (gridSelectedIdx ?? activeIdx) : activeIdx;
+  useEffect(() => {
+    const container = timelineRef.current;
+    const item = tlItemRefs.current[scrollTargetIdx];
+    if (!container || !item) return;
+    // Only scroll the horizontal strip (mobile). On desktop the strip is a
+    // vertical list with no horizontal scroll; detect by actual scrollable
+    // width rather than computed flex-direction (which is unreliable).
+    if (container.scrollWidth <= container.clientWidth + 1) return;
+    const containerRect = container.getBoundingClientRect();
+    const itemRect = item.getBoundingClientRect();
+    const itemOffsetLeft = itemRect.left - containerRect.left + container.scrollLeft;
+    const target = itemOffsetLeft - (container.clientWidth - item.clientWidth) / 2;
+    container.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+  }, [scrollTargetIdx]);
+
+  // When a shape is selected on mobile, we only update the sheet handle title
+  // — we do NOT auto-expand. The user can then tap or swipe up on the handle
+  // to reveal the KPIs. Instant expansion was jarring and obscured the actual
+  // object they just tapped.
+
+  // Keep the grid-view selection synced with whichever date is being viewed,
+  // so returning to grid from detail highlights the cell the user was on.
+  useEffect(() => {
+    if (view === "detail") setGridSelectedIdx(activeIdx);
+  }, [view, activeIdx]);
   const prevIdxRef = useRef(activeIdx);
   useEffect(() => {
     if (prevIdxRef.current !== activeIdx) {
@@ -183,6 +235,24 @@ function App() {
 
   const s = effectiveSnapshot;
 
+  // Descriptive label for whatever shape is currently being inspected in the
+  // detail view. Shown in the mobile bottom-sheet handle so the user can see
+  // what they just tapped without expanding the sheet.
+  const selectionLabel: string | null = (() => {
+    if (view !== "detail") return null;
+    const feeLabels = ["1-10 sat/vB", "11-30 sat/vB", "31-80 sat/vB", "81+ sat/vB"];
+    switch (hoverCtx.type) {
+      case "block": return `Block #${hoverCtx.block[0].toLocaleString()}`;
+      case "fee": return `Fee Tier · ${feeLabels[hoverCtx.tierIndex]}`;
+      case "settlement": return "Block Settlement";
+      case "congestion": return "Network Congestion";
+      case "volume": return "BTC Volume";
+      case "hashrate": return "Hashrate";
+      case "difficulty": return "Difficulty";
+      default: return null;
+    }
+  })();
+
   return (
     <div className="hud-shell">
       <Canvas
@@ -190,7 +260,13 @@ function App() {
         gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0, powerPreference: "high-performance" }}
         dpr={[1, 2]}
         style={{ position: "fixed", inset: 0 }}
-        onPointerMissed={() => { if (view === "detail") { setPinnedGroup(null); setActiveGroup(null); } }}
+        onPointerMissed={() => {
+          if (view === "detail") {
+            setPinnedGroup(null);
+            setActiveGroup(null);
+            setHoverCtx({ type: "none" });
+          }
+        }}
       >
         <color attach="background" args={["#020202"]} />
         {view === "detail" && <fog attach="fog" args={["#010101", 20, 45]} />}
@@ -199,9 +275,22 @@ function App() {
           <GridScene
             snapshots={mosaicSnapshots}
             hoverIdx={gridHoverIdx}
+            selectedIdx={gridSelectedIdx}
             legendHover={legendHover}
             onHover={setGridHoverIdx}
-            onSelect={(i) => { setActiveIdx(i); setView("detail"); setGridHoverIdx(null); }}
+            onSelect={(i) => {
+              // Mobile: first tap previews (updates sheet + highlights cell),
+              // second tap on the same cell enters detail view. Desktop keeps
+              // single-click-to-enter since hover already previews.
+              if (isMobile && gridSelectedIdx !== i) {
+                setGridSelectedIdx(i);
+              } else {
+                setActiveIdx(i);
+                setGridSelectedIdx(i);
+                setView("detail");
+                setGridHoverIdx(null);
+              }
+            }}
           />
         ) : (
           <PrimeRadiantScene
@@ -226,11 +315,21 @@ function App() {
             }}
           />
         )}
-        <EffectComposer multisampling={0}>
-          <Bloom luminanceThreshold={view === "grid" ? 0.5 : 0.3} luminanceSmoothing={0.4} intensity={view === "grid" ? 0.4 : 0.8} mipmapBlur levels={6} />
-          <ChromaticAberration blendFunction={BlendFunction.NORMAL} offset={new THREE.Vector2(0.0008, 0.0008)} radialModulation modulationOffset={0.2} />
-          <Vignette eskil={false} offset={0.25} darkness={0.7} />
-        </EffectComposer>
+        {isMobile ? (
+          // Mobile: no bloom, no chromatic aberration. iOS GPUs render
+          // post-processing in half-float precision, which overflows on close-up
+          // HDR emissive pixels and produces spurious green/blue color shifts.
+          // The raw emissive materials look fine on their own without bloom.
+          <EffectComposer multisampling={0}>
+            <Vignette eskil={false} offset={0.3} darkness={0.7} />
+          </EffectComposer>
+        ) : (
+          <EffectComposer multisampling={0}>
+            <Bloom luminanceThreshold={view === "grid" ? 0.55 : 0.4} luminanceSmoothing={0.5} intensity={view === "grid" ? 0.4 : 0.7} mipmapBlur levels={6} />
+            <ChromaticAberration blendFunction={BlendFunction.NORMAL} offset={new THREE.Vector2(0.00035, 0.00035)} radialModulation={false} modulationOffset={0} />
+            <Vignette eskil={false} offset={0.25} darkness={0.7} />
+          </EffectComposer>
+        )}
         {view === "detail" && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={0.3} maxDistance={60} rotateSpeed={2} zoomSpeed={1.5} panSpeed={0.8} />}
       </Canvas>
 
@@ -319,12 +418,16 @@ function App() {
           </button>
         </div>
 
-        <div className="timeline-vertical">
+        <div className="timeline-vertical" ref={timelineRef}>
           {mosaicSnapshots.map((snap, i) => {
-            const isActive = view === "grid" ? gridHoverIdx === i : i === activeIdx;
+            // Active in grid view tracks hover (desktop) or selected (mobile).
+            // Active in detail view tracks the currently-viewed date.
+            const gridActiveIdx = gridHoverIdx ?? gridSelectedIdx;
+            const isActive = view === "grid" ? gridActiveIdx === i : i === activeIdx;
             return (
               <button
                 key={snap.id}
+                ref={(el) => { tlItemRefs.current[i] = el; }}
                 className={`tl-item ${isActive ? "active" : ""}`}
                 onMouseEnter={() => { if (view === "grid") setGridHoverIdx(i); }}
                 onMouseLeave={() => { if (view === "grid") setGridHoverIdx(null); }}
@@ -350,87 +453,147 @@ function App() {
         </div>
       </div>
 
-      {/* Legend toggle removed — now in right panel header */}
-
-      {showLegend && (
-        <div className="legend-overlay" onClick={() => { setShowLegend(false); setLegendHover(null); }}>
-          <div className="legend-panel" onClick={e => e.stopPropagation()}>
-            <div className="legend-header">
-              <span>Legend</span>
-              <span className="legend-hint">Hover to highlight</span>
-              <button className="legend-close" onClick={() => { setShowLegend(false); setLegendHover(null); }} type="button">✕</button>
-            </div>
-            <div className="legend-grid" onMouseLeave={() => setLegendHover(null)}>
-              {[
-                { id: "spine", icon: <span className="legend-block" />, name: "Block", desc: "Width = weight, brightness = tx count" },
-                { id: "fee-0", icon: <span className="legend-line" style={{ background: "#FF9933" }} />, name: "Fee Tiers", desc: "4 arcs showing fee distribution" },
-                { id: "settlement", icon: <span className="legend-line" style={{ background: "#FA660F" }} />, name: "Settlement", desc: "Block production health" },
-                { id: "congestion", icon: <span className="legend-line" style={{ background: "#FF4400" }} />, name: "Congestion", desc: "Network congestion score" },
-                { id: "volume", icon: <span className="legend-line" style={{ background: "#FFB040" }} />, name: "BTC Volume", desc: "Daily BTC transferred" },
-                { id: "hashrate-ring", icon: <span className="legend-arc" />, name: "Hashrate", desc: "Vertical ring, vs 906 EH/s peak" },
-                { id: "difficulty-ring", icon: <span className="legend-arc dark" />, name: "Difficulty", desc: "Vertical ring, log-scaled" },
-                { id: "particles", icon: <span className="legend-dot" />, name: "Addresses", desc: "1 particle = 1,000 active addresses" },
-              ].map((item, i) => (
-                <div
-                  key={i}
-                  className={`legend-item ${legendHover === item.id ? "legend-active" : ""}`}
-                  onMouseEnter={() => setLegendHover(item.id)}
-                >
-                  {item.icon}<span>{item.name}</span><span className="legend-desc">{item.desc}</span>
-                </div>
-              ))}
-            </div>
-            <div className="legend-controls">
-              <span>Click shape</span><span className="legend-desc">Pause &amp; inspect</span>
-              <span>Click again</span><span className="legend-desc">Resume</span>
-              <span>Click background</span><span className="legend-desc">Resume</span>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ═══ RIGHT PANEL: Context + What-If ═══ */}
-      <div className="hud hud-right-panel">
+      <div className={`hud hud-right-panel ${mobileSheetExpanded ? "mobile-expanded" : "mobile-collapsed"}`}>
+        {/* Mobile-only collapsible handle */}
+        <div
+          className="mobile-sheet-handle"
+          onClick={() => setMobileSheetExpanded(v => !v)}
+          onTouchStart={(e) => { sheetTouchStartY.current = e.touches[0].clientY; }}
+          onTouchEnd={(e) => {
+            const start = sheetTouchStartY.current;
+            if (start == null) return;
+            const dy = e.changedTouches[0].clientY - start;
+            sheetTouchStartY.current = null;
+            // Swipe up → expand; swipe down → collapse
+            if (dy < -20) setMobileSheetExpanded(true);
+            else if (dy > 20) setMobileSheetExpanded(false);
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label={mobileSheetExpanded ? "Collapse details" : "Expand details. Swipe up for full KPIs."}
+        >
+          <span className="handle-title">
+            {selectionLabel ?? "Tap to see more"}
+          </span>
+          {selectionLabel && (
+            <button
+              className="handle-clear-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setHoverCtx({ type: "none" });
+                setPinnedGroup(null);
+                setActiveGroup(null);
+              }}
+              type="button"
+              aria-label="Clear selection"
+              title="Clear selection"
+            >
+              ✕
+            </button>
+          )}
+          <button
+            className="handle-info-btn"
+            onClick={(e) => { e.stopPropagation(); setShowGuideTab("legend"); setShowDataInfo(true); }}
+            type="button"
+            aria-label="Info"
+          >
+            <span className="info-icon">i</span>
+          </button>
+          <span className={`handle-chevron ${mobileSheetExpanded ? "up" : "down"}`}>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4 L6 8 L10 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </span>
+        </div>
+
+        {/* Desktop header — Legend + Info buttons (hidden on mobile via CSS) */}
         <div className="right-panel-header">
-          <button className="panel-header-btn" onClick={() => setShowLegend(v => !v)} type="button">
+          <button
+            className="panel-header-btn"
+            onClick={() => { setShowGuideTab("legend"); setShowDataInfo(true); }}
+            type="button"
+          >
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="5" height="3" rx="0.5" fill="#FF8C3A"/><line x1="8" y1="3.5" x2="15" y2="3.5" stroke="#777" strokeWidth="1.2"/><circle cx="3.5" cy="8.5" r="1.8" stroke="#FA660F" strokeWidth="1.2" fill="none"/><line x1="8" y1="8.5" x2="15" y2="8.5" stroke="#777" strokeWidth="1.2"/><circle cx="3.5" cy="13.5" r="1" fill="#FFAA55"/><line x1="8" y1="13.5" x2="15" y2="13.5" stroke="#777" strokeWidth="1.2"/></svg>
             Legend
           </button>
-          <button className="panel-header-btn" onClick={() => setShowDataInfo(true)} type="button">
+          <button
+            className="panel-header-btn"
+            onClick={() => { setShowGuideTab("source"); setShowDataInfo(true); }}
+            type="button"
+          >
             <span className="info-icon">i</span> Info
           </button>
         </div>
+
         <div className={`context-panel ${view === "grid" ? "context-full" : ""}`}>
+          {/* Mobile-only: embed the narration at the top of the sheet content */}
+          {view === "detail" && NARRATION[baseSnapshot.id] && (
+            <div className="mobile-narration">
+              <span className="mobile-narration-label">Context</span>
+              <p>{NARRATION[baseSnapshot.id]}</p>
+            </div>
+          )}
           <ContextPanel
-            snapshot={view === "grid" && gridHoverIdx !== null ? mosaicSnapshots[gridHoverIdx] : s}
+            snapshot={
+              view === "grid"
+                ? mosaicSnapshots[gridHoverIdx ?? gridSelectedIdx ?? activeIdx]
+                : s
+            }
             hoverCtx={view === "grid" ? { type: "none" } : hoverCtx}
-            blocks={view === "grid" && gridHoverIdx !== null ? (mosaicSnapshots[gridHoverIdx].blocks ?? []) : currentBlocks}
+            blocks={
+              view === "grid"
+                ? (mosaicSnapshots[gridHoverIdx ?? gridSelectedIdx ?? activeIdx].blocks ?? [])
+                : currentBlocks
+            }
           />
         </div>
         {view === "detail" && (
-          <>
+          <div className={`whatif-collapsible ${whatIfExpanded ? "expanded" : "collapsed"}`}>
             <div className="right-divider" />
-            <div className="whatif-section">
-              <div className="hud-whatif-header">
-                <span className="whatif-title">What-If Simulation</span>
-                {hasOverrides && <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>}
-              </div>
-              {WHAT_IF_PARAMS.map((param) => {
-                const baseVal = baseSnapshot[param.snapshotField] as number;
-                const currentVal = overrides[param.key] ?? baseVal;
-                const isOverridden = overrides[param.key] !== null && overrides[param.key] !== undefined;
-                return (
-                  <div key={param.key} className={`slider-row ${isOverridden ? "overridden" : ""}`}>
-                    <div className="slider-header">
-                      <span className="slider-label">{param.label}</span>
-                      <span className="slider-value">{param.key === "difficulty" ? formatDifficulty(currentVal) : param.max > 100 ? currentVal.toLocaleString() : currentVal.toFixed(1)}<span className="slider-unit">{param.unit}</span></span>
-                    </div>
-                    <input type="range" min={param.min} max={param.max} step={param.step} value={currentVal} onChange={(e) => setOverride(param.key, parseFloat(e.target.value))} onDoubleClick={() => setOverride(param.key, null)} />
+            <button
+              className="whatif-toggle"
+              onClick={() => setWhatIfExpanded(v => !v)}
+              type="button"
+            >
+              <span className="whatif-title">What-If Simulation</span>
+              <span className={`whatif-chevron ${whatIfExpanded ? "up" : "down"}`}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4 L6 8 L10 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </span>
+            </button>
+            {whatIfExpanded && (
+              <div className="whatif-section">
+                <div className="whatif-popover-header">
+                  <span className="whatif-popover-title">What-If Simulation</span>
+                  <div className="whatif-popover-actions">
+                    {hasOverrides && (
+                      <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>
+                    )}
+                    <button
+                      className="whatif-popover-close"
+                      onClick={() => setWhatIfExpanded(false)}
+                      type="button"
+                      aria-label="Close What-If"
+                    >
+                      ✕
+                    </button>
                   </div>
-                );
-              })}
-            </div>
-          </>
+                </div>
+                {WHAT_IF_PARAMS.map((param) => {
+                  const baseVal = baseSnapshot[param.snapshotField] as number;
+                  const currentVal = overrides[param.key] ?? baseVal;
+                  const isOverridden = overrides[param.key] !== null && overrides[param.key] !== undefined;
+                  return (
+                    <div key={param.key} className={`slider-row ${isOverridden ? "overridden" : ""}`}>
+                      <div className="slider-header">
+                        <span className="slider-label">{param.label}</span>
+                        <span className="slider-value">{param.key === "difficulty" ? formatDifficulty(currentVal) : param.max > 100 ? currentVal.toLocaleString() : currentVal.toFixed(1)}<span className="slider-unit">{param.unit}</span></span>
+                      </div>
+                      <input type="range" min={param.min} max={param.max} step={param.step} value={currentVal} onChange={(e) => setOverride(param.key, parseFloat(e.target.value))} onDoubleClick={() => setOverride(param.key, null)} />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -450,11 +613,35 @@ function App() {
         <div className="guide-overlay" onClick={() => setShowDataInfo(false)}>
           <div className="guide-modal" onClick={(e) => e.stopPropagation()}>
             <div className="guide-tabs">
-              <button className={`guide-tab ${!showGuideTab || showGuideTab === "source" ? "active" : ""}`} onClick={() => setShowGuideTab("source")} type="button">Data Sources</button>
+              <button className={`guide-tab ${showGuideTab === "legend" ? "active" : ""}`} onClick={() => setShowGuideTab("legend")} type="button">Legend</button>
               <button className={`guide-tab ${showGuideTab === "visual" ? "active" : ""}`} onClick={() => setShowGuideTab("visual")} type="button">How to Read</button>
+              <button className={`guide-tab ${showGuideTab === "source" ? "active" : ""}`} onClick={() => setShowGuideTab("source")} type="button">Data Sources</button>
             </div>
 
-            {(!showGuideTab || showGuideTab === "source") && (
+            {showGuideTab === "legend" && (
+              <div className="guide-body guide-legend-body">
+                {[
+                  { id: "spine", icon: <span className="legend-block" />, name: "Block", desc: "Each cuboid is one block; width = weight (up to 4 MWU), brightness = tx count." },
+                  { id: "fee-0", icon: <span className="legend-line" style={{ background: "#FF9933" }} />, name: "Fee Tiers", desc: "4 horizontal arcs showing fee distribution and pressure." },
+                  { id: "settlement", icon: <span className="legend-line" style={{ background: "#FA660F" }} />, name: "Settlement", desc: "Arc length = block production health (full = on schedule)." },
+                  { id: "congestion", icon: <span className="legend-line" style={{ background: "#FF4400" }} />, name: "Congestion", desc: "Red arc; length and thickness scale with network congestion." },
+                  { id: "volume", icon: <span className="legend-line" style={{ background: "#FFB040" }} />, name: "BTC Volume", desc: "Gold arc proportional to daily BTC transferred vs 1M BTC peak." },
+                  { id: "hashrate-ring", icon: <span className="legend-arc" />, name: "Hashrate", desc: "Vertical ring, proportional to hashrate vs 1151 EH/s peak." },
+                  { id: "difficulty-ring", icon: <span className="legend-arc dark" />, name: "Difficulty", desc: "Vertical ring, log-scaled from 1 to 150 trillion." },
+                  { id: "particles", icon: <span className="legend-dot" />, name: "Addresses", desc: "Each particle ≈ 1,000 active addresses; larger = whale activity." },
+                ].map((item) => (
+                  <div key={item.id} className="guide-legend-item">
+                    <div className="guide-legend-icon">{item.icon}</div>
+                    <div className="guide-legend-text">
+                      <strong>{item.name}</strong>
+                      <p>{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {showGuideTab === "source" && (
               <div className="guide-body">
                 <div className="data-info-section">
                   <h4>Underlying Data</h4>
@@ -468,6 +655,10 @@ function App() {
                   <h4>What You're Seeing</h4>
                   <p>25 historically significant dates from Genesis (Jan 2009) through 2025. Each shows real blocks mined that day, real address activity, real BTC volumes, and real network conditions — all published through Mosaic and rendered as data-driven geometry. Nothing is decorative.</p>
                 </div>
+                <div className="data-info-section">
+                  <h4>About the Hashrate Number</h4>
+                  <p>Bitcoin hashrate cannot be measured directly — it's always estimated from observed block production and difficulty. Different sources publish different values for the same day depending on their smoothing window. We use a 7-day moving average from blockchain.com's public charts API, which closely matches the headline numbers reported by CoinDesk, CoinWarz, and Hashrate Index. Day-to-day "instantaneous" hashrate can swing ±15% from random block-timing variance.</p>
+                </div>
               </div>
             )}
 
@@ -479,11 +670,11 @@ function App() {
                 </div>
                 <div className="data-info-section">
                   <h4>Horizontal Rings — Transaction Metrics</h4>
-                  <p>Fee Tiers (r=2.2): four arcs showing fee distribution, thickness scales with fee pressure. Settlement (r=2.8): arc length = block production health (full circle = on schedule). Congestion (r=3.3): red arc, length scales with congestion score. BTC Volume (r=3.8): gold arc proportional to daily BTC transferred vs the 4.6M BTC/day peak.</p>
+                  <p>Fee Tiers (r=2.2): four arcs showing fee distribution, thickness scales with fee pressure. Settlement (r=2.8): arc length = block production health (full circle = on schedule). Congestion (r=3.3): red arc, length scales with congestion score. BTC Volume (r=3.8): gold arc proportional to daily BTC transferred vs the 1M BTC/day peak.</p>
                 </div>
                 <div className="data-info-section">
                   <h4>Vertical Rings — Security Metrics</h4>
-                  <p>Hashrate (YZ plane, r=2.5): arc proportional to hashrate vs 906 EH/s peak. Difficulty (XZ plane, r=3.0): log-scaled arc from 1 to 150 trillion. These rings grow dramatically from Genesis to 2025.</p>
+                  <p>Hashrate (YZ plane, r=2.5): arc proportional to hashrate vs 1151 EH/s peak. Difficulty (XZ plane, r=3.0): log-scaled arc from 1 to 150 trillion. These rings grow dramatically from Genesis to 2025.</p>
                 </div>
                 <div className="data-info-section">
                   <h4>Floating Particles — Active Addresses</h4>
@@ -574,9 +765,9 @@ function ContextPanel({ snapshot, hoverCtx, blocks }: { snapshot: NetworkSnapsho
       <div className="ctx-content">
         <div className="ctx-title">Network Hashrate</div>
         <CtxRow label="Hashrate" value={`${s.networkHashrateEh.toFixed(1)} EH/s`} />
-        <CtxRow label="Ring Fill" value={`${((s.networkHashrateEh / 906.5) * 100).toFixed(1)}%`} />
+        <CtxRow label="Ring Fill" value={`${((s.networkHashrateEh / 1151.6) * 100).toFixed(1)}%`} />
         <CtxRow label="Halving Era" value={`${Math.floor(s.blockHeight / 210000) + 1}`} />
-        <div className="ctx-notes"><p>Blue vertical ring. Arc length proportional to hashrate relative to the 2025 peak of 906 EH/s. Measures total computational power securing the network.</p></div>
+        <div className="ctx-notes"><p>Blue vertical ring. Arc length proportional to hashrate relative to the 2025 peak of 1,151 EH/s (7-day moving average). Measures total computational power securing the network.</p></div>
       </div>
     );
   }
@@ -586,10 +777,10 @@ function ContextPanel({ snapshot, hoverCtx, blocks }: { snapshot: NetworkSnapsho
       <div className="ctx-content">
         <div className="ctx-title">BTC Volume</div>
         <CtxRow label="BTC Transferred" value={`${Math.round(s.btcTransferred).toLocaleString()}`} />
-        <CtxRow label="Ring Fill" value={`${((s.btcTransferred / 4700000) * 100).toFixed(1)}%`} />
+        <CtxRow label="Ring Fill" value={`${((s.btcTransferred / 1000000) * 100).toFixed(1)}%`} />
         <CtxRow label="Active Addresses" value={s.activeAddresses.toLocaleString()} />
         <CtxRow label="Total Outputs" value={s.totalOutputs.toLocaleString()} />
-        <div className="ctx-notes"><p>Gold horizontal ring at r=3.8. Arc length proportional to daily BTC transferred relative to the 2021 ATH peak of 4.6M BTC/day.</p></div>
+        <div className="ctx-notes"><p>Gold horizontal ring at r=3.8. Arc length proportional to estimated daily BTC transferred (excluding change) relative to a 1M BTC/day reference. Sourced from blockchain.com.</p></div>
       </div>
     );
   }
@@ -664,7 +855,7 @@ interface SceneProps {
    ═══════════════════════════════════════════════════════ */
 
 function CameraRig({ view }: { view: "grid" | "detail" }) {
-  const { camera } = useThree();
+  const { camera, size } = useThree();
   const targetPos = useRef(new THREE.Vector3(0, 0, 22));
   const targetFov = useRef(42);
   const transitioning = useRef(false);
@@ -672,18 +863,83 @@ function CameraRig({ view }: { view: "grid" | "detail" }) {
 
   useEffect(() => {
     if (view === "grid") {
-      targetPos.current.set(0, 0, 22);
-      targetFov.current = 42;
+      // Account for side panels covering part of the canvas. These must match
+      // the responsive panel widths declared in styles.css.
+      const vpW = size.width;
+      const vpH = size.height;
+      let sidebarWidth: number;
+      let topReserve: number;
+      let bottomReserve: number;
+      if (vpW > 1200) {
+        sidebarWidth = 310 + 330 + 32; // default panels + margins
+        topReserve = 100;
+        bottomReserve = 40;
+      } else if (vpW > 1000) {
+        sidebarWidth = 260 + 290 + 32;
+        topReserve = 100;
+        bottomReserve = 40;
+      } else if (vpW > 820) {
+        sidebarWidth = 230 + 260 + 24;
+        topReserve = 90;
+        bottomReserve = 40;
+      } else if (vpW > 640) {
+        sidebarWidth = 210 + 230 + 20;
+        topReserve = 80;
+        bottomReserve = 40;
+      } else {
+        // Mobile: panels are top strip + bottom sheet, not sidebars.
+        sidebarWidth = 0;
+        topReserve = 110; // banner + timeline strip
+        // Bottom sheet: when collapsed it's ~64px; when expanded it overlays
+        // the canvas, but we still frame to the collapsed footprint so the
+        // geometry stays at a consistent size.
+        bottomReserve = 72;
+      }
+      const usableW = Math.max(vpW - sidebarWidth, 280);
+      const usableH = Math.max(vpH - topReserve - bottomReserve, 280);
+      // Canvas aspect — what three.js uses for projection.
+      const canvasAspect = vpW / vpH;
+
+      // Grid footprint: 5x5 at SPACING_X=3.6, SPACING_Y=3.2, cell radius ~1.4.
+      // Half-extents plus a bit of breathing room.
+      const gridHalfW = (4 * 3.6) / 2 + 1.6; // ~8.8
+      const gridHalfH = (4 * 3.2) / 2 + 1.6; // ~8.0
+
+      // Pick a FOV: wider on narrow/mobile so the grid doesn't need a huge z.
+      const fov = vpW < 640 ? 55 : vpW < 900 ? 48 : 42;
+      const tanHalf = Math.tan((fov * Math.PI) / 360);
+
+      // We want the grid to fit inside the *usable* region at the focal plane.
+      // Visible half-height at distance d = d * tanHalf.
+      // Visible half-width at distance d = d * tanHalf * canvasAspect.
+      // Fraction of that width that's "usable" (not covered by sidebars)
+      // = usableW / vpW. Same for height = usableH / vpH.
+      const usableFracW = usableW / vpW;
+      const usableFracH = usableH / vpH;
+      const distH = gridHalfH / (tanHalf * usableFracH);
+      const distW = gridHalfW / (tanHalf * canvasAspect * usableFracW);
+      const dist = Math.min(Math.max(distH, distW), 60);
+
+      // Center grid vertically within the usable region. Positive C_y → camera
+      // looks at a point above world origin → grid appears below screen center.
+      // Desktop has a small banner top → slight downshift. Mobile has a huge
+      // bottom sheet → large upshift.
+      const verticalShiftPx = (topReserve - bottomReserve) / 2;
+      const worldPerPx = (dist * tanHalf * 2) / vpH;
+      const offsetY = verticalShiftPx * worldPerPx;
+
+      targetPos.current.set(0, offsetY, dist);
+      targetFov.current = fov;
       // Reset up vector — TrackballControls modifies it during free rotation
       camera.up.set(0, 1, 0);
     } else {
       targetPos.current.set(0, 1.5, 11);
-      targetFov.current = 36;
+      targetFov.current = size.width < 640 ? 44 : 36;
       camera.up.set(0, 1, 0);
     }
     transitioning.current = true;
     transitionStart.current = performance.now();
-  }, [view, camera]);
+  }, [view, camera, size.width, size.height]);
 
   useFrame((_, delta) => {
     if (!transitioning.current) return;
@@ -701,7 +957,7 @@ function CameraRig({ view }: { view: "grid" | "detail" }) {
       persp.updateProjectionMatrix();
     }
     if (view === "grid") {
-      camera.lookAt(0, 0, 0);
+      camera.lookAt(0, targetPos.current.y, 0);
     }
   });
 
@@ -712,15 +968,18 @@ function CameraRig({ view }: { view: "grid" | "detail" }) {
    GRID SCENE — 5x5 landing page with simplified mini snapshots
    ═══════════════════════════════════════════════════════ */
 
-function GridScene({ snapshots, hoverIdx, legendHover, onHover, onSelect }: {
+function GridScene({ snapshots, hoverIdx, selectedIdx, legendHover, onHover, onSelect }: {
   snapshots: NetworkSnapshot[];
   hoverIdx: number | null;
+  selectedIdx: number | null;
   legendHover: string | null;
   onHover: (i: number | null) => void;
   onSelect: (i: number) => void;
 }) {
   const groupRefs = useRef<(THREE.Group | null)[]>([]);
   const [, forceUpdate] = useState(0);
+  // Used for the selected-cell pulse animation.
+  const pulseRef = useRef(0);
 
   // Staggered phase offsets so cells don't rotate in lockstep
   const phaseOffsets = useMemo(() =>
@@ -731,6 +990,7 @@ function GridScene({ snapshots, hoverIdx, legendHover, onHover, onSelect }: {
     groupRefs.current.forEach((g) => {
       if (g) g.rotation.y += delta * 0.15;
     });
+    pulseRef.current += delta;
     forceUpdate((n) => n + 1);
   });
 
@@ -738,6 +998,9 @@ function GridScene({ snapshots, hoverIdx, legendHover, onHover, onSelect }: {
   const COLS = 5;
   const SPACING_X = 3.6; // world units between cells (horizontal)
   const SPACING_Y = 3.2; // world units between cells (vertical, tighter)
+
+  // Gentle pulse for the selected cell (1.0 ± 0.06)
+  const pulse = 1 + Math.sin(pulseRef.current * 3.2) * 0.06;
 
   return (
     <group position={[0, -0.3, 0]}>
@@ -753,8 +1016,16 @@ function GridScene({ snapshots, hoverIdx, legendHover, onHover, onSelect }: {
         const x = (col - (COLS - 1) / 2) * SPACING_X;
         const y = ((COLS - 1) / 2 - row) * SPACING_Y;
         const isHovered = hoverIdx === i;
-        const dim = hoverIdx !== null && !isHovered ? 0.25 : 1;
-        const scale = isHovered ? 0.32 : 0.28;
+        const isSelected = selectedIdx === i;
+        // Dim non-hovered cells when hovering. If nothing is hovered but
+        // something is selected, dim the non-selected cells.
+        const dim = hoverIdx !== null
+          ? (isHovered ? 1 : 0.25)
+          : selectedIdx !== null
+            ? (isSelected ? 1 : 0.45)
+            : 1;
+        // Selected cell is larger and pulses; hovered cell is larger.
+        const baseScale = isSelected ? 0.36 * pulse : isHovered ? 0.32 : 0.28;
 
         return (
           <group
@@ -772,11 +1043,19 @@ function GridScene({ snapshots, hoverIdx, legendHover, onHover, onSelect }: {
               <meshBasicMaterial colorWrite={false} depthWrite={false} />
             </mesh>
 
+            {/* Selection ring — subtle orange circle around the selected cell */}
+            {isSelected && (
+              <mesh rotation={[Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[1.3, 1.38, 48]} />
+                <meshBasicMaterial color="#FA660F" transparent opacity={0.55 * pulse} side={THREE.DoubleSide} />
+              </mesh>
+            )}
+
             <group
               ref={(r) => { groupRefs.current[i] = r; }}
-              scale={scale}
+              scale={baseScale}
             >
-              <MiniSnapshot snapshot={snap} opacity={dim} highlighted={isHovered} legendHover={legendHover} />
+              <MiniSnapshot snapshot={snap} opacity={dim} highlighted={isHovered || isSelected} legendHover={legendHover} />
             </group>
           </group>
         );
@@ -798,9 +1077,9 @@ function MiniSnapshot({ snapshot: s, opacity: dim, highlighted, legendHover }: {
   const fp = s.feePressureIndex / 10;
   const cg = s.congestionScore / 10;
   const bs = s.blockProductionStress / 10;
-  const maxHashrate = 906.5;
+  const maxHashrate = 1151.6;
   const maxDifficulty = 150839487445892;
-  const maxBtcVolume = 4700000;
+  const maxBtcVolume = 1000000;
   const hrNorm = Math.min(s.networkHashrateEh / maxHashrate, 1);
   const diffLog = s.difficulty > 0 ? Math.log10(s.difficulty) / Math.log10(maxDifficulty) : 0;
   const vol = Math.min(s.btcTransferred / maxBtcVolume, 1);
@@ -1008,9 +1287,9 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
   const cgTarget = s.congestionScore / 10;
   const bsTarget = s.blockProductionStress / 10;
   const healthTarget = s.networkHealthScore / 10;
-  const maxHashrate = 906.5;
+  const maxHashrate = 1151.6;
   const maxDifficulty = 150839487445892;
-  const maxBtcVolume = 4700000; // 2021 ATH peak
+  const maxBtcVolume = 1000000; // peak ~900k BTC/day in 2011 era
   const hrTarget = Math.min(s.networkHashrateEh / maxHashrate, 1);
   const diffTarget = s.difficulty > 0 ? Math.log10(s.difficulty) / Math.log10(maxDifficulty) : 0;
   const volTarget = Math.min(s.btcTransferred / maxBtcVolume, 1);
@@ -1125,7 +1404,7 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
         return (
           <group key={gid} position={[0, 0, z]}
             onPointerOver={(e) => { e.stopPropagation(); onHover(gid); onRingHover("fee", i); }}
-            onPointerOut={() => { onHover(null); onRingHover(null); }}
+            onPointerOut={(e) => { onHover(null); if (e.pointerType === "mouse") onRingHover(null); }}
             onClick={(e) => { e.stopPropagation(); onClick(gid); }}
           >
             <ArcBand radius={r} thickness={thickness} depth={0.05 + bucket.intensity * 0.03} startAngle={startAngle + gap / 2} endAngle={startAngle + gap / 2 + usable} color={feeColors[i]} emissiveIntensity={(0.25 + bucket.intensity * 0.6 + glowExtra(gid)) * g} opacity={0.8 * g} />
@@ -1144,7 +1423,7 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
         return (
           <group position={[0, 0, z]}
             onPointerOver={(e) => { e.stopPropagation(); onHover(gid); onRingHover("congestion"); }}
-            onPointerOut={() => { onHover(null); onRingHover(null); }}
+            onPointerOut={(e) => { onHover(null); if (e.pointerType === "mouse") onRingHover(null); }}
             onClick={(e) => { e.stopPropagation(); onClick(gid); }}
           >
             <ArcBand radius={r} thickness={thickness} depth={0.05 + cg * 0.04} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#FF4400" emissiveIntensity={(0.2 + cg * 0.8 + glowExtra(gid)) * g} opacity={(cg > 0.01 ? 0.65 + cg * 0.25 : 0.06) * g} />
@@ -1164,7 +1443,7 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
         return (
           <group position={[0, 0, z]}
             onPointerOver={(e) => { e.stopPropagation(); onHover(gid); onRingHover("settlement"); }}
-            onPointerOut={() => { onHover(null); onRingHover(null); }}
+            onPointerOut={(e) => { onHover(null); if (e.pointerType === "mouse") onRingHover(null); }}
             onClick={(e) => { e.stopPropagation(); onClick(gid); }}
           >
             <ArcBand radius={r} thickness={thickness} depth={0.05} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#FA660F" emissiveIntensity={(0.25 + stressHealth * 0.5 + glowExtra(gid)) * g} opacity={0.75 * g} />
@@ -1183,7 +1462,7 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
         return (
           <group position={[0, 0, vol * 0.15]}
             onPointerOver={(e) => { e.stopPropagation(); onHover(gid); onRingHover("volume"); }}
-            onPointerOut={() => { onHover(null); onRingHover(null); }}
+            onPointerOut={(e) => { onHover(null); if (e.pointerType === "mouse") onRingHover(null); }}
             onClick={(e) => { e.stopPropagation(); onClick(gid); }}
           >
             <ArcBand radius={r} thickness={thickness} depth={0.05 + vol * 0.03} startAngle={Math.PI - fillAngle / 2} endAngle={Math.PI + fillAngle / 2} color="#FFB040" emissiveIntensity={(0.2 + vol * 0.6 + glowExtra(gid)) * g} opacity={(0.4 + vol * 0.4) * g} />
@@ -1202,7 +1481,7 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
         return (
           <group rotation={[0, Math.PI / 2, 0]}
             onPointerOver={(e) => { e.stopPropagation(); onHover(gid); onRingHover("hashrate"); }}
-            onPointerOut={() => { onHover(null); onRingHover(null); }}
+            onPointerOut={(e) => { onHover(null); if (e.pointerType === "mouse") onRingHover(null); }}
             onClick={(e) => { e.stopPropagation(); onClick(gid); }}
           >
             <ArcBand radius={r} thickness={thickness} depth={0.04 + hrNorm * 0.02} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#FF7722" emissiveIntensity={(0.2 + hrNorm * 0.6 + glowExtra(gid)) * g} opacity={(0.5 + hrNorm * 0.35) * g} />
@@ -1222,7 +1501,7 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
         return (
           <group rotation={[Math.PI / 2, 0, 0]}
             onPointerOver={(e) => { e.stopPropagation(); onHover(gid); onRingHover("difficulty"); }}
-            onPointerOut={() => { onHover(null); onRingHover(null); }}
+            onPointerOut={(e) => { onHover(null); if (e.pointerType === "mouse") onRingHover(null); }}
             onClick={(e) => { e.stopPropagation(); onClick(gid); }}
           >
             <ArcBand radius={r} thickness={thickness} depth={0.04 + diffLog * 0.02} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#CC6600" emissiveIntensity={(0.2 + diffLog * 0.5 + glowExtra(gid)) * g} opacity={(0.4 + diffLog * 0.4) * g} />
@@ -1367,7 +1646,8 @@ function ArcBand({ radius, thickness, depth, startAngle, endAngle, color, emissi
 }) {
   const geo = useMemo(() => makeArcGeo(radius, thickness, depth, startAngle, endAngle), [radius, thickness, depth, startAngle, endAngle]);
   // Thicker invisible hit area for easier mouse interaction
-  const hitGeo = useMemo(() => makeArcGeo(radius, Math.max(thickness * 3, 0.15), depth * 3, startAngle, endAngle), [radius, thickness, depth, startAngle, endAngle]);
+  // Hit padding kept modest so background taps between rings aren't captured.
+  const hitGeo = useMemo(() => makeArcGeo(radius, Math.max(thickness * 1.8, 0.09), depth * 2, startAngle, endAngle), [radius, thickness, depth, startAngle, endAngle]);
 
   return (
     <group>
@@ -1498,9 +1778,12 @@ function BlockSpine({ blocks, opacity: blockOpacity = 1, frozen = false, highlig
   return (
     <group
       onPointerOver={(e) => { e.stopPropagation(); onHover("spine"); }}
-      onPointerOut={() => {
+      onPointerOut={(e) => {
         onHover(null);
-        if (!frozen) {
+        // On touch, leave the block selection in place — it should only be
+        // cleared by a background tap or a new selection. Desktop mouse still
+        // clears on hover-out when not pinned.
+        if (e.pointerType === "mouse" && !frozen) {
           onBlockHover(null, 0);
           highlightInstance(-1);
         }
@@ -1515,6 +1798,17 @@ function BlockSpine({ blocks, opacity: blockOpacity = 1, frozen = false, highlig
             onBlockHover(blocks[e.instanceId], e.instanceId);
             highlightInstance(e.instanceId);
           }
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (e.instanceId !== undefined && e.instanceId < blocks.length) {
+            onBlockHover(blocks[e.instanceId], e.instanceId);
+            highlightInstance(e.instanceId);
+          }
+          // Also fire the group-level click so the spine pins/pauses just
+          // like before. The outer group's onClick is shadowed by this
+          // stopPropagation, so we invoke its handler manually.
+          onClick("spine");
         }}
       >
         <boxGeometry args={[1, 1, 1]} />

@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#1a0a02"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <radialGradient id="core" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFD080"/>
+      <stop offset="40%" stop-color="#FA660F"/>
+      <stop offset="100%" stop-color="#FA660F" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="64" height="64" rx="10" fill="url(#bg)"/>
+
+  <!-- Starfield -->
+  <g fill="#FFAA55" opacity="0.7">
+    <circle cx="8" cy="12" r="0.5"/>
+    <circle cx="14" cy="6" r="0.4"/>
+    <circle cx="22" cy="10" r="0.3"/>
+    <circle cx="46" cy="8" r="0.4"/>
+    <circle cx="54" cy="14" r="0.5"/>
+    <circle cx="58" cy="22" r="0.3"/>
+    <circle cx="6" cy="34" r="0.4"/>
+    <circle cx="56" cy="40" r="0.5"/>
+    <circle cx="10" cy="52" r="0.4"/>
+    <circle cx="18" cy="58" r="0.3"/>
+    <circle cx="44" cy="54" r="0.4"/>
+    <circle cx="52" cy="58" r="0.5"/>
+    <circle cx="26" cy="6" r="0.3"/>
+    <circle cx="40" cy="58" r="0.3"/>
+    <circle cx="60" cy="32" r="0.4"/>
+  </g>
+
+  <!-- Outer gold ring -->
+  <circle cx="32" cy="32" r="26" fill="none" stroke="#FFB040" stroke-width="2.2" opacity="0.85"/>
+
+  <!-- Middle orange ring (with gap on right) -->
+  <circle cx="32" cy="32" r="20" fill="none" stroke="#FA660F" stroke-width="2" opacity="0.95"
+          stroke-dasharray="110 8 8 8" stroke-dashoffset="28"/>
+
+  <!-- Horizontal equatorial band (ellipse in perspective) -->
+  <ellipse cx="32" cy="32" rx="22" ry="3" fill="none" stroke="#CC5500" stroke-width="1.6" opacity="0.7"/>
+  <ellipse cx="32" cy="32" rx="22" ry="3" fill="none" stroke="#FF8C3A" stroke-width="0.6" opacity="0.5"/>
+
+  <!-- Central block spine -->
+  <g>
+    <rect x="30.5" y="10" width="3" height="44" fill="#FA660F" opacity="0.85"/>
+    <!-- Segmented block highlights -->
+    <rect x="30.5" y="12" width="3" height="1.5" fill="#FFAA44"/>
+    <rect x="30.5" y="18" width="3" height="1.5" fill="#FFAA44"/>
+    <rect x="30.5" y="26" width="3" height="1.5" fill="#FFD080"/>
+    <rect x="30.5" y="34" width="3" height="1.5" fill="#FFAA44"/>
+    <rect x="30.5" y="42" width="3" height="1.5" fill="#FFAA44"/>
+    <rect x="30.5" y="48" width="3" height="1.5" fill="#FFAA44"/>
+  </g>
+
+  <!-- Core glow at center -->
+  <circle cx="32" cy="32" r="6" fill="url(#core)"/>
+  <circle cx="32" cy="32" r="1.4" fill="#FFD080"/>
+
+  <!-- Top highlight flare on outer ring -->
+  <circle cx="32" cy="6" r="2.2" fill="#FFD080" opacity="0.9"/>
+</svg>
