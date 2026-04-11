@@ -336,7 +336,7 @@ function App() {
       {/* ═══ TOP BANNER ═══ */}
       <div className="hud hud-banner">
         <h1 className="hud-title">The Bitcoin Network as Data Driven Geometry</h1>
-        <p className="hud-powered">Powered by Strategy Mosaic</p>
+        <p className="hud-powered">Real on-chain data · CoinMetrics + blockchain.com</p>
       </div>
 
       {/* ═══ GRID VIEW SUBTITLE ═══ */}
@@ -644,25 +644,21 @@ function App() {
             {showGuideTab === "source" && (
               <div className="guide-body">
                 <div className="data-info-section">
-                  <h4>Underlying Data</h4>
-                  <p>On-chain data — blocks, transactions, addresses, outputs, fees, and transfer volumes — is sourced from Google BigQuery's public Bitcoin blockchain dataset. Network and mempool analytics — hashrate, difficulty, fee pressure, congestion, block production stress, mempool depth, and mining pool shares — come from blockchain and mempool data extracts.</p>
-                </div>
-                <div className="data-info-section">
-                  <h4>Strategy Mosaic — Semantic Layer</h4>
-                  <p>Strategy Mosaic provides a unified semantic layer over these raw sources. Every metric in this visualization is served from a single certified model — delivering a single source of truth and consistent business logic across all 25 historical snapshots.</p>
-                </div>
-                <div className="data-info-section">
                   <h4>What You're Seeing</h4>
-                  <p>25 historically significant dates from Genesis (Jan 2009) through 2025. Each shows real blocks mined that day, real address activity, real BTC volumes, and real network conditions — all published through Mosaic and rendered as data-driven geometry. Nothing is decorative.</p>
+                  <p>25 historically significant dates from Genesis (January 2009) through 2025. Each snapshot shows real blocks mined that day, real address activity, real BTC volumes, and real network conditions — rendered as data-driven geometry. Nothing is decorative.</p>
                 </div>
                 <div className="data-info-section">
                   <h4>Per-Field Source of Truth</h4>
-                  <p>Each metric comes from the most authoritative free public source:</p>
-                  <p>• <strong>activeAddresses, hashrate, totalFeesBtc, blocksPerDay</strong> → CoinMetrics community API (the gold-standard on-chain data provider used by Bloomberg, CoinDesk, and academic researchers).</p>
-                  <p>• <strong>difficulty</strong> → blockchain.com /charts/difficulty (CoinMetrics community tier doesn't expose difficulty).</p>
-                  <p>• <strong>btcTransferred</strong> → raw transfer volume from the original Mosaic / BigQuery extract, which matches Glassnode's "Transfer Volume" methodology (includes change outputs). The blockchain.com "estimated" version filters more aggressively and reports ~10x lower numbers — we don't use it because it doesn't match how the metric is reported elsewhere.</p>
-                  <p>• <strong>mempool count and size</strong> → blockchain.com (no widely available historical mempool source agrees fully; this is the best free option).</p>
-                  <p>Bitcoin hashrate is always an estimate (derived from observed block production), so day-to-day numbers can swing ±15% across sources depending on smoothing window. CoinMetrics applies its own smoothing.</p>
+                  <p>Each metric comes from the most authoritative free public source for that specific field:</p>
+                  <p>• <strong>Active addresses, hashrate, total fees, blocks per day</strong> → CoinMetrics community API. CoinMetrics is the gold-standard on-chain data provider used by Bloomberg, CoinDesk, and academic researchers.</p>
+                  <p>• <strong>Difficulty</strong> → blockchain.com <code>/charts/difficulty</code> (CoinMetrics community tier doesn't expose this metric).</p>
+                  <p>• <strong>BTC transferred</strong> → raw transfer volume that matches Glassnode's "Transfer Volume" methodology (includes change outputs). blockchain.com's "estimated" version filters more aggressively and reports ~10× lower numbers — we don't use it because it doesn't match how the metric is reported anywhere else.</p>
+                  <p>• <strong>Mempool count and size</strong> → blockchain.com (no widely available historical mempool source agrees fully; this is the best free option).</p>
+                  <p>• <strong>Per-block spine data</strong> (height, size, weight, tx count) → Google BigQuery <code>crypto_bitcoin</code> public dataset.</p>
+                </div>
+                <div className="data-info-section">
+                  <h4>About Hashrate Variance</h4>
+                  <p>Bitcoin hashrate cannot be measured directly — it's always estimated from observed block production and difficulty. Different sources publish different values for the same day depending on smoothing window. Day-to-day "instantaneous" numbers can swing ±15% from random block-timing variance.</p>
                 </div>
               </div>
             )}
