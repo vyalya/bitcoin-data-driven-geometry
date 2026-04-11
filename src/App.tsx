@@ -349,7 +349,6 @@ function App() {
       {/* ═══ TOP BANNER ═══ */}
       <div className="hud hud-banner">
         <h1 className="hud-title">The Bitcoin Network as Data Driven Geometry</h1>
-        <p className="hud-powered">Real on-chain data · CoinMetrics + blockchain.com</p>
       </div>
 
       {/* ═══ GRID VIEW SUBTITLE ═══ */}
