@@ -625,8 +625,8 @@ function App() {
                   { id: "fee-0", icon: <span className="legend-line" style={{ background: "#FF9933" }} />, name: "Fee Tiers", desc: "4 horizontal arcs showing fee distribution and pressure." },
                   { id: "settlement", icon: <span className="legend-line" style={{ background: "#FA660F" }} />, name: "Settlement", desc: "Arc length = block production health (full = on schedule)." },
                   { id: "congestion", icon: <span className="legend-line" style={{ background: "#FF4400" }} />, name: "Congestion", desc: "Red arc; length and thickness scale with network congestion." },
-                  { id: "volume", icon: <span className="legend-line" style={{ background: "#FFB040" }} />, name: "BTC Volume", desc: "Gold arc proportional to daily BTC transferred vs 1M BTC peak." },
-                  { id: "hashrate-ring", icon: <span className="legend-arc" />, name: "Hashrate", desc: "Vertical ring, proportional to hashrate vs 1151 EH/s peak." },
+                  { id: "volume", icon: <span className="legend-line" style={{ background: "#FFB040" }} />, name: "BTC Volume", desc: "Gold arc proportional to daily BTC transferred vs 4.6M BTC peak." },
+                  { id: "hashrate-ring", icon: <span className="legend-arc" />, name: "Hashrate", desc: "Vertical ring, proportional to hashrate vs 1305 EH/s peak." },
                   { id: "difficulty-ring", icon: <span className="legend-arc dark" />, name: "Difficulty", desc: "Vertical ring, log-scaled from 1 to 150 trillion." },
                   { id: "particles", icon: <span className="legend-dot" />, name: "Addresses", desc: "Each particle ≈ 1,000 active addresses; larger = whale activity." },
                 ].map((item) => (
@@ -656,8 +656,13 @@ function App() {
                   <p>25 historically significant dates from Genesis (Jan 2009) through 2025. Each shows real blocks mined that day, real address activity, real BTC volumes, and real network conditions — all published through Mosaic and rendered as data-driven geometry. Nothing is decorative.</p>
                 </div>
                 <div className="data-info-section">
-                  <h4>About the Hashrate Number</h4>
-                  <p>Bitcoin hashrate cannot be measured directly — it's always estimated from observed block production and difficulty. Different sources publish different values for the same day depending on their smoothing window. We use a 7-day moving average from blockchain.com's public charts API, which closely matches the headline numbers reported by CoinDesk, CoinWarz, and Hashrate Index. Day-to-day "instantaneous" hashrate can swing ±15% from random block-timing variance.</p>
+                  <h4>Per-Field Source of Truth</h4>
+                  <p>Each metric comes from the most authoritative free public source:</p>
+                  <p>• <strong>activeAddresses, hashrate, totalFeesBtc, blocksPerDay</strong> → CoinMetrics community API (the gold-standard on-chain data provider used by Bloomberg, CoinDesk, and academic researchers).</p>
+                  <p>• <strong>difficulty</strong> → blockchain.com /charts/difficulty (CoinMetrics community tier doesn't expose difficulty).</p>
+                  <p>• <strong>btcTransferred</strong> → raw transfer volume from the original Mosaic / BigQuery extract, which matches Glassnode's "Transfer Volume" methodology (includes change outputs). The blockchain.com "estimated" version filters more aggressively and reports ~10x lower numbers — we don't use it because it doesn't match how the metric is reported elsewhere.</p>
+                  <p>• <strong>mempool count and size</strong> → blockchain.com (no widely available historical mempool source agrees fully; this is the best free option).</p>
+                  <p>Bitcoin hashrate is always an estimate (derived from observed block production), so day-to-day numbers can swing ±15% across sources depending on smoothing window. CoinMetrics applies its own smoothing.</p>
                 </div>
               </div>
             )}
@@ -670,11 +675,11 @@ function App() {
                 </div>
                 <div className="data-info-section">
                   <h4>Horizontal Rings — Transaction Metrics</h4>
-                  <p>Fee Tiers (r=2.2): four arcs showing fee distribution, thickness scales with fee pressure. Settlement (r=2.8): arc length = block production health (full circle = on schedule). Congestion (r=3.3): red arc, length scales with congestion score. BTC Volume (r=3.8): gold arc proportional to daily BTC transferred vs the 1M BTC/day peak.</p>
+                  <p>Fee Tiers (r=2.2): four arcs showing fee distribution, thickness scales with fee pressure. Settlement (r=2.8): arc length = block production health (full circle = on schedule). Congestion (r=3.3): red arc, length scales with congestion score. BTC Volume (r=3.8): gold arc proportional to daily BTC transferred vs the 4.6M BTC/day peak.</p>
                 </div>
                 <div className="data-info-section">
                   <h4>Vertical Rings — Security Metrics</h4>
-                  <p>Hashrate (YZ plane, r=2.5): arc proportional to hashrate vs 1151 EH/s peak. Difficulty (XZ plane, r=3.0): log-scaled arc from 1 to 150 trillion. These rings grow dramatically from Genesis to 2025.</p>
+                  <p>Hashrate (YZ plane, r=2.5): arc proportional to hashrate vs 1305 EH/s peak. Difficulty (XZ plane, r=3.0): log-scaled arc from 1 to 150 trillion. These rings grow dramatically from Genesis to 2025.</p>
                 </div>
                 <div className="data-info-section">
                   <h4>Floating Particles — Active Addresses</h4>
@@ -765,9 +770,9 @@ function ContextPanel({ snapshot, hoverCtx, blocks }: { snapshot: NetworkSnapsho
       <div className="ctx-content">
         <div className="ctx-title">Network Hashrate</div>
         <CtxRow label="Hashrate" value={`${s.networkHashrateEh.toFixed(1)} EH/s`} />
-        <CtxRow label="Ring Fill" value={`${((s.networkHashrateEh / 1151.6) * 100).toFixed(1)}%`} />
+        <CtxRow label="Ring Fill" value={`${((s.networkHashrateEh / 1305.5) * 100).toFixed(1)}%`} />
         <CtxRow label="Halving Era" value={`${Math.floor(s.blockHeight / 210000) + 1}`} />
-        <div className="ctx-notes"><p>Blue vertical ring. Arc length proportional to hashrate relative to the 2025 peak of 1,151 EH/s (7-day moving average). Measures total computational power securing the network.</p></div>
+        <div className="ctx-notes"><p>Blue vertical ring. Arc length proportional to hashrate relative to the 2025 peak of ~1,305 EH/s. Measures total computational power securing the network. Sourced from CoinMetrics.</p></div>
       </div>
     );
   }
@@ -777,10 +782,10 @@ function ContextPanel({ snapshot, hoverCtx, blocks }: { snapshot: NetworkSnapsho
       <div className="ctx-content">
         <div className="ctx-title">BTC Volume</div>
         <CtxRow label="BTC Transferred" value={`${Math.round(s.btcTransferred).toLocaleString()}`} />
-        <CtxRow label="Ring Fill" value={`${((s.btcTransferred / 1000000) * 100).toFixed(1)}%`} />
+        <CtxRow label="Ring Fill" value={`${((s.btcTransferred / 4600000) * 100).toFixed(1)}%`} />
         <CtxRow label="Active Addresses" value={s.activeAddresses.toLocaleString()} />
         <CtxRow label="Total Outputs" value={s.totalOutputs.toLocaleString()} />
-        <div className="ctx-notes"><p>Gold horizontal ring at r=3.8. Arc length proportional to estimated daily BTC transferred (excluding change) relative to a 1M BTC/day reference. Sourced from blockchain.com.</p></div>
+        <div className="ctx-notes"><p>Gold horizontal ring at r=3.8. Arc length proportional to daily raw BTC transfer volume (Glassnode-style methodology, including change outputs) relative to the 2021 ATH of ~4.6M BTC/day.</p></div>
       </div>
     );
   }
@@ -1077,9 +1082,9 @@ function MiniSnapshot({ snapshot: s, opacity: dim, highlighted, legendHover }: {
   const fp = s.feePressureIndex / 10;
   const cg = s.congestionScore / 10;
   const bs = s.blockProductionStress / 10;
-  const maxHashrate = 1151.6;
+  const maxHashrate = 1305.5;
   const maxDifficulty = 150839487445892;
-  const maxBtcVolume = 1000000;
+  const maxBtcVolume = 4600000;
   const hrNorm = Math.min(s.networkHashrateEh / maxHashrate, 1);
   const diffLog = s.difficulty > 0 ? Math.log10(s.difficulty) / Math.log10(maxDifficulty) : 0;
   const vol = Math.min(s.btcTransferred / maxBtcVolume, 1);
@@ -1287,9 +1292,9 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
   const cgTarget = s.congestionScore / 10;
   const bsTarget = s.blockProductionStress / 10;
   const healthTarget = s.networkHealthScore / 10;
-  const maxHashrate = 1151.6;
+  const maxHashrate = 1305.5;
   const maxDifficulty = 150839487445892;
-  const maxBtcVolume = 1000000; // peak ~900k BTC/day in 2011 era
+  const maxBtcVolume = 4600000; // 2021 ATH peak ~4.6M BTC/day raw transfer (Glassnode methodology)
   const hrTarget = Math.min(s.networkHashrateEh / maxHashrate, 1);
   const diffTarget = s.difficulty > 0 ? Math.log10(s.difficulty) / Math.log10(maxDifficulty) : 0;
   const volTarget = Math.min(s.btcTransferred / maxBtcVolume, 1);
