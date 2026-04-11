@@ -654,49 +654,99 @@ function App() {
             )}
 
             {showGuideTab === "source" && (
-              <div className="guide-body">
-                <div className="data-info-section">
-                  <h4>What You're Seeing</h4>
-                  <p>25 historically significant dates from Genesis (January 2009) through 2025. Each snapshot shows real blocks mined that day, real address activity, real BTC volumes, and real network conditions — rendered as data-driven geometry. Nothing is decorative.</p>
+              <div className="guide-body source-body">
+                <p className="source-intro">
+                  25 historically significant dates from Genesis (January 2009) through 2025.
+                  Every numeric field below is traceable to a verified public source.
+                  Nothing is decorative.
+                </p>
+
+                <div className="source-tier">
+                  <div className="source-tier-header">
+                    <span className="source-tier-badge tier-1">Tier 1</span>
+                    <h4>Pulled directly from public sources</h4>
+                  </div>
+                  <ul className="source-list">
+                    <li><span className="source-field">Hashrate</span><span className="source-arrow">→</span><span className="source-origin">CoinMetrics <code>HashRate</code></span></li>
+                    <li><span className="source-field">Active addresses</span><span className="source-arrow">→</span><span className="source-origin">CoinMetrics <code>AdrActCnt</code></span></li>
+                    <li><span className="source-field">Total fees (BTC)</span><span className="source-arrow">→</span><span className="source-origin">CoinMetrics <code>FeeTotNtv</code></span></li>
+                    <li><span className="source-field">Blocks per day</span><span className="source-arrow">→</span><span className="source-origin">CoinMetrics <code>BlkCnt</code></span></li>
+                    <li><span className="source-field">Difficulty</span><span className="source-arrow">→</span><span className="source-origin">blockchain.com <code>/charts/difficulty</code></span></li>
+                    <li><span className="source-field">Mempool count</span><span className="source-arrow">→</span><span className="source-origin">blockchain.com <code>/charts/mempool-count</code></span></li>
+                    <li><span className="source-field">Mempool size</span><span className="source-arrow">→</span><span className="source-origin">blockchain.com <code>/charts/mempool-size</code></span></li>
+                    <li><span className="source-field">Block heights, per-block spine</span><span className="source-arrow">→</span><span className="source-origin">Google BigQuery <code>crypto_bitcoin</code> via Strategy Mosaic</span></li>
+                  </ul>
                 </div>
 
-                <div className="data-info-section">
-                  <h4>Source of Truth — Verified Public Sources</h4>
-                  <p>Each numeric field is pulled from the most authoritative free public source. Run <code>node scripts/audit_data.mjs</code> to re-verify any time.</p>
-                  <p>• <strong>Hashrate (EH/s)</strong> → CoinMetrics <code>HashRate</code></p>
-                  <p>• <strong>Active addresses</strong> → CoinMetrics <code>AdrActCnt</code></p>
-                  <p>• <strong>Total fees (BTC)</strong> → CoinMetrics <code>FeeTotNtv</code></p>
-                  <p>• <strong>Blocks mined per day</strong> → CoinMetrics <code>BlkCnt</code></p>
-                  <p>• <strong>Avg block interval</strong> → derived from CoinMetrics blocks/day (86400 ÷ BlkCnt)</p>
-                  <p>• <strong>Difficulty</strong> → blockchain.com <code>/charts/difficulty</code></p>
-                  <p>• <strong>Mempool count &amp; size</strong> → blockchain.com <code>/charts/mempool-count</code> + <code>/charts/mempool-size</code></p>
-                  <p>• <strong>Per-block spine data</strong> (height, size, weight, tx count) → Google BigQuery <code>crypto_bitcoin</code> public dataset</p>
+                <div className="source-tier">
+                  <div className="source-tier-header">
+                    <span className="source-tier-badge tier-2">Tier 2</span>
+                    <h4>Derived from Tier 1 with transparent formulas</h4>
+                  </div>
+                  <ul className="source-list source-list-formula">
+                    <li>
+                      <span className="source-field">Avg block interval</span>
+                      <code className="source-formula">= 86400 ÷ BlkCnt</code>
+                    </li>
+                    <li>
+                      <span className="source-field">Block production stress</span>
+                      <code className="source-formula">= piecewise(interval ÷ 600s)</code>
+                    </li>
+                    <li>
+                      <span className="source-field">Congestion score</span>
+                      <code className="source-formula">= clamp(mempoolTxCount ÷ 35,000 × 10)</code>
+                    </li>
+                    <li>
+                      <span className="source-field">Fee pressure index</span>
+                      <code className="source-formula">= clamp(totalFeesBtc ÷ 100)</code>
+                    </li>
+                    <li>
+                      <span className="source-field">Health score</span>
+                      <code className="source-formula">= 10 − congestion·0.3 − feePressure·0.3 − max(0, stress−1)·1.5</code>
+                    </li>
+                  </ul>
+                  <p className="source-footnote">All formulas live in <code>scripts/derive_composites.mjs</code>.</p>
                 </div>
 
-                <div className="data-info-section">
-                  <h4>Source of Truth — Derived from Real Inputs</h4>
-                  <p>These are computed from the verified inputs above using transparent formulas (see <code>scripts/derive_composites.mjs</code>):</p>
-                  <p>• <strong>Block production stress</strong> = piecewise function of avg block interval relative to the 10-min target. Healthy ≈ 0.7-0.9, congested &gt; 1.5.</p>
-                  <p>• <strong>Congestion score (0-10)</strong> = clamp(mempoolTxCount / 35,000 × 10)</p>
-                  <p>• <strong>Fee pressure index (0-10)</strong> = clamp(totalFeesBtc / 100)</p>
-                  <p>• <strong>Health score (0-10)</strong> = 10 − congestion×0.3 − feePressure×0.3 − max(0, stress−1)×1.5</p>
-                  <p>• <strong>Fee tier distribution (4 buckets)</strong> = interpolated from feePressureIndex using 5 anchor distributions (calm → extreme). The actual per-block fee histogram requires a BigQuery extract that we don't currently maintain.</p>
+                <div className="source-tier">
+                  <div className="source-tier-header">
+                    <span className="source-tier-badge tier-3">Tier 3</span>
+                    <h4>Strategy Mosaic / BigQuery (canonical source, not individually re-verified)</h4>
+                  </div>
+                  <ul className="source-list">
+                    <li><span className="source-field">BTC transferred</span><span className="source-arrow">→</span><span className="source-origin">Mosaic over BigQuery — matches Glassnode "Transfer Volume" methodology (raw on-chain throughput, includes change outputs)</span></li>
+                    <li><span className="source-field">Whale outputs (1000+ BTC, 100+ BTC)</span><span className="source-arrow">→</span><span className="source-origin">Mosaic over BigQuery</span></li>
+                    <li><span className="source-field">Mid &amp; retail outputs, total outputs</span><span className="source-arrow">→</span><span className="source-origin">Mosaic over BigQuery</span></li>
+                    <li><span className="source-field">Fee tier distribution (4 buckets)</span><span className="source-arrow">→</span><span className="source-origin">Interpolated from feePressureIndex using 5 anchor distributions. Real per-block histogram needs a fresh BigQuery extract.</span></li>
+                  </ul>
+                  <p className="source-footnote">BigQuery's <code>crypto_bitcoin</code> dataset is the canonical Bitcoin blockchain. These fields were pulled via Strategy Mosaic's semantic layer over BigQuery in the original data extract and are trustworthy by source, but have not been individually re-fetched and diffed against external sources for each of the 25 snapshots.</p>
                 </div>
 
-                <div className="data-info-section">
-                  <h4>Source of Truth — Less Verifiable</h4>
-                  <p>• <strong>BTC transferred</strong> — raw on-chain output volume from the original BigQuery extract. Matches Glassnode's "Transfer Volume" methodology (includes change outputs). blockchain.com's "estimated" version filters change outputs more aggressively and reports ~10× lower numbers — we don't use it because it doesn't match how the metric is reported anywhere else.</p>
-                  <p>• <strong>Whale outputs, total outputs, unique senders/receivers</strong> — from the original BigQuery extract. Not individually re-verified against external sources for each snapshot, but BigQuery is the canonical Bitcoin blockchain dataset.</p>
+                <div className="source-tier">
+                  <div className="source-tier-header">
+                    <span className="source-tier-badge tier-note">Note</span>
+                    <h4>About hashrate variance</h4>
+                  </div>
+                  <p className="source-paragraph">
+                    Bitcoin hashrate cannot be measured directly — it is always estimated from observed
+                    block production and difficulty. Different providers publish different values for
+                    the same day depending on smoothing window. Day-to-day numbers can swing ±15% from
+                    random block-timing variance. We use CoinMetrics' published value, which is the
+                    standard cited by Bloomberg, CoinDesk, and academic researchers.
+                  </p>
                 </div>
 
-                <div className="data-info-section">
-                  <h4>About Hashrate Variance</h4>
-                  <p>Bitcoin hashrate cannot be measured directly — it's always estimated from observed block production and difficulty. Different sources publish different values for the same day depending on smoothing window. Day-to-day "instantaneous" numbers can swing ±15% from random block-timing variance. We use CoinMetrics' published value, which is the standard cited by Bloomberg, CoinDesk, and academic researchers.</p>
-                </div>
-
-                <div className="data-info-section">
-                  <h4>Re-fetch &amp; Audit</h4>
-                  <p>The data is patched in place via <code>scripts/patch_coinmetrics.mjs</code> (idempotent, re-runnable any time). The audit script <code>scripts/audit_data.mjs</code> cross-checks every numeric field and reports per-row deltas. As of the latest deploy, audit reports zero rows with &gt;10% deviation from the cited sources.</p>
+                <div className="source-tier">
+                  <div className="source-tier-header">
+                    <span className="source-tier-badge tier-note">Audit</span>
+                    <h4>Re-fetch &amp; verify</h4>
+                  </div>
+                  <p className="source-paragraph">
+                    Data is patched in place via <code>scripts/patch_coinmetrics.mjs</code> (idempotent, re-runnable).
+                    The audit script <code>scripts/audit_data.mjs</code> cross-checks every Tier 1 field
+                    against its source and reports per-row deltas. As of the latest deploy, audit reports
+                    zero rows with &gt;10% deviation.
+                  </p>
                 </div>
               </div>
             )}
@@ -909,30 +959,34 @@ function CameraRig({ view }: { view: "grid" | "detail" }) {
       let sidebarWidth: number;
       let topReserve: number;
       let bottomReserve: number;
+      // Banner is now a single line of text (subtitle removed) — significantly
+      // less vertical space needed at the top, so we shrink topReserve across
+      // all breakpoints.
       if (vpW > 1200) {
         sidebarWidth = 310 + 330 + 32; // default panels + margins
-        topReserve = 100;
+        topReserve = 60;
         bottomReserve = 40;
       } else if (vpW > 1000) {
         sidebarWidth = 260 + 290 + 32;
-        topReserve = 100;
+        topReserve = 60;
         bottomReserve = 40;
       } else if (vpW > 820) {
         sidebarWidth = 230 + 260 + 24;
-        topReserve = 90;
+        topReserve = 56;
         bottomReserve = 40;
       } else if (vpW > 640) {
         sidebarWidth = 210 + 230 + 20;
-        topReserve = 80;
+        topReserve = 52;
         bottomReserve = 40;
       } else {
         // Mobile: panels are top strip + bottom sheet, not sidebars.
+        // Single-line banner (~38px) + timeline strip (44px) + small gap = ~88
         sidebarWidth = 0;
-        topReserve = 110; // banner + timeline strip
-        // Bottom sheet: when collapsed it's ~64px; when expanded it overlays
+        topReserve = 88;
+        // Bottom sheet: when collapsed it's ~54px; when expanded it overlays
         // the canvas, but we still frame to the collapsed footprint so the
         // geometry stays at a consistent size.
-        bottomReserve = 72;
+        bottomReserve = 60;
       }
       const usableW = Math.max(vpW - sidebarWidth, 280);
       const usableH = Math.max(vpH - topReserve - bottomReserve, 280);
