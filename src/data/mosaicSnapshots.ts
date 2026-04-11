@@ -31,49 +31,6 @@ export function deriveRingBands(snapshot: {
 
 /* ─── Helpers ─── */
 
-/* Pool distributions from Mosaic — 3 distinct periods */
-const POOLS_PRE2024 = [
-  { id: "foundry", name: "Foundry USA", sharePct: 0.300 },
-  { id: "antpool", name: "AntPool", sharePct: 0.215 },
-  { id: "viabtc", name: "ViaBTC", sharePct: 0.119 },
-  { id: "f2pool", name: "F2Pool", sharePct: 0.115 },
-  { id: "mara", name: "MARA Pool", sharePct: 0.043 },
-  { id: "binance", name: "Binance Pool", sharePct: 0.039 },
-  { id: "spider", name: "SpiderPool", sharePct: 0.037 },
-  { id: "luxor", name: "Luxor", sharePct: 0.028 },
-  { id: "secpool", name: "SECPOOL", sharePct: 0.023 },
-  { id: "sbi", name: "SBI Crypto", sharePct: 0.016 },
-];
-const POOLS_2024 = [
-  { id: "foundry", name: "Foundry USA", sharePct: 0.300 },
-  { id: "antpool", name: "AntPool", sharePct: 0.202 },
-  { id: "viabtc", name: "ViaBTC", sharePct: 0.127 },
-  { id: "f2pool", name: "F2Pool", sharePct: 0.108 },
-  { id: "spider", name: "SpiderPool", sharePct: 0.055 },
-  { id: "mara", name: "MARA Pool", sharePct: 0.047 },
-  { id: "secpool", name: "SECPOOL", sharePct: 0.032 },
-  { id: "luxor", name: "Luxor", sharePct: 0.029 },
-  { id: "binance", name: "Binance Pool", sharePct: 0.023 },
-  { id: "sbi", name: "SBI Crypto", sharePct: 0.015 },
-];
-const POOLS_2025 = [
-  { id: "foundry", name: "Foundry USA", sharePct: 0.296 },
-  { id: "antpool", name: "AntPool", sharePct: 0.178 },
-  { id: "viabtc", name: "ViaBTC", sharePct: 0.116 },
-  { id: "f2pool", name: "F2Pool", sharePct: 0.109 },
-  { id: "spider", name: "SpiderPool", sharePct: 0.079 },
-  { id: "mara", name: "MARA Pool", sharePct: 0.049 },
-  { id: "secpool", name: "SECPOOL", sharePct: 0.037 },
-  { id: "luxor", name: "Luxor", sharePct: 0.034 },
-  { id: "binance", name: "Binance Pool", sharePct: 0.021 },
-  { id: "sbi", name: "SBI Crypto", sharePct: 0.016 },
-];
-
-function poolsForDate(date: string, hashrate: number) {
-  const pools = date >= "2025-10-10" ? POOLS_2025 : date >= "2024-04-20" ? POOLS_2024 : POOLS_PRE2024;
-  return pools.map((p) => ({ ...p, hashRateEh: Math.round(hashrate * p.sharePct), shareChange30d: 0 }));
-}
-
 function bkt(s0: number, s1: number, s2: number, s3: number) {
   return [
     { id: "low", feeRateLabel: "1-10 sat/vB", txShare: s0, intensity: Math.min(s0 / 0.25, 1) },
@@ -226,7 +183,6 @@ function mk(id: string, label: string, date: string, notes: string[]): NetworkSn
     mode: "historical" as const,
     ...m,
     ...g,
-    miningPools: poolsForDate(date, m.networkHashrateEh),
     feeBuckets: deriveFeeBucketsFromPressure(m.feePressureIndex),
     ringBands: deriveRingBands(s),
     notes,

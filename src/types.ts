@@ -1,11 +1,3 @@
-export type MiningPoolSnapshot = {
-  id: string;
-  name: string;
-  sharePct: number;
-  hashRateEh: number;
-  shareChange30d: number;
-};
-
 export type FeeBucket = {
   id: string;
   feeRateLabel: string;
@@ -51,7 +43,6 @@ export type NetworkSnapshot = {
   whaleOutputs100: number;
   midOutputs10: number;
   retailOutputs: number;
-  miningPools: MiningPoolSnapshot[];
   feeBuckets: FeeBucket[];
   ringBands: RingBand[];
   notes: string[];

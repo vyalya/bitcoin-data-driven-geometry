@@ -687,7 +687,6 @@ function App() {
                   <h4>Source of Truth — Less Verifiable</h4>
                   <p>• <strong>BTC transferred</strong> — raw on-chain output volume from the original BigQuery extract. Matches Glassnode's "Transfer Volume" methodology (includes change outputs). blockchain.com's "estimated" version filters change outputs more aggressively and reports ~10× lower numbers — we don't use it because it doesn't match how the metric is reported anywhere else.</p>
                   <p>• <strong>Whale outputs, total outputs, unique senders/receivers</strong> — from the original BigQuery extract. Not individually re-verified against external sources for each snapshot, but BigQuery is the canonical Bitcoin blockchain dataset.</p>
-                  <p>• <strong>Mining pool distributions</strong> — three hardcoded distributions (pre-2024, 2024, 2025) keyed off snapshot date. Not per-day accurate; intended as visual texture rather than authoritative pool share data.</p>
                 </div>
 
                 <div className="data-info-section">
