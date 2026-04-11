@@ -91,7 +91,20 @@ function App() {
         (s as Record<string, unknown>)[param.snapshotField] = ov;
       }
     }
-    s.networkHealthScore = Math.max(0, Math.min(10, 10 - (s.feePressureIndex + s.congestionScore + s.blockProductionStress + s.minerConcentrationScore) / 4));
+    // Composite health score derived from real verified inputs. Same formula
+    // used by scripts/derive_composites.mjs so the displayed value matches
+    // what's stored on disk for the base snapshot, and updates correctly when
+    // What-If sliders adjust congestion/fee pressure/stress.
+    s.networkHealthScore = Math.max(
+      0,
+      Math.min(
+        10,
+        10
+          - s.congestionScore * 0.3
+          - s.feePressureIndex * 0.3
+          - Math.max(0, s.blockProductionStress - 1) * 1.5
+      )
+    );
     s.ringBands = deriveRingBands(s);
     s.mempoolSizeMb = s.mempoolTxCount * 0.00028;
     return s;
@@ -647,18 +660,45 @@ function App() {
                   <h4>What You're Seeing</h4>
                   <p>25 historically significant dates from Genesis (January 2009) through 2025. Each snapshot shows real blocks mined that day, real address activity, real BTC volumes, and real network conditions — rendered as data-driven geometry. Nothing is decorative.</p>
                 </div>
+
                 <div className="data-info-section">
-                  <h4>Per-Field Source of Truth</h4>
-                  <p>Each metric comes from the most authoritative free public source for that specific field:</p>
-                  <p>• <strong>Active addresses, hashrate, total fees, blocks per day</strong> → CoinMetrics community API. CoinMetrics is the gold-standard on-chain data provider used by Bloomberg, CoinDesk, and academic researchers.</p>
-                  <p>• <strong>Difficulty</strong> → blockchain.com <code>/charts/difficulty</code> (CoinMetrics community tier doesn't expose this metric).</p>
-                  <p>• <strong>BTC transferred</strong> → raw transfer volume that matches Glassnode's "Transfer Volume" methodology (includes change outputs). blockchain.com's "estimated" version filters more aggressively and reports ~10× lower numbers — we don't use it because it doesn't match how the metric is reported anywhere else.</p>
-                  <p>• <strong>Mempool count and size</strong> → blockchain.com (no widely available historical mempool source agrees fully; this is the best free option).</p>
-                  <p>• <strong>Per-block spine data</strong> (height, size, weight, tx count) → Google BigQuery <code>crypto_bitcoin</code> public dataset.</p>
+                  <h4>Source of Truth — Verified Public Sources</h4>
+                  <p>Each numeric field is pulled from the most authoritative free public source. Run <code>node scripts/audit_data.mjs</code> to re-verify any time.</p>
+                  <p>• <strong>Hashrate (EH/s)</strong> → CoinMetrics <code>HashRate</code></p>
+                  <p>• <strong>Active addresses</strong> → CoinMetrics <code>AdrActCnt</code></p>
+                  <p>• <strong>Total fees (BTC)</strong> → CoinMetrics <code>FeeTotNtv</code></p>
+                  <p>• <strong>Blocks mined per day</strong> → CoinMetrics <code>BlkCnt</code></p>
+                  <p>• <strong>Avg block interval</strong> → derived from CoinMetrics blocks/day (86400 ÷ BlkCnt)</p>
+                  <p>• <strong>Difficulty</strong> → blockchain.com <code>/charts/difficulty</code></p>
+                  <p>• <strong>Mempool count &amp; size</strong> → blockchain.com <code>/charts/mempool-count</code> + <code>/charts/mempool-size</code></p>
+                  <p>• <strong>Per-block spine data</strong> (height, size, weight, tx count) → Google BigQuery <code>crypto_bitcoin</code> public dataset</p>
                 </div>
+
+                <div className="data-info-section">
+                  <h4>Source of Truth — Derived from Real Inputs</h4>
+                  <p>These are computed from the verified inputs above using transparent formulas (see <code>scripts/derive_composites.mjs</code>):</p>
+                  <p>• <strong>Block production stress</strong> = piecewise function of avg block interval relative to the 10-min target. Healthy ≈ 0.7-0.9, congested &gt; 1.5.</p>
+                  <p>• <strong>Congestion score (0-10)</strong> = clamp(mempoolTxCount / 35,000 × 10)</p>
+                  <p>• <strong>Fee pressure index (0-10)</strong> = clamp(totalFeesBtc / 100)</p>
+                  <p>• <strong>Health score (0-10)</strong> = 10 − congestion×0.3 − feePressure×0.3 − max(0, stress−1)×1.5</p>
+                  <p>• <strong>Fee tier distribution (4 buckets)</strong> = interpolated from feePressureIndex using 5 anchor distributions (calm → extreme). The actual per-block fee histogram requires a BigQuery extract that we don't currently maintain.</p>
+                </div>
+
+                <div className="data-info-section">
+                  <h4>Source of Truth — Less Verifiable</h4>
+                  <p>• <strong>BTC transferred</strong> — raw on-chain output volume from the original BigQuery extract. Matches Glassnode's "Transfer Volume" methodology (includes change outputs). blockchain.com's "estimated" version filters change outputs more aggressively and reports ~10× lower numbers — we don't use it because it doesn't match how the metric is reported anywhere else.</p>
+                  <p>• <strong>Whale outputs, total outputs, unique senders/receivers</strong> — from the original BigQuery extract. Not individually re-verified against external sources for each snapshot, but BigQuery is the canonical Bitcoin blockchain dataset.</p>
+                  <p>• <strong>Mining pool distributions</strong> — three hardcoded distributions (pre-2024, 2024, 2025) keyed off snapshot date. Not per-day accurate; intended as visual texture rather than authoritative pool share data.</p>
+                </div>
+
                 <div className="data-info-section">
                   <h4>About Hashrate Variance</h4>
-                  <p>Bitcoin hashrate cannot be measured directly — it's always estimated from observed block production and difficulty. Different sources publish different values for the same day depending on smoothing window. Day-to-day "instantaneous" numbers can swing ±15% from random block-timing variance.</p>
+                  <p>Bitcoin hashrate cannot be measured directly — it's always estimated from observed block production and difficulty. Different sources publish different values for the same day depending on smoothing window. Day-to-day "instantaneous" numbers can swing ±15% from random block-timing variance. We use CoinMetrics' published value, which is the standard cited by Bloomberg, CoinDesk, and academic researchers.</p>
+                </div>
+
+                <div className="data-info-section">
+                  <h4>Re-fetch &amp; Audit</h4>
+                  <p>The data is patched in place via <code>scripts/patch_coinmetrics.mjs</code> (idempotent, re-runnable any time). The audit script <code>scripts/audit_data.mjs</code> cross-checks every numeric field and reports per-row deltas. As of the latest deploy, audit reports zero rows with &gt;10% deviation from the cited sources.</p>
                 </div>
               </div>
             )}
