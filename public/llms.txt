@@ -1,0 +1,54 @@
+# The Bitcoin Network as Data Driven Geometry
+
+> An interactive 3D visualization of the Bitcoin network across 105 historically significant dates — from Genesis (January 3, 2009) to the present. Every shape, ring, particle, and block maps to a real on-chain metric. No decorative geometry; no synthetic data.
+
+## What this is
+
+The site renders 105 daily snapshots of the Bitcoin network as 3D geometry. Rather than a chart or table, each snapshot becomes a scene where every visual element corresponds to a verified metric for that day. Calm days look calm; crisis days look tortured.
+
+Included dates cover halvings (2012, 2016, 2020, 2024), major price peaks and crashes, exchange failures (Mt. Gox 2014, FTX 2022), protocol upgrades (SegWit lock-in 2017, Taproot 2021), regulatory events, and the present.
+
+## Visual mapping (what every shape means)
+
+- **Center spine** — each cuboid is one real block mined that day. Width scales with block weight (up to 4 million weight units); brightness scales with transaction count.
+- **Fee tier rings** (horizontal, radius 2.2) — four arcs representing the fee distribution across sat/vB tiers. Thickness scales with fee pressure.
+- **Settlement ring** (horizontal, radius 2.8) — arc length reflects block production health relative to the 10-minute target. Full circle = on schedule.
+- **Congestion ring** (horizontal, radius 3.3) — red arc; length and intensity scale with the network congestion score derived from mempool depth.
+- **BTC volume ring** (horizontal, radius 3.8) — gold arc proportional to daily BTC transferred vs the 2021 all-time-high of ~4.6M BTC/day (Glassnode-style raw transfer methodology).
+- **Hashrate ring** (vertical, YZ plane, radius 2.5) — arc proportional to network hashrate vs the ~1,305 EH/s peak.
+- **Difficulty ring** (vertical, XZ plane, radius 3.0) — log-scaled arc representing mining difficulty from 1 (Genesis) to 150 trillion.
+- **Floating particles** — each particle represents ~1,000 unique active addresses that day. Larger, brighter particles indicate whale activity (outputs over 100 BTC).
+
+## Data sources and provenance
+
+Every numeric field is traceable to a free, public source. Data is re-fetched and audited via scripts in the repository.
+
+| Field | Source |
+|---|---|
+| Network hashrate (EH/s) | CoinMetrics `HashRate` |
+| Active addresses | CoinMetrics `AdrActCnt` |
+| Total daily fees (BTC) | CoinMetrics `FeeTotNtv` |
+| Blocks per day | CoinMetrics `BlkCnt` |
+| Mining difficulty | blockchain.com `/charts/difficulty` |
+| Mempool transaction count and size | blockchain.com |
+| BTC transferred per day | Google BigQuery `crypto_bitcoin` (Glassnode-style raw transfer volume) |
+| Per-block size, weight, transaction count | Google BigQuery `crypto_bitcoin` |
+| Whale output counts (100+ BTC, 1000+ BTC) | Google BigQuery `crypto_bitcoin` |
+
+## Features
+
+- **105 snapshots** navigable via a scrollable timeline and a 2D landing grid.
+- **Full search** supporting free-text name matching, single years (`2024`), year ranges (`2020-2023`), months (`2020-03`), exact dates (`2020-03-12`), precise ranges (`2020-03-01..2020-06-30`), and natural-language ranges (`2017 to 2021`, `2025-11 to today`). Text terms are AND-combined; date terms are OR-combined.
+- **What-If simulation** — sliders for hashrate, difficulty, active addresses, fee pressure, congestion score, and block production stress. Rings and particles respond in real time.
+- **Click-to-pin** — clicking any ring or block freezes the scene; clicking again resumes.
+- **Mobile-optimized** — collapsible bottom sheet, horizontal timeline strip, two-stage grid selection.
+
+## Technical stack
+
+React 19, TypeScript 5.9, React Three Fiber 9, Three.js, Vite 7, Cloudflare Pages. Requires JavaScript and WebGL2. No user accounts, cookies, or tracking.
+
+## License and repository
+
+Source, methodology, and audit scripts: https://github.com/vyalya/bitcoin-data-driven-geometry
+
+The underlying data is derived from public on-chain sources and is made available without restriction. The site is free to use and non-commercial.

@@ -1497,23 +1497,19 @@ function GridScene({ snapshots, hoverIdx, selectedIdx, matchedIndices, legendHov
       <pointLight position={[-15, 5, 10]} intensity={4} color="#B87206" distance={50} decay={1.5} />
 
       {snapshots.map((snap, i) => {
+        const isFilteredOut = matchedIndices !== null && !matchedIndices.has(i);
+        if (isFilteredOut) return null;
         const col = i % COLS;
         const row = Math.floor(i / COLS);
         const x = (col - (COLS - 1) / 2) * SPACING_X;
         const y = ((ROWS - 1) / 2 - row) * SPACING_Y;
         const isHovered = hoverIdx === i;
         const isSelected = selectedIdx === i;
-        const isFilteredOut = matchedIndices !== null && !matchedIndices.has(i);
-        // Dim non-hovered cells when hovering. If nothing is hovered but
-        // something is selected, dim the non-selected cells. Filtered-out
-        // cells stay in place but fade heavily so history's shape is preserved.
-        const dim = isFilteredOut
-          ? 0.1
-          : hoverIdx !== null
-            ? (isHovered ? 1 : 0.25)
-            : selectedIdx !== null
-              ? (isSelected ? 1 : 0.45)
-              : 1;
+        const dim = hoverIdx !== null
+          ? (isHovered ? 1 : 0.25)
+          : selectedIdx !== null
+            ? (isSelected ? 1 : 0.45)
+            : 1;
         // Selected cell is larger and pulses; hovered cell is larger.
         const baseScale = isSelected ? 0.36 * pulse : isHovered ? 0.32 : 0.28;
 

@@ -3,11 +3,166 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#000000" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>The Bitcoin Network as Data Driven Geometry</title>
+    <link rel="canonical" href="https://bitcoin-geometry.com/" />
+
+    <title>The Bitcoin Network as Data Driven Geometry — Real On-Chain Data in 3D</title>
+
+    <meta
+      name="description"
+      content="An interactive 3D visualization of the Bitcoin network across 105 historically significant dates — halvings, halts, hacks, ATHs — from Genesis (January 2009) to the present. Every shape, ring, particle, and block maps to a real on-chain metric (hashrate, difficulty, fees, addresses, block weight, transaction volume) sourced from CoinMetrics, blockchain.com, and Google BigQuery. No decorative geometry, no synthetic data."
+    />
+    <meta
+      name="keywords"
+      content="Bitcoin, blockchain, 3D visualization, on-chain data, hashrate, difficulty, block weight, transaction fees, active addresses, CoinMetrics, BigQuery, Bitcoin history, halving, SegWit, Mt. Gox, data visualization, network geometry"
+    />
+    <meta name="author" content="bitcoin-geometry.com" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+
+    <!-- Open Graph / Facebook / LinkedIn / Slack previews -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://bitcoin-geometry.com/" />
+    <meta property="og:title" content="The Bitcoin Network as Data Driven Geometry" />
+    <meta
+      property="og:description"
+      content="A 3D, interactive portrait of the Bitcoin network at 105 historic moments — every shape maps to a real on-chain number. CoinMetrics + blockchain.com + BigQuery data. No decorative geometry."
+    />
+    <meta property="og:image" content="https://bitcoin-geometry.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="A luminous 3D data-geometry rendering of the Bitcoin network — concentric rings of fees, hashrate, difficulty, and transaction volume around a spine of real block data." />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Bitcoin as Data Driven Geometry" />
+
+    <!-- Twitter / X card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The Bitcoin Network as Data Driven Geometry" />
+    <meta
+      name="twitter:description"
+      content="Interactive 3D Bitcoin network across 105 historic dates. Every shape = a real on-chain number."
+    />
+    <meta name="twitter:image" content="https://bitcoin-geometry.com/og-image.png" />
+    <meta name="twitter:image:alt" content="3D rendering of the Bitcoin network as concentric rings of real on-chain data." />
+
+    <!-- JSON-LD structured data — surfaces clean facts to Google, Bing, and AI crawlers (GPTBot, PerplexityBot, ClaudeBot, Google-Extended, Bytespider, etc.). -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://bitcoin-geometry.com/#website",
+          "url": "https://bitcoin-geometry.com/",
+          "name": "The Bitcoin Network as Data Driven Geometry",
+          "description": "Interactive 3D visualization of the Bitcoin network at 105 historic dates, with every visual element mapped to a real on-chain metric.",
+          "inLanguage": "en",
+          "publisher": { "@id": "https://bitcoin-geometry.com/#publisher" }
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://bitcoin-geometry.com/#app",
+          "name": "The Bitcoin Network as Data Driven Geometry",
+          "url": "https://bitcoin-geometry.com/",
+          "applicationCategory": "DataVisualizationApplication",
+          "operatingSystem": "Any (web browser)",
+          "browserRequirements": "Requires JavaScript and WebGL2",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+          "description": "A 3D, data-faithful portrait of the Bitcoin network. 105 snapshots from Genesis (2009-01-03) through the present render real on-chain metrics — block weight, transaction count, fee distribution, hashrate, difficulty, active addresses, BTC transfer volume — as geometry. No decorative shapes.",
+          "featureList": [
+            "105 historically significant Bitcoin network snapshots",
+            "Per-block spine with width = block weight, brightness = transaction count",
+            "Horizontal rings for fee tiers, settlement health, congestion, BTC volume",
+            "Vertical rings for hashrate and difficulty (log-scaled)",
+            "Floating particles representing active addresses (whale highlighting)",
+            "Full-text + date-range search (name, year, month, range, natural language)",
+            "What-if sliders for hashrate, difficulty, fee pressure, congestion, block stress",
+            "Mobile-optimized bottom sheet and horizontal timeline"
+          ],
+          "about": [
+            { "@type": "Thing", "name": "Bitcoin", "sameAs": "https://en.wikipedia.org/wiki/Bitcoin" },
+            { "@type": "Thing", "name": "Blockchain", "sameAs": "https://en.wikipedia.org/wiki/Blockchain" },
+            { "@type": "Thing", "name": "Data visualization", "sameAs": "https://en.wikipedia.org/wiki/Data_visualization" }
+          ],
+          "isAccessibleForFree": true
+        },
+        {
+          "@type": "CreativeWork",
+          "@id": "https://bitcoin-geometry.com/#work",
+          "name": "The Bitcoin Network as Data Driven Geometry",
+          "description": "A data-driven 3D portrait of the Bitcoin network. Every shape — rings, particles, blocks — maps to a verified on-chain metric. Sources: CoinMetrics (hashrate, active addresses, fees, block count), blockchain.com (difficulty, mempool), Google BigQuery crypto_bitcoin (per-block data, BTC transferred).",
+          "keywords": "Bitcoin, on-chain analytics, 3D visualization, hashrate, difficulty, fees, blockchain history",
+          "license": "https://bitcoin-geometry.com/",
+          "creditText": "Data: CoinMetrics, blockchain.com, Google BigQuery"
+        },
+        {
+          "@type": "Dataset",
+          "@id": "https://bitcoin-geometry.com/#dataset",
+          "name": "Bitcoin Network Historical Snapshots (105 dates)",
+          "description": "Per-day network-state records covering 105 historically significant dates from Bitcoin Genesis (2009-01-03) through the present. Each record includes hashrate (EH/s), mining difficulty, active addresses, total fees (BTC), block count, average block interval, mempool depth, congestion score, BTC transferred, whale-output counts, and fee-tier distribution, plus per-block size/weight/tx-count arrays.",
+          "keywords": ["Bitcoin", "on-chain data", "hashrate", "difficulty", "blockchain", "historical"],
+          "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "creator": { "@id": "https://bitcoin-geometry.com/#publisher" },
+          "isAccessibleForFree": true,
+          "variableMeasured": [
+            "Network hashrate (EH/s, CoinMetrics)",
+            "Mining difficulty (blockchain.com)",
+            "Active addresses (CoinMetrics AdrActCnt)",
+            "Total daily fees in BTC (CoinMetrics FeeTotNtv)",
+            "Blocks per day (CoinMetrics BlkCnt)",
+            "Mempool transaction count and size (blockchain.com)",
+            "BTC transferred per day (BigQuery crypto_bitcoin)",
+            "Per-block weight, size, and transaction count (BigQuery)",
+            "Whale output counts at 100+ BTC and 1000+ BTC thresholds"
+          ]
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://bitcoin-geometry.com/#publisher",
+          "name": "bitcoin-geometry.com",
+          "url": "https://bitcoin-geometry.com/"
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <!-- Fallback text for non-JS crawlers and accessibility tools. Most AI
+         crawlers (GPTBot, ClaudeBot, PerplexityBot) do not execute JavaScript,
+         so rendered React content is invisible to them. This <noscript> block
+         mirrors the JSON-LD above in human-readable form. -->
+    <noscript>
+      <h1>The Bitcoin Network as Data Driven Geometry</h1>
+      <p>
+        An interactive 3D visualization of the Bitcoin network across 105
+        historically significant dates — from Genesis (January 3, 2009) through
+        the present. Every shape, ring, particle, and block maps to a real
+        on-chain metric.
+      </p>
+      <h2>What the geometry means</h2>
+      <ul>
+        <li><strong>Center spine</strong> — each cuboid is one real block; width = block weight (up to 4 MWU), brightness = transaction count.</li>
+        <li><strong>Fee tier rings</strong> — four horizontal arcs showing fee distribution by sat/vB tier.</li>
+        <li><strong>Settlement ring</strong> — arc length tracks block production health (full circle = on-schedule 10-minute intervals).</li>
+        <li><strong>Congestion ring</strong> — red arc, length scales with mempool pressure.</li>
+        <li><strong>Volume ring</strong> — gold arc proportional to daily BTC transferred vs the 2021 ATH (~4.6M BTC/day).</li>
+        <li><strong>Hashrate ring</strong> — vertical ring, arc length vs the ~1,305 EH/s peak.</li>
+        <li><strong>Difficulty ring</strong> — log-scaled vertical ring from 1 to 150 trillion.</li>
+        <li><strong>Floating particles</strong> — each particle ≈ 1,000 active addresses; larger = whale activity (100+ BTC outputs).</li>
+      </ul>
+      <h2>Data sources</h2>
+      <ul>
+        <li>Hashrate, active addresses, fees, block count: CoinMetrics (community tier).</li>
+        <li>Difficulty, mempool depth: blockchain.com public charts.</li>
+        <li>Per-block data, BTC transferred, whale outputs: Google BigQuery <code>crypto_bitcoin</code> dataset.</li>
+      </ul>
+      <p>
+        Full source, methodology, and audit scripts at
+        <a href="https://github.com/vyalya/bitcoin-data-driven-geometry">github.com/vyalya/bitcoin-data-driven-geometry</a>.
+      </p>
+      <p><strong>This site requires JavaScript and WebGL2 to render the 3D scene.</strong></p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
