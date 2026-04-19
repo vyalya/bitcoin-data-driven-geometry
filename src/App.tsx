@@ -5,6 +5,7 @@ import { BlendFunction } from "postprocessing";
 import { useMemo, useRef, useState, useCallback, useEffect, useLayoutEffect } from "react";
 import * as THREE from "three";
 import { mosaicSnapshots, deriveRingBands } from "./data/mosaicSnapshots";
+import { loadSnapshots } from "./db";
 import type { NetworkSnapshot, BlockTuple } from "./types";
 
 /* ═══════════════════════════════════════════════════════
@@ -71,10 +72,19 @@ type HoverContext =
   | { type: "volume" };
 
 function App() {
+  // Snapshots: start with static mosaicSnapshots, upgrade to DuckDB data if parquet is present
+  const [snapshots, setSnapshots] = useState<NetworkSnapshot[]>(mosaicSnapshots);
   const [activeIdx, setActiveIdx] = useState(0);
-  const baseSnapshot = mosaicSnapshots[activeIdx];
+  const baseSnapshot = snapshots[Math.min(activeIdx, snapshots.length - 1)];
 
-  // Blocks from pre-baked static data
+  // Attempt to load richer data from DuckDB-WASM parquet files (no-op if not present)
+  useEffect(() => {
+    loadSnapshots().then((loaded) => {
+      if (loaded && loaded.length > 0) setSnapshots(loaded);
+    }).catch(() => { /* fall back to static data silently */ });
+  }, []);
+
+  // Blocks from pre-baked static data (or from DuckDB once loaded)
   const currentBlocks: BlockTuple[] = baseSnapshot.blocks ?? [];
 
   const [overrides, setOverrides] = useState<Record<string, number | null>>({});
@@ -178,7 +188,7 @@ function App() {
       if (!playRef.current) return;
       setActiveIdx((prev) => {
         const next = prev + 1;
-        if (next >= mosaicSnapshots.length) {
+        if (next >= snapshots.length) {
           setPlaying(false);
           return prev;
         }
@@ -283,10 +293,10 @@ function App() {
       >
         <color attach="background" args={["#020202"]} />
         {view === "detail" && <fog attach="fog" args={["#010101", 20, 45]} />}
-        <CameraRig view={view} />
+        <CameraRig view={view} snapCount={snapshots.length} />
         {view === "grid" ? (
           <GridScene
-            snapshots={mosaicSnapshots}
+            snapshots={snapshots}
             hoverIdx={gridHoverIdx}
             selectedIdx={gridSelectedIdx}
             legendHover={legendHover}
@@ -354,7 +364,7 @@ function App() {
       {/* ═══ GRID VIEW SUBTITLE ═══ */}
       {view === "grid" && (
         <div className="hud grid-subtitle">
-          25 historical snapshots · hover any in the timeline or click to explore
+          {snapshots.length} historical snapshots · hover any in the timeline or click to explore
         </div>
       )}
 
@@ -395,7 +405,7 @@ function App() {
               } else {
                 setPinnedGroup(null);
                 setActiveGroup(null);
-                if (activeIdx >= mosaicSnapshots.length - 1) setActiveIdx(0);
+                if (activeIdx >= snapshots.length - 1) setActiveIdx(0);
                 setPlaying(true);
                 setRotationEnabled(true);
               }
@@ -431,7 +441,7 @@ function App() {
         </div>
 
         <div className="timeline-vertical" ref={timelineRef}>
-          {mosaicSnapshots.map((snap, i) => {
+          {snapshots.map((snap, i) => {
             // Active in grid view tracks hover (desktop) or selected (mobile).
             // Active in detail view tracks the currently-viewed date.
             const gridActiveIdx = gridHoverIdx ?? gridSelectedIdx;
@@ -538,22 +548,22 @@ function App() {
 
         <div className={`context-panel ${view === "grid" ? "context-full" : ""}`}>
           {/* Mobile-only: embed the narration at the top of the sheet content */}
-          {view === "detail" && NARRATION[baseSnapshot.id] && (
+          {view === "detail" && (NARRATION[baseSnapshot.id] ?? baseSnapshot.narration) && (
             <div className="mobile-narration">
               <span className="mobile-narration-label">Context</span>
-              <p>{NARRATION[baseSnapshot.id]}</p>
+              <p>{NARRATION[baseSnapshot.id] ?? baseSnapshot.narration}</p>
             </div>
           )}
           <ContextPanel
             snapshot={
               view === "grid"
-                ? mosaicSnapshots[gridHoverIdx ?? gridSelectedIdx ?? activeIdx]
+                ? snapshots[gridHoverIdx ?? gridSelectedIdx ?? activeIdx]
                 : s
             }
             hoverCtx={view === "grid" ? { type: "none" } : hoverCtx}
             blocks={
               view === "grid"
-                ? (mosaicSnapshots[gridHoverIdx ?? gridSelectedIdx ?? activeIdx].blocks ?? [])
+                ? (snapshots[gridHoverIdx ?? gridSelectedIdx ?? activeIdx]?.blocks ?? [])
                 : currentBlocks
             }
           />
@@ -610,11 +620,11 @@ function App() {
       </div>
 
       {/* ═══ NARRATION BUBBLE ═══ */}
-      {view === "detail" && showNarration && NARRATION[baseSnapshot.id] && (
+      {view === "detail" && showNarration && (NARRATION[baseSnapshot.id] ?? baseSnapshot.narration) && (
         <div className="narration-bar">
           <div className="narration-content">
             <span className="narration-label">{baseSnapshot.label}</span>
-            <p className="narration-text">{NARRATION[baseSnapshot.id]}</p>
+            <p className="narration-text">{NARRATION[baseSnapshot.id] ?? baseSnapshot.narration}</p>
           </div>
           <button className="narration-close" onClick={() => setShowNarration(false)} type="button" title="Hide narration">✕</button>
         </div>
@@ -943,12 +953,78 @@ interface SceneProps {
    CAMERA RIG — smoothly animates camera between grid and detail views
    ═══════════════════════════════════════════════════════ */
 
-function CameraRig({ view }: { view: "grid" | "detail" }) {
-  const { camera, size } = useThree();
+function CameraRig({ view, snapCount }: { view: "grid" | "detail"; snapCount: number }) {
+  const { camera, size, gl } = useThree();
   const targetPos = useRef(new THREE.Vector3(0, 0, 22));
   const targetFov = useRef(42);
   const transitioning = useRef(false);
   const transitionStart = useRef(0);
+
+  // Scroll state (grid mode only)
+  const COLS = 5;
+  const SPACING_Y = 3.2;
+  const uiOffsetY = useRef(0);   // sidebar-bias Y, set on each grid view entry
+  const gridDist = useRef(22);   // Z distance in grid mode, set on each grid view entry
+  const snapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isInGrid = useRef(view === "grid");
+  isInGrid.current = view === "grid";
+
+  // Compute row-center world Y (rows are symmetric around 0, row 0 at top)
+  const rowCenterY = useCallback((row: number) => {
+    const ROWS = Math.ceil(snapCount / COLS);
+    return ((ROWS - 1) / 2 - row) * SPACING_Y;
+  }, [snapCount]);
+
+  // Wheel + touch scroll handler
+  useEffect(() => {
+    const ROWS = Math.ceil(snapCount / COLS);
+    const topY = rowCenterY(0);        // row 0 center world Y
+    const botY = rowCenterY(ROWS - 1); // last row center world Y
+
+    const doSnap = () => {
+      const relY = targetPos.current.y - uiOffsetY.current;
+      let closestRow = 0, closestDist = Infinity;
+      for (let r = 0; r < ROWS; r++) {
+        const d = Math.abs(rowCenterY(r) - relY);
+        if (d < closestDist) { closestDist = d; closestRow = r; }
+      }
+      targetPos.current.y = rowCenterY(closestRow) + uiOffsetY.current;
+    };
+
+    const clamp = (y: number) =>
+      Math.max(botY + uiOffsetY.current, Math.min(topY + uiOffsetY.current, y));
+
+    const handleWheel = (e: WheelEvent) => {
+      if (!isInGrid.current) return;
+      e.preventDefault();
+      targetPos.current.y = clamp(targetPos.current.y - e.deltaY * 0.018);
+      if (snapTimer.current) clearTimeout(snapTimer.current);
+      snapTimer.current = setTimeout(doSnap, 300);
+    };
+
+    let touchY = 0;
+    const handleTouchStart = (e: TouchEvent) => { touchY = e.touches[0].clientY; };
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isInGrid.current) return;
+      e.preventDefault();
+      const dy = touchY - e.touches[0].clientY;
+      touchY = e.touches[0].clientY;
+      targetPos.current.y = clamp(targetPos.current.y - dy * 0.05);
+      if (snapTimer.current) clearTimeout(snapTimer.current);
+      snapTimer.current = setTimeout(doSnap, 300);
+    };
+
+    const canvas = gl.domElement;
+    canvas.addEventListener("wheel", handleWheel, { passive: false });
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: true });
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+    return () => {
+      canvas.removeEventListener("wheel", handleWheel);
+      canvas.removeEventListener("touchstart", handleTouchStart);
+      canvas.removeEventListener("touchmove", handleTouchMove);
+      if (snapTimer.current) clearTimeout(snapTimer.current);
+    };
+  }, [gl.domElement, snapCount, rowCenterY]);
 
   useEffect(() => {
     if (view === "grid") {
@@ -993,35 +1069,31 @@ function CameraRig({ view }: { view: "grid" | "detail" }) {
       // Canvas aspect — what three.js uses for projection.
       const canvasAspect = vpW / vpH;
 
-      // Grid footprint: 5x5 at SPACING_X=3.6, SPACING_Y=3.2, cell radius ~1.4.
-      // Half-extents plus a bit of breathing room.
-      const gridHalfW = (4 * 3.6) / 2 + 1.6; // ~8.8
-      const gridHalfH = (4 * 3.2) / 2 + 1.6; // ~8.0
+      // Show ~5 rows at a time: cell radius ~1.4, 5 rows of SPACING_Y=3.2.
+      const gridHalfW = (4 * 3.6) / 2 + 1.6; // ~8.8 (5 cols)
+      const gridHalfH = (4 * 3.2) / 2 + 1.6; // ~8.0 (5 visible rows)
 
       // Pick a FOV: wider on narrow/mobile so the grid doesn't need a huge z.
       const fov = vpW < 640 ? 55 : vpW < 900 ? 48 : 42;
       const tanHalf = Math.tan((fov * Math.PI) / 360);
 
-      // We want the grid to fit inside the *usable* region at the focal plane.
-      // Visible half-height at distance d = d * tanHalf.
-      // Visible half-width at distance d = d * tanHalf * canvasAspect.
-      // Fraction of that width that's "usable" (not covered by sidebars)
-      // = usableW / vpW. Same for height = usableH / vpH.
       const usableFracW = usableW / vpW;
       const usableFracH = usableH / vpH;
       const distH = gridHalfH / (tanHalf * usableFracH);
       const distW = gridHalfW / (tanHalf * canvasAspect * usableFracW);
       const dist = Math.min(Math.max(distH, distW), 60);
 
-      // Center grid vertically within the usable region. Positive C_y → camera
-      // looks at a point above world origin → grid appears below screen center.
-      // Desktop has a small banner top → slight downshift. Mobile has a huge
-      // bottom sheet → large upshift.
+      // Center grid vertically within the usable region.
       const verticalShiftPx = (topReserve - bottomReserve) / 2;
       const worldPerPx = (dist * tanHalf * 2) / vpH;
       const offsetY = verticalShiftPx * worldPerPx;
 
-      targetPos.current.set(0, offsetY, dist);
+      uiOffsetY.current = offsetY;
+      gridDist.current = dist;
+
+      // Start at top of grid (row 0) when entering grid view
+      const startY = rowCenterY(0) + offsetY;
+      targetPos.current.set(0, startY, dist);
       targetFov.current = fov;
       // Reset up vector — TrackballControls modifies it during free rotation
       camera.up.set(0, 1, 0);
@@ -1032,26 +1104,40 @@ function CameraRig({ view }: { view: "grid" | "detail" }) {
     }
     transitioning.current = true;
     transitionStart.current = performance.now();
-  }, [view, camera, size.width, size.height]);
+  }, [view, camera, size.width, size.height, rowCenterY]);
 
   useFrame((_, delta) => {
-    if (!transitioning.current) return;
-    const elapsed = (performance.now() - transitionStart.current) / 1000;
-    // Transition for max 1 second — after that, stop fighting the user controls
-    if (elapsed > 1.0) {
-      transitioning.current = false;
+    const t = 1 - Math.pow(0.002, delta);
+
+    if (view === "grid") {
+      // Always smooth-lerp Y toward scroll target (even after transition settles)
+      camera.position.y += (targetPos.current.y - camera.position.y) * t;
+      // During initial transition: also lerp Z and FOV
+      if (transitioning.current) {
+        const elapsed = (performance.now() - transitionStart.current) / 1000;
+        if (elapsed > 1.0) transitioning.current = false;
+        camera.position.z += (gridDist.current - camera.position.z) * t;
+        const persp = camera as THREE.PerspectiveCamera;
+        if (persp.fov !== undefined) {
+          persp.fov += (targetFov.current - persp.fov) * t;
+          persp.updateProjectionMatrix();
+        }
+      }
+      camera.lookAt(0, camera.position.y, 0);
       return;
     }
-    const t = 1 - Math.pow(0.001, delta);
+
+    // Detail view: run transition lerp
+    if (!transitioning.current) return;
+    const elapsed = (performance.now() - transitionStart.current) / 1000;
+    if (elapsed > 1.0) { transitioning.current = false; return; }
     camera.position.lerp(targetPos.current, t);
     const persp = camera as THREE.PerspectiveCamera;
     if (persp.fov !== undefined) {
       persp.fov += (targetFov.current - persp.fov) * t;
       persp.updateProjectionMatrix();
     }
-    if (view === "grid") {
-      camera.lookAt(0, targetPos.current.y, 0);
-    }
+    camera.lookAt(0, targetPos.current.y, 0);
   });
 
   return null;
@@ -1074,9 +1160,10 @@ function GridScene({ snapshots, hoverIdx, selectedIdx, legendHover, onHover, onS
   // Used for the selected-cell pulse animation.
   const pulseRef = useRef(0);
 
-  // Staggered phase offsets so cells don't rotate in lockstep
+  // Staggered phase offsets — deterministic (golden-ratio seed) so cells don't
+  // re-randomize on every mount while still appearing visually distributed.
   const phaseOffsets = useMemo(() =>
-    Array.from({ length: snapshots.length }, () => Math.random() * Math.PI * 2),
+    Array.from({ length: snapshots.length }, (_, i) => Math.sin(i * 1.618) * Math.PI * 2),
   [snapshots.length]);
 
   useFrame((_, delta) => {
@@ -1087,10 +1174,11 @@ function GridScene({ snapshots, hoverIdx, selectedIdx, legendHover, onHover, onS
     forceUpdate((n) => n + 1);
   });
 
-  // 5x5 grid layout
+  // 21×5 scrollable grid layout
   const COLS = 5;
+  const ROWS = Math.ceil(snapshots.length / COLS);
   const SPACING_X = 3.6; // world units between cells (horizontal)
-  const SPACING_Y = 3.2; // world units between cells (vertical, tighter)
+  const SPACING_Y = 3.2; // world units between cells (vertical)
 
   // Gentle pulse for the selected cell (1.0 ± 0.06)
   const pulse = 1 + Math.sin(pulseRef.current * 3.2) * 0.06;
@@ -1107,7 +1195,7 @@ function GridScene({ snapshots, hoverIdx, selectedIdx, legendHover, onHover, onS
         const col = i % COLS;
         const row = Math.floor(i / COLS);
         const x = (col - (COLS - 1) / 2) * SPACING_X;
-        const y = ((COLS - 1) / 2 - row) * SPACING_Y;
+        const y = ((ROWS - 1) / 2 - row) * SPACING_Y;
         const isHovered = hoverIdx === i;
         const isSelected = selectedIdx === i;
         // Dim non-hovered cells when hovering. If nothing is hovered but
