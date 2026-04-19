@@ -188,7 +188,23 @@ function App() {
   const [showLegend] = useState(false);
   const [legendHover] = useState<string | null>(null);
   const [view, setView] = useState<"grid" | "detail">("grid");
-  const [gridHoverIdx, setGridHoverIdx] = useState<number | null>(null);
+  // TrackballControls fights the transition lerp when both run the same frame
+  // (its per-frame lookAt overrides ours, causing a visible jump mid-fade).
+  // Delay mounting the controls until the 1-second transition finishes.
+  const [controlsReady, setControlsReady] = useState(false);
+  useEffect(() => {
+    if (view !== "detail") { setControlsReady(false); return; }
+    const id = setTimeout(() => setControlsReady(true), 1050);
+    return () => clearTimeout(id);
+  }, [view]);
+  // Two-source hover: timeline-item hover drives the camera (grid pane scrolls
+  // to the row). Grid-cell hover drives the timeline (auto-scrolls the list).
+  // Merged into `gridHoverIdx` for consumers that just need "anything hovered"
+  // (right KPI panel, grid cell highlight, etc.).
+  const [timelineHoverIdx, setTimelineHoverIdx] = useState<number | null>(null);
+  const [cellHoverIdx, setCellHoverIdx] = useState<number | null>(null);
+  const gridHoverIdx = timelineHoverIdx ?? cellHoverIdx;
+  const setGridHoverIdx = setCellHoverIdx; // legacy alias — cell is the default "hover" source
   // Grid-view selection: first tap previews, second tap (on same cell) enters detail
   const [gridSelectedIdx, setGridSelectedIdx] = useState<number | null>(null);
   const [showGuideTab, setShowGuideTab] = useState<"about" | "legend" | "visual" | "source">("about");
@@ -282,8 +298,10 @@ function App() {
   const timelineHovered = useRef(false);
   // In grid view, follow hover (desktop) or selected (mobile) or active.
   // In detail view, always follow activeIdx.
+  // Timeline auto-scroll follows cell hover (so hovering a grid cell brings
+  // its entry into view) or the current selection if nothing is hovered.
   const scrollTargetIdx = view === "grid"
-    ? (gridHoverIdx ?? gridSelectedIdx ?? activeIdx)
+    ? (cellHoverIdx ?? gridSelectedIdx ?? activeIdx)
     : activeIdx;
   useEffect(() => {
     if (timelineHovered.current) return;
@@ -367,7 +385,7 @@ function App() {
       >
         <color attach="background" args={["#020202"]} />
         {view === "detail" && <fog attach="fog" args={["#010101", 20, 45]} />}
-        <CameraRig view={view} snapCount={snapshots.length} focusIdx={gridHoverIdx ?? gridSelectedIdx} />
+        <CameraRig view={view} snapCount={snapshots.length} focusIdx={timelineHoverIdx ?? gridSelectedIdx} />
         {view === "grid" ? (
           <GridScene
             snapshots={snapshots}
@@ -375,18 +393,19 @@ function App() {
             selectedIdx={gridSelectedIdx}
             matchedIndices={matchedIndices}
             legendHover={legendHover}
-            onHover={setGridHoverIdx}
+            onHover={setCellHoverIdx}
             onSelect={(i) => {
               // Mobile: first tap previews (updates sheet + highlights cell),
-              // second tap on the same cell enters detail view. Desktop keeps
-              // single-click-to-enter since hover already previews.
+              // second tap on the same cell enters detail. Desktop: single
+              // click enters detail directly.
               if (isMobile && gridSelectedIdx !== i) {
                 setGridSelectedIdx(i);
               } else {
                 setActiveIdx(i);
                 setGridSelectedIdx(i);
                 setView("detail");
-                setGridHoverIdx(null);
+                setCellHoverIdx(null);
+                setTimelineHoverIdx(null);
               }
             }}
           />
@@ -428,7 +447,7 @@ function App() {
             <Vignette eskil={false} offset={0.25} darkness={0.7} />
           </EffectComposer>
         )}
-        {view === "detail" && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={0.3} maxDistance={60} rotateSpeed={2} zoomSpeed={1.5} panSpeed={0.8} />}
+        {view === "detail" && controlsReady && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={0.3} maxDistance={60} rotateSpeed={2} zoomSpeed={1.5} panSpeed={0.8} />}
       </Canvas>
 
       {/* ═══ TOP BANNER ═══ */}
@@ -486,7 +505,8 @@ function App() {
                 : (activeIdx >= snapshots.length - 1 ? 0 : activeIdx);
               setActiveIdx(startIdx);
               if (view === "grid") {
-                setGridHoverIdx(null);
+                setCellHoverIdx(null);
+                setTimelineHoverIdx(null);
                 setGridSelectedIdx(null);
                 setView("detail");
               }
@@ -570,13 +590,15 @@ function App() {
                   key={snap.id}
                   ref={(el) => { tlItemRefs.current[i] = el; }}
                   className={`tl-item ${isActive ? "active" : ""}`}
-                  onMouseEnter={() => { if (view === "grid") setGridHoverIdx(i); }}
-                  onMouseLeave={() => { if (view === "grid") setGridHoverIdx(null); }}
+                  onMouseEnter={() => { if (view === "grid") setTimelineHoverIdx(i); }}
+                  onMouseLeave={() => { if (view === "grid") setTimelineHoverIdx(null); }}
                   onClick={() => {
                     if (view === "grid") {
                       setActiveIdx(i);
+                      setGridSelectedIdx(i);
                       setView("detail");
-                      setGridHoverIdx(null);
+                      setTimelineHoverIdx(null);
+                      setCellHoverIdx(null);
                     } else {
                       setActiveIdx(i); clearSelection(); setPlaying(false);
                     }
@@ -636,7 +658,7 @@ function App() {
           )}
           <button
             className="handle-info-btn"
-            onClick={(e) => { e.stopPropagation(); setShowGuideTab("legend"); setShowDataInfo(true); }}
+            onClick={(e) => { e.stopPropagation(); setShowGuideTab("about"); setShowDataInfo(true); }}
             type="button"
             aria-label="Info"
           >
@@ -659,7 +681,7 @@ function App() {
           </button>
           <button
             className="panel-header-btn"
-            onClick={() => { setShowGuideTab("source"); setShowDataInfo(true); }}
+            onClick={() => { setShowGuideTab("about"); setShowDataInfo(true); }}
             type="button"
           >
             <span className="info-icon">i</span> Info
@@ -1271,9 +1293,25 @@ function CameraRig({ view, snapCount, focusIdx }: { view: "grid" | "detail"; sna
       // Reset up vector — TrackballControls modifies it during free rotation
       camera.up.set(0, 1, 0);
     } else {
+      // Cut directly to the detail camera pose — no camera lerp. The grid
+      // view can be framed from anywhere (high Y to see rows, distant Z),
+      // and lerping from there to (0, 1.5, 11) produced a visible snap or
+      // descent no matter how we interpolated. The scene's own opacity
+      // fade-in carries the transition feel; the camera is just there when
+      // it's needed.
+      const fov = size.width < 640 ? 44 : 36;
       targetPos.current.set(0, 1.5, 11);
-      targetFov.current = size.width < 640 ? 44 : 36;
+      targetFov.current = fov;
       camera.up.set(0, 1, 0);
+      camera.position.set(0, 1.5, 11);
+      const persp = camera as THREE.PerspectiveCamera;
+      if (persp.fov !== undefined) {
+        persp.fov = fov;
+        persp.updateProjectionMatrix();
+      }
+      camera.lookAt(0, 1.5, 0);
+      transitioning.current = false;
+      return;
     }
     transitioning.current = true;
     transitionStart.current = performance.now();
