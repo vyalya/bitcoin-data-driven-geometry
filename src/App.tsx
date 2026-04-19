@@ -757,7 +757,7 @@ function App() {
                   <h4 className="guide-section-title">Elements of the scene</h4>
                   <div className="guide-cards">
                     {[
-                      { icon: <span className="legend-block" />, name: "Block Spine", desc: "A vertical stack of cuboids — one per block mined that day.", meta: "Width ← block weight (up to 4 MWU) · Brightness ← transaction count" },
+                      { icon: <span className="legend-block" />, name: "Block Crown", desc: "A radial ring of spikes at the center — one spike per block mined that day.", meta: "Spike length ← block weight (up to 4 MWU) · Brightness ← transaction count" },
                       { icon: <span className="legend-line" style={{ background: "#FFBF5E" }} />, name: "Fee Tiers", desc: "Four horizontal arcs (r=2.2), one per fee bucket (1–10, 11–30, 31–80, 81+ sat/vB).", meta: "Thickness ← fee pressure · Segment share ← bucket distribution" },
                       { icon: <span className="legend-line" style={{ background: "#F7931A" }} />, name: "Settlement", desc: "Horizontal arc (r=2.8). Full circle = blocks on schedule; shrinks when blocks arrive late.", meta: "Arc length ← average block interval vs 600 s target" },
                       { icon: <span className="legend-line" style={{ background: "#D97706" }} />, name: "Congestion", desc: "Horizontal arc (r=3.3). Barely visible when the mempool is clear; blazes under load.", meta: "Thickness + intensity ← mempool transaction count" },
@@ -820,7 +820,7 @@ function App() {
 
                     <span className="guide-map-data">Blocks carry more txs</span>
                     <span className="guide-map-arrow">→</span>
-                    <span className="guide-map-visual">Central spine cuboids glow brighter; wider ones mean fuller blocks</span>
+                    <span className="guide-map-visual">Central block-crown spikes glow brighter; longer ones mean fuller blocks</span>
                   </div>
                 </div>
 
@@ -2067,7 +2067,12 @@ function BlockSpine({ blocks, opacity: blockOpacity = 1, frozen = false, highlig
   const count = blocks.length || 1;
   const maxTxs = useMemo(() => Math.max(...blocks.map(b => b[3]), 1), [blocks]);
 
-  // useLayoutEffect: set matrices synchronously before paint to prevent identity-matrix flash
+  // useLayoutEffect: set matrices synchronously before paint to prevent
+  // identity-matrix flash. Blocks are arranged as a radial "crown" in the
+  // XY plane — each block is a spike pointing outward from center, length
+  // driven by weight (fuller block = longer spike), thickness by size,
+  // color brightness by tx count. This reads legibly from any view angle
+  // instead of looking like a horizontal beam when seen from the side.
   useLayoutEffect(() => {
     const mesh = meshRef.current;
     if (!mesh || blocks.length === 0) return;
@@ -2075,21 +2080,25 @@ function BlockSpine({ blocks, opacity: blockOpacity = 1, frozen = false, highlig
     const color = new THREE.Color();
     hoveredRef.current = -1;
 
-    const spineH = 4;
-    const slot = spineH / count;
-    const bh = Math.max(0.005, Math.min(0.04, slot * 0.4));
+    const INNER_R = 0.3;
+    const MIN_SPIKE = 0.12;
+    const MAX_SPIKE = 1.35;
 
     for (let i = 0; i < count; i++) {
       const [, size, weight, txs] = blocks[i];
       const wNorm = Math.min(weight / 4000000, 1);
       const sNorm = Math.min(size / 2000000, 1);
 
-      const w = 0.03 + wNorm * 0.18;
-      const dp = 0.02 + sNorm * 0.12;
+      const spikeLen = MIN_SPIKE + MAX_SPIKE * wNorm;
+      const thickness = 0.012 + sNorm * 0.022;
+      const midR = INNER_R + spikeLen / 2;
 
-      const y = (i - (count - 1) / 2) * slot;
-      dummy.position.set(0, y, 0);
-      dummy.scale.set(w, bh, dp);
+      const angle = (i / count) * Math.PI * 2;
+      dummy.position.set(Math.cos(angle) * midR, Math.sin(angle) * midR, 0);
+      dummy.lookAt(0, 0, 0);
+      // After lookAt, local +Z faces outward from origin. Extend the box
+      // along Z for the spike length; width/height are the thin axes.
+      dummy.scale.set(thickness, thickness, spikeLen);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
 
