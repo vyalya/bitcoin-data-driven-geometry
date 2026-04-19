@@ -3,6 +3,7 @@ import { TrackballControls } from "@react-three/drei";
 import { EffectComposer, Bloom, Vignette, ChromaticAberration } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 import { useMemo, useRef, useState, useCallback, useEffect, useLayoutEffect } from "react";
+import { createPortal } from "react-dom";
 import * as THREE from "three";
 import { staticSnapshots } from "./data/staticSnapshots";
 import { loadSnapshots, loadBlocksForDate, loadAllBlocks } from "./db";
@@ -607,7 +608,7 @@ function App() {
             aria-expanded={searchHelpOpen}
           >?</button>
         </div>
-        {searchHelpOpen && (
+        {searchHelpOpen && createPortal(
           <div className="timeline-search-hints" role="tooltip">
             <div className="hints-title">Search syntax</div>
             <dl>
@@ -621,7 +622,8 @@ function App() {
               <dt>Combine</dt><dd><code>halving 2024 to today</code></dd>
             </dl>
             <div className="hints-note">Text terms are AND'd; date terms are OR'd. Use space to separate.</div>
-          </div>
+          </div>,
+          document.body
         )}
         {matchedIndices !== null && (
           <div className="timeline-search-count">
