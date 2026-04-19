@@ -1347,6 +1347,13 @@ function CameraRig({ view, snapCount, focusIdx }: { view: "grid" | "detail"; sna
       // descent no matter how we interpolated. The scene's own opacity
       // fade-in carries the transition feel; the camera is just there when
       // it's needed.
+      //
+      // Look at the ORIGIN, not (0, 1.5, 0). The scene geometry is centered
+      // at origin; looking at (0, 1.5, 0) pushes the scene visibly into the
+      // lower half of the canvas and — because TrackballControls defaults
+      // its target to (0,0,0) and resets lookAt when it mounts — caused a
+      // visible "jump up" as the scene re-centered. Matching the controls'
+      // default eliminates that jump.
       const fov = size.width < 640 ? 44 : 36;
       targetPos.current.set(0, 1.5, 11);
       targetFov.current = fov;
@@ -1357,7 +1364,7 @@ function CameraRig({ view, snapCount, focusIdx }: { view: "grid" | "detail"; sna
         persp.fov = fov;
         persp.updateProjectionMatrix();
       }
-      camera.lookAt(0, 1.5, 0);
+      camera.lookAt(0, 0, 0);
       transitioning.current = false;
       return;
     }
