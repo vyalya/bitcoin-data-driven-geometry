@@ -11,13 +11,6 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
 import type { NetworkSnapshot, BlockTuple } from "./types";
 
-// Self-host just the worker script (small — ~20 KB) and rely on jsDelivr for
-// the WASM module (34 MB — over Cloudflare Pages' 25 MiB per-file limit, so
-// can't be in dist/). This avoids the blob: Worker trick entirely, which was
-// the piece CSP was blocking.
-import duckdb_worker_eh from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
-import duckdb_worker_mvp from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url";
-
 // ─── Derived metric helpers (mirrors build_db.mjs formulas) ──────────────────
 
 function deriveFeeBuckets(feePressureIndex: number) {
@@ -85,27 +78,24 @@ function toISODate(v: unknown): string {
 
 let dbPromise: Promise<duckdb.AsyncDuckDB> | null = null;
 
-// Pin the jsDelivr WASM URL to the exact version of @duckdb/duckdb-wasm we
-// install from node_modules. getJsDelivrBundles() returns @latest which can
-// drift ahead of our bundled worker — causing a WebAssembly "function
-// signature mismatch" at instantiate time when worker and WASM speak
-// different FFI ABIs.
-const DUCKDB_WASM_VERSION = "1.32.0";
-const CDN_BASE = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${DUCKDB_WASM_VERSION}/dist`;
-
 async function getDB(): Promise<duckdb.AsyncDuckDB> {
   if (dbPromise) return dbPromise;
   dbPromise = (async () => {
-    // Worker: self-hosted (same origin, no blob: indirection).
-    // WASM: jsDelivr-hosted (too big for Pages), pinned to our version.
-    const bundle = await duckdb.selectBundle({
-      mvp: { mainModule: `${CDN_BASE}/duckdb-mvp.wasm`, mainWorker: duckdb_worker_mvp },
-      eh:  { mainModule: `${CDN_BASE}/duckdb-eh.wasm`,  mainWorker: duckdb_worker_eh  },
-    });
-    const worker = new Worker(bundle.mainWorker!);
+    // Let the package pick worker + WASM from jsDelivr. The package hardcodes
+    // its own version into these URLs, so worker and WASM are guaranteed to
+    // match regardless of what npm has installed. The blob: wrapper around
+    // importScripts is how duckdb-wasm recommends loading on CSP-restricted
+    // sites — browsers treat it as same-origin for purposes of CSP.
+    const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
+    const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
+    const workerUrl = URL.createObjectURL(
+      new Blob([`importScripts("${bundle.mainWorker!}");`], { type: "text/javascript" })
+    );
+    const worker = new Worker(workerUrl);
     const logger = new duckdb.ConsoleLogger(duckdb.LogLevel.WARNING);
     const db = new duckdb.AsyncDuckDB(logger, worker);
     await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+    URL.revokeObjectURL(workerUrl);
     return db;
   })();
   return dbPromise;
