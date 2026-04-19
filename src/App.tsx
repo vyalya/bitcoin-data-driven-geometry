@@ -778,7 +778,7 @@ function App() {
             <div className="guide-tabs">
               <button className={`guide-tab ${showGuideTab === "about" ? "active" : ""}`} onClick={() => setShowGuideTab("about")} type="button">About</button>
               <button className={`guide-tab ${showGuideTab === "legend" ? "active" : ""}`} onClick={() => setShowGuideTab("legend")} type="button">Legend</button>
-              <button className={`guide-tab ${showGuideTab === "visual" ? "active" : ""}`} onClick={() => setShowGuideTab("visual")} type="button">How to Read</button>
+              <button className={`guide-tab ${showGuideTab === "visual" ? "active" : ""}`} onClick={() => setShowGuideTab("visual")} type="button">Guide</button>
               <button className={`guide-tab ${showGuideTab === "source" ? "active" : ""}`} onClick={() => setShowGuideTab("source")} type="button">Sources</button>
             </div>
 
@@ -808,7 +808,7 @@ function App() {
                   <h4 className="guide-section-title">How to explore</h4>
                   <p className="guide-paragraph">
                     Start with the <strong>Legend</strong> to learn what each element represents, then
-                    <strong> How to Read</strong> to see how data moves the geometry. Scrub through
+                    the <strong>Guide</strong> to see how data moves the geometry. Scrub through
                     history with the timeline, search by year or event, or orbit and zoom the scene
                     directly to inspect a particular moment up close.
                   </p>
