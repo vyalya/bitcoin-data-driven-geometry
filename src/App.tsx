@@ -702,22 +702,6 @@ function App() {
             </span>
           )}
           {mobileSheetExpanded && <span className="handle-title handle-title-min">Close</span>}
-          {selectionLabel && (
-            <button
-              className="handle-clear-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                setHoverCtx({ type: "none" });
-                setPinnedGroup(null);
-                setActiveGroup(null);
-              }}
-              type="button"
-              aria-label="Clear selection"
-              title="Clear selection"
-            >
-              ✕
-            </button>
-          )}
           <button
             className="handle-info-btn"
             onClick={(e) => { e.stopPropagation(); setShowGuideTab("about"); setShowDataInfo(true); }}
