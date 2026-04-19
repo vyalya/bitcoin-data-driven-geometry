@@ -150,6 +150,79 @@ button, input, textarea { font: inherit; }
   background: rgba(247, 147, 26, 0.12);
   color: var(--accent);
 }
+.timeline-search-help {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-tertiary);
+  font-size: 0.68rem;
+  line-height: 1;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.timeline-search-help:hover,
+.timeline-search-help.open {
+  background: rgba(247, 147, 26, 0.1);
+  color: var(--accent);
+  border-color: rgba(247, 147, 26, 0.35);
+}
+.timeline-search-hints {
+  margin: 0 12px 10px;
+  padding: 10px 12px;
+  background: rgba(10, 10, 10, 0.72);
+  border: 1px solid rgba(247, 147, 26, 0.2);
+  border-radius: 8px;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  animation: hints-in 0.15s ease-out;
+}
+@keyframes hints-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.timeline-search-hints .hints-title {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.timeline-search-hints dl {
+  margin: 0 0 6px;
+  display: grid;
+  grid-template-columns: minmax(68px, auto) 1fr;
+  gap: 2px 8px;
+}
+.timeline-search-hints dt {
+  color: var(--text-tertiary);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+}
+.timeline-search-hints dd {
+  margin: 0;
+  color: var(--text);
+}
+.timeline-search-hints code {
+  font-size: 0.7rem;
+  color: var(--accent);
+  background: rgba(247, 147, 26, 0.07);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+.timeline-search-hints .hints-note {
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
 .timeline-search-count {
   flex-shrink: 0;
   padding: 6px 14px;
@@ -554,105 +627,6 @@ button, input, textarea { font: inherit; }
   background: var(--panel-border);
   flex-shrink: 0;
 }
-
-/* What-If section */
-.whatif-section {
-  padding: 14px 20px 16px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.06) transparent;
-}
-
-.hud-whatif-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.whatif-title {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.reset-button {
-  background: transparent;
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  font-size: 0.7rem;
-  padding: 4px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.reset-button:hover { background: rgba(247, 147, 26, 0.1); }
-
-.slider-row { padding: 6px 0; }
-.slider-row.overridden .slider-label { color: var(--accent); }
-.slider-row.overridden .slider-value { color: var(--accent); }
-
-.slider-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 4px;
-}
-
-.slider-label {
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.slider-value {
-  font-size: 0.88rem;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-
-.slider-unit {
-  font-size: 0.68rem;
-  color: var(--text-tertiary);
-  margin-left: 2px;
-}
-
-.slider-row input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 3px;
-  background: rgba(247, 147, 26, 0.12);
-  border-radius: 2px;
-  outline: none;
-  cursor: pointer;
-}
-.slider-row.overridden input[type="range"] { background: rgba(247, 147, 26, 0.25); }
-
-.slider-row input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--text);
-  border: none;
-  cursor: pointer;
-}
-.slider-row.overridden input[type="range"]::-webkit-slider-thumb { background: var(--accent); }
-
-.slider-row input[type="range"]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--text);
-  border: none;
-  cursor: pointer;
-}
-.slider-row.overridden input[type="range"]::-moz-range-thumb { background: var(--accent); }
 
 /* ═══════════════════════════════════════════
    NARRATION BUBBLE — bottom center
@@ -1235,159 +1209,6 @@ button, input, textarea { font: inherit; }
    — anchored to the bottom of the right panel;
      pops upward as a popover when expanded.
    ═══════════════════════════════════════════ */
-.whatif-collapsible {
-  flex-shrink: 0;
-  position: relative;
-  margin-top: auto;
-  border-top: 1px solid var(--panel-border);
-  background: var(--surface-solid);
-}
-.whatif-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 12px 20px;
-  background: none;
-  border: none;
-  color: var(--accent);
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
-  transition: background 0.12s;
-  position: relative;
-  z-index: 2;
-}
-.whatif-toggle:hover { background: rgba(247, 147, 26, 0.05); }
-.whatif-toggle .whatif-title {
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-.whatif-chevron {
-  display: flex;
-  align-items: center;
-  color: var(--text-tertiary);
-  transition: transform 0.25s;
-}
-.whatif-chevron.down { transform: rotate(0deg); }
-.whatif-chevron.up { transform: rotate(180deg); }
-.whatif-collapsible.expanded .whatif-toggle {
-  border-bottom: 1px solid rgba(247, 147, 26, 0.12);
-  background: rgba(247, 147, 26, 0.04);
-}
-/* Dim the bottom toggle's title when the popover is open — its own header
-   provides the visible label, no need to repeat it in full intensity. */
-.whatif-collapsible.expanded .whatif-toggle .whatif-title { opacity: 0.35; }
-/* The slider panel pops upward from the toggle button as a floating popover */
-.whatif-collapsible.expanded .whatif-section {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 100%;
-  max-height: 56vh;
-  overflow-y: auto;
-  background: linear-gradient(180deg, #141414 0%, #0a0a0a 100%);
-  border: 1px solid rgba(247, 147, 26, 0.4);
-  border-bottom: 1px solid rgba(247, 147, 26, 0.18);
-  border-radius: 8px 8px 0 0;
-  box-shadow:
-    0 -20px 60px rgba(0, 0, 0, 0.85),
-    0 -2px 24px rgba(247, 147, 26, 0.18),
-    inset 0 1px 0 rgba(247, 147, 26, 0.15);
-  animation: whatif-slide-up 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-  z-index: 3;
-  padding: 0 0 14px;
-}
-.whatif-collapsible.expanded .whatif-section .slider-row {
-  padding: 10px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.025);
-}
-.whatif-collapsible.expanded .whatif-section .slider-row:last-child {
-  border-bottom: none;
-}
-.whatif-collapsible.expanded .whatif-section .slider-row.overridden {
-  background: rgba(247, 147, 26, 0.04);
-}
-.whatif-collapsible.expanded .whatif-section .slider-header {
-  margin-bottom: 8px;
-  gap: 8px;
-}
-.whatif-collapsible.expanded .whatif-section .slider-label {
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-  color: var(--text-tertiary);
-  flex-shrink: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.whatif-collapsible.expanded .whatif-section .slider-value {
-  font-size: 0.84rem;
-  font-weight: 600;
-  color: var(--text);
-  flex-shrink: 0;
-  text-align: right;
-}
-.whatif-collapsible.expanded .whatif-section .slider-unit {
-  font-size: 0.62rem;
-  color: var(--text-tertiary);
-  margin-left: 3px;
-}
-.whatif-collapsible.expanded .whatif-section input[type="range"] {
-  width: 100%;
-  display: block;
-}
-
-@keyframes whatif-slide-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Header bar that sits at the top of the popover with title + actions */
-.whatif-popover-header {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 18px;
-  background: linear-gradient(180deg, rgba(247, 147, 26, 0.12) 0%, rgba(247, 147, 26, 0.04) 100%);
-  border-bottom: 1px solid rgba(247, 147, 26, 0.22);
-  margin-bottom: 4px;
-}
-.whatif-popover-title {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-}
-.whatif-popover-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.whatif-popover-close {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: 1px solid rgba(247, 147, 26, 0.35);
-  border-radius: 50%;
-  color: var(--accent);
-  font-size: 0.72rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-  transition: background 0.12s, transform 0.12s;
-}
-.whatif-popover-close:hover { background: rgba(247, 147, 26, 0.15); transform: scale(1.05); }
 
 /* ═══════════════════════════════════════════
    RESPONSIVE — tablet and mobile
@@ -1664,7 +1485,6 @@ button, input, textarea { font: inherit; }
   /* Hide the desktop header + body in collapsed state */
   .hud-right-panel.mobile-collapsed .right-panel-header,
   .hud-right-panel.mobile-collapsed .context-panel,
-  .hud-right-panel.mobile-collapsed .whatif-section,
   .hud-right-panel.mobile-collapsed .right-divider {
     display: none !important;
   }
@@ -1678,10 +1498,6 @@ button, input, textarea { font: inherit; }
     max-height: none;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-  }
-  .hud-right-panel.mobile-expanded .whatif-section {
-    flex: 0 0 auto;
-    max-height: none;
   }
   /* Embedded narration inside the sheet (replaces floating bubble) */
   .mobile-narration {
@@ -1712,9 +1528,6 @@ button, input, textarea { font: inherit; }
   .ctx-label, .ctx-value { font-size: 0.78rem; }
   .ctx-row { padding: 3px 0; }
   .ctx-notes p { font-size: 0.7rem; }
-
-  /* Hide What-If entirely on mobile — keeps the sheet focused on viewing */
-  .whatif-collapsible { display: none !important; }
 
   /* Grid subtitle disappears on mobile — not enough room */
   .grid-subtitle { display: none; }

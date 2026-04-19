@@ -5,7 +5,7 @@ import { BlendFunction } from "postprocessing";
 import { useMemo, useRef, useState, useCallback, useEffect, useLayoutEffect } from "react";
 import * as THREE from "three";
 import { staticSnapshots } from "./data/staticSnapshots";
-import { loadSnapshots, loadBlocksForDate } from "./db";
+import { loadSnapshots, loadBlocksForDate, loadAllBlocks } from "./db";
 import type { NetworkSnapshot, BlockTuple } from "./types";
 
 /* ═══════════════════════════════════════════════════════
@@ -70,9 +70,29 @@ function App() {
     }).catch((e) => { console.error("[App] loadSnapshots threw:", e); });
   }, []);
 
-  // Blocks: pre-baked if present, otherwise fetch per-date from blocks.parquet
+  // Blocks: pre-baked if present, otherwise fetched from blocks.parquet. On
+  // mount we pull the full blocks table in one query and index by date so
+  // every grid cell has its crown from the start.
   const [blocksByDate, setBlocksByDate] = useState<Record<string, BlockTuple[]>>({});
+  useEffect(() => {
+    loadAllBlocks().then((all) => {
+      if (Object.keys(all).length > 0) setBlocksByDate(all);
+    }).catch((e) => console.error("[App] loadAllBlocks threw:", e));
+  }, []);
+
+  // Inject blocks into every snapshot so downstream components (grid cells,
+  // detail view) all just read snap.blocks without needing prop drilling.
+  const snapshotsWithBlocks = useMemo<NetworkSnapshot[]>(() => {
+    return snapshots.map((s) => {
+      if (s.blocks && s.blocks.length > 0) return s;
+      const date = s.snapshotTime.slice(0, 10);
+      const blocks = blocksByDate[date];
+      if (!blocks || blocks.length === 0) return s;
+      return { ...s, blocks };
+    });
+  }, [snapshots, blocksByDate]);
   const activeDate = baseSnapshot.snapshotTime.slice(0, 10);
+  // Fallback: if the bulk load missed the active date, fetch per-date.
   useEffect(() => {
     if ((baseSnapshot.blocks && baseSnapshot.blocks.length > 0) || blocksByDate[activeDate]) return;
     loadBlocksForDate(activeDate).then((blocks) => {
@@ -182,13 +202,29 @@ function App() {
   const [hoverCtx, setHoverCtx] = useState<HoverContext>({ type: "none" });
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [showDataInfo, setShowDataInfo] = useState(false);
+  const [searchHelpOpen, setSearchHelpOpen] = useState(false);
   // Legacy legend state — the standalone legend modal was replaced by a tab
   // in the Info modal, but these values are still referenced by scene props.
   // Setters are intentionally unused.
   const [showLegend] = useState(false);
   const [legendHover] = useState<string | null>(null);
   const [view, setView] = useState<"grid" | "detail">("grid");
-  const [gridHoverIdx, setGridHoverIdx] = useState<number | null>(null);
+  // TrackballControls fights the transition lerp when both run the same frame
+  // (its per-frame lookAt overrides ours, causing a visible jump mid-fade).
+  // Delay mounting the controls until the 1-second transition finishes.
+  const [controlsReady, setControlsReady] = useState(false);
+  useEffect(() => {
+    if (view !== "detail") { setControlsReady(false); return; }
+    const id = setTimeout(() => setControlsReady(true), 1050);
+    return () => clearTimeout(id);
+  }, [view]);
+  // Two-source hover: timeline-item hover drives the camera (grid pane scrolls
+  // to the row). Grid-cell hover drives the timeline (auto-scrolls the list).
+  // Merged into `gridHoverIdx` for consumers that just need "anything hovered"
+  // (right KPI panel, grid cell highlight, etc.).
+  const [timelineHoverIdx, setTimelineHoverIdx] = useState<number | null>(null);
+  const [cellHoverIdx, setCellHoverIdx] = useState<number | null>(null);
+  const gridHoverIdx = timelineHoverIdx ?? cellHoverIdx;
   // Grid-view selection: first tap previews, second tap (on same cell) enters detail
   const [gridSelectedIdx, setGridSelectedIdx] = useState<number | null>(null);
   const [showGuideTab, setShowGuideTab] = useState<"about" | "legend" | "visual" | "source">("about");
@@ -282,8 +318,10 @@ function App() {
   const timelineHovered = useRef(false);
   // In grid view, follow hover (desktop) or selected (mobile) or active.
   // In detail view, always follow activeIdx.
+  // Timeline auto-scroll follows cell hover (so hovering a grid cell brings
+  // its entry into view) or the current selection if nothing is hovered.
   const scrollTargetIdx = view === "grid"
-    ? (gridHoverIdx ?? gridSelectedIdx ?? activeIdx)
+    ? (cellHoverIdx ?? gridSelectedIdx ?? activeIdx)
     : activeIdx;
   useEffect(() => {
     if (timelineHovered.current) return;
@@ -367,26 +405,27 @@ function App() {
       >
         <color attach="background" args={["#020202"]} />
         {view === "detail" && <fog attach="fog" args={["#010101", 20, 45]} />}
-        <CameraRig view={view} snapCount={snapshots.length} focusIdx={gridHoverIdx ?? gridSelectedIdx} />
+        <CameraRig view={view} snapCount={snapshots.length} focusIdx={timelineHoverIdx ?? gridSelectedIdx} />
         {view === "grid" ? (
           <GridScene
-            snapshots={snapshots}
+            snapshots={snapshotsWithBlocks}
             hoverIdx={gridHoverIdx}
             selectedIdx={gridSelectedIdx}
             matchedIndices={matchedIndices}
             legendHover={legendHover}
-            onHover={setGridHoverIdx}
+            onHover={setCellHoverIdx}
             onSelect={(i) => {
               // Mobile: first tap previews (updates sheet + highlights cell),
-              // second tap on the same cell enters detail view. Desktop keeps
-              // single-click-to-enter since hover already previews.
+              // second tap on the same cell enters detail. Desktop: single
+              // click enters detail directly.
               if (isMobile && gridSelectedIdx !== i) {
                 setGridSelectedIdx(i);
               } else {
                 setActiveIdx(i);
                 setGridSelectedIdx(i);
                 setView("detail");
-                setGridHoverIdx(null);
+                setCellHoverIdx(null);
+                setTimelineHoverIdx(null);
               }
             }}
           />
@@ -428,7 +467,7 @@ function App() {
             <Vignette eskil={false} offset={0.25} darkness={0.7} />
           </EffectComposer>
         )}
-        {view === "detail" && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={0.3} maxDistance={60} rotateSpeed={2} zoomSpeed={1.5} panSpeed={0.8} />}
+        {view === "detail" && controlsReady && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={0.3} maxDistance={60} rotateSpeed={2} zoomSpeed={1.5} panSpeed={0.8} />}
       </Canvas>
 
       {/* ═══ TOP BANNER ═══ */}
@@ -486,7 +525,8 @@ function App() {
                 : (activeIdx >= snapshots.length - 1 ? 0 : activeIdx);
               setActiveIdx(startIdx);
               if (view === "grid") {
-                setGridHoverIdx(null);
+                setCellHoverIdx(null);
+                setTimelineHoverIdx(null);
                 setGridSelectedIdx(null);
                 setView("detail");
               }
@@ -543,7 +583,30 @@ function App() {
               aria-label="Clear search"
             >×</button>
           )}
+          <button
+            className={`timeline-search-help ${searchHelpOpen ? "open" : ""}`}
+            onClick={() => setSearchHelpOpen((v) => !v)}
+            type="button"
+            aria-label="Search syntax help"
+            aria-expanded={searchHelpOpen}
+          >?</button>
         </div>
+        {searchHelpOpen && (
+          <div className="timeline-search-hints" role="tooltip">
+            <div className="hints-title">Search syntax</div>
+            <dl>
+              <dt>Name</dt><dd><code>halving</code> · <code>mt gox</code></dd>
+              <dt>Year</dt><dd><code>2024</code></dd>
+              <dt>Year range</dt><dd><code>2020-2023</code></dd>
+              <dt>Month</dt><dd><code>2020-03</code></dd>
+              <dt>Date</dt><dd><code>2020-03-12</code></dd>
+              <dt>Precise range</dt><dd><code>2020-03-01..2020-06-30</code></dd>
+              <dt>Natural range</dt><dd><code>2017 to 2021</code> · <code>2025-11 to today</code></dd>
+              <dt>Combine</dt><dd><code>halving 2024 to today</code></dd>
+            </dl>
+            <div className="hints-note">Text terms are AND'd; date terms are OR'd. Use space to separate.</div>
+          </div>
+        )}
         {matchedIndices !== null && (
           <div className="timeline-search-count">
             {matchedIndices.size} of {snapshots.length}
@@ -570,13 +633,15 @@ function App() {
                   key={snap.id}
                   ref={(el) => { tlItemRefs.current[i] = el; }}
                   className={`tl-item ${isActive ? "active" : ""}`}
-                  onMouseEnter={() => { if (view === "grid") setGridHoverIdx(i); }}
-                  onMouseLeave={() => { if (view === "grid") setGridHoverIdx(null); }}
+                  onMouseEnter={() => { if (view === "grid") setTimelineHoverIdx(i); }}
+                  onMouseLeave={() => { if (view === "grid") setTimelineHoverIdx(null); }}
                   onClick={() => {
                     if (view === "grid") {
                       setActiveIdx(i);
+                      setGridSelectedIdx(i);
                       setView("detail");
-                      setGridHoverIdx(null);
+                      setTimelineHoverIdx(null);
+                      setCellHoverIdx(null);
                     } else {
                       setActiveIdx(i); clearSelection(); setPlaying(false);
                     }
@@ -636,7 +701,7 @@ function App() {
           )}
           <button
             className="handle-info-btn"
-            onClick={(e) => { e.stopPropagation(); setShowGuideTab("legend"); setShowDataInfo(true); }}
+            onClick={(e) => { e.stopPropagation(); setShowGuideTab("about"); setShowDataInfo(true); }}
             type="button"
             aria-label="Info"
           >
@@ -659,7 +724,7 @@ function App() {
           </button>
           <button
             className="panel-header-btn"
-            onClick={() => { setShowGuideTab("source"); setShowDataInfo(true); }}
+            onClick={() => { setShowGuideTab("about"); setShowDataInfo(true); }}
             type="button"
           >
             <span className="info-icon">i</span> Info
@@ -757,7 +822,7 @@ function App() {
                   <h4 className="guide-section-title">Elements of the scene</h4>
                   <div className="guide-cards">
                     {[
-                      { icon: <span className="legend-block" />, name: "Block Spine", desc: "A vertical stack of cuboids — one per block mined that day.", meta: "Width ← block weight (up to 4 MWU) · Brightness ← transaction count" },
+                      { icon: <span className="legend-block" />, name: "Block Crown", desc: "A radial ring of spikes at the center — one spike per block mined that day.", meta: "Spike length ← block weight (up to 4 MWU) · Brightness ← transaction count" },
                       { icon: <span className="legend-line" style={{ background: "#FFBF5E" }} />, name: "Fee Tiers", desc: "Four horizontal arcs (r=2.2), one per fee bucket (1–10, 11–30, 31–80, 81+ sat/vB).", meta: "Thickness ← fee pressure · Segment share ← bucket distribution" },
                       { icon: <span className="legend-line" style={{ background: "#F7931A" }} />, name: "Settlement", desc: "Horizontal arc (r=2.8). Full circle = blocks on schedule; shrinks when blocks arrive late.", meta: "Arc length ← average block interval vs 600 s target" },
                       { icon: <span className="legend-line" style={{ background: "#D97706" }} />, name: "Congestion", desc: "Horizontal arc (r=3.3). Barely visible when the mempool is clear; blazes under load.", meta: "Thickness + intensity ← mempool transaction count" },
@@ -820,7 +885,7 @@ function App() {
 
                     <span className="guide-map-data">Blocks carry more txs</span>
                     <span className="guide-map-arrow">→</span>
-                    <span className="guide-map-visual">Central spine cuboids glow brighter; wider ones mean fuller blocks</span>
+                    <span className="guide-map-visual">Central block-crown spikes glow brighter; longer ones mean fuller blocks</span>
                   </div>
                 </div>
 
@@ -1005,13 +1070,16 @@ function ContextPanel({ snapshot, hoverCtx, blocks }: { snapshot: NetworkSnapsho
   }
 
   if (hoverCtx.type === "hashrate") {
+    const hasData = s.networkHashrateEh > 0;
     return (
       <div className="ctx-content">
         <div className="ctx-title">Network Hashrate</div>
-        <CtxRow label="Hashrate" value={`${s.networkHashrateEh.toFixed(1)} EH/s`} />
-        <CtxRow label="Ring Fill" value={`${((s.networkHashrateEh / 1305.5) * 100).toFixed(1)}%`} />
+        <CtxRow label="Hashrate" value={hasData ? `${s.networkHashrateEh.toFixed(1)} EH/s` : "— (no data)"} />
+        <CtxRow label="Ring Fill" value={hasData ? `${((s.networkHashrateEh / 1305.5) * 100).toFixed(1)}%` : "—"} />
         <CtxRow label="Halving Era" value={`${Math.floor(s.blockHeight / 210000) + 1}`} />
-        <div className="ctx-notes"><p>Amber vertical ring. Arc length proportional to hashrate relative to the 2025 peak of ~1,305 EH/s. Measures total computational power securing the network. Sourced from CoinMetrics.</p></div>
+        <div className="ctx-notes"><p>{hasData
+          ? "Amber vertical ring. Arc length proportional to hashrate relative to the 2025 peak of ~1,305 EH/s. Measures total computational power securing the network. Sourced from CoinMetrics."
+          : "CoinMetrics hashrate coverage starts in 2011. For earlier dates, no estimate is reported — so the ring is hidden rather than shown as zero."}</p></div>
       </div>
     );
   }
@@ -1030,13 +1098,17 @@ function ContextPanel({ snapshot, hoverCtx, blocks }: { snapshot: NetworkSnapsho
   }
 
   if (hoverCtx.type === "difficulty") {
+    const hasDiff = s.difficulty > 0;
+    const hasHr = s.networkHashrateEh > 0;
     return (
       <div className="ctx-content">
         <div className="ctx-title">Mining Difficulty</div>
-        <CtxRow label="Difficulty" value={formatDifficulty(s.difficulty)} />
-        <CtxRow label="Hashrate" value={`${s.networkHashrateEh.toFixed(1)} EH/s`} />
+        <CtxRow label="Difficulty" value={hasDiff ? formatDifficulty(s.difficulty) : "— (no data)"} />
+        <CtxRow label="Hashrate" value={hasHr ? `${s.networkHashrateEh.toFixed(1)} EH/s` : "— (no data)"} />
         <CtxRow label="Difficulty Epoch" value={`${Math.floor(s.blockHeight / 2016)}`} />
-        <div className="ctx-notes"><p>Deep-gold vertical ring. Log-scaled arc — difficulty spans from 1 (Genesis) to 150 trillion (2025). Adjusts every 2,016 blocks to maintain ~10 min block times.</p></div>
+        <div className="ctx-notes"><p>{hasDiff
+          ? "Deep-gold vertical ring. Log-scaled arc — difficulty spans from 1 (Genesis) to 150 trillion (2025). Adjusts every 2,016 blocks to maintain ~10 min block times."
+          : "blockchain.com difficulty coverage doesn't reach this date. The ring is hidden rather than shown as zero."}</p></div>
       </div>
     );
   }
@@ -1050,8 +1122,8 @@ function ContextPanel({ snapshot, hoverCtx, blocks }: { snapshot: NetworkSnapsho
       <CtxRow label="Fee Pressure" value={`${s.feePressureIndex.toFixed(1)}/10`} />
       <CtxRow label="Congestion" value={`${s.congestionScore.toFixed(1)}/10`} />
       <CtxRow label="Block Stress" value={`${s.blockProductionStress.toFixed(1)}/10`} />
-      <CtxRow label="Hashrate" value={`${s.networkHashrateEh.toFixed(0)} EH/s`} />
-      <CtxRow label="Difficulty" value={formatDifficulty(s.difficulty)} />
+      <CtxRow label="Hashrate" value={s.networkHashrateEh > 0 ? `${s.networkHashrateEh.toFixed(0)} EH/s` : "—"} />
+      <CtxRow label="Difficulty" value={s.difficulty > 0 ? formatDifficulty(s.difficulty) : "—"} />
       <div className="ctx-divider" />
       <CtxRow label="Blocks" value={`${blocks.length}`} />
       <CtxRow label="Mempool" value={s.mempoolTxCount.toLocaleString()} />
@@ -1189,7 +1261,12 @@ function CameraRig({ view, snapCount, focusIdx }: { view: "grid" | "detail"; sna
   }, [focusIdx, view, snapCount, rowCenterY]);
 
 
-  useEffect(() => {
+  // useLayoutEffect (not useEffect): we need to reposition the camera
+  // synchronously after the view switches, before the browser paints. A plain
+  // useEffect fires after paint, leaving one frame where the new scene is
+  // rendered with the camera still at the old (grid) position — the visible
+  // "snap" on entering detail view.
+  useLayoutEffect(() => {
     if (view === "grid") {
       // Account for side panels covering part of the canvas. These must match
       // the responsive panel widths declared in styles.css.
@@ -1264,9 +1341,32 @@ function CameraRig({ view, snapCount, focusIdx }: { view: "grid" | "detail"; sna
       // Reset up vector — TrackballControls modifies it during free rotation
       camera.up.set(0, 1, 0);
     } else {
+      // Cut directly to the detail camera pose — no camera lerp. The grid
+      // view can be framed from anywhere (high Y to see rows, distant Z),
+      // and lerping from there to (0, 1.5, 11) produced a visible snap or
+      // descent no matter how we interpolated. The scene's own opacity
+      // fade-in carries the transition feel; the camera is just there when
+      // it's needed.
+      //
+      // Look at the ORIGIN, not (0, 1.5, 0). The scene geometry is centered
+      // at origin; looking at (0, 1.5, 0) pushes the scene visibly into the
+      // lower half of the canvas and — because TrackballControls defaults
+      // its target to (0,0,0) and resets lookAt when it mounts — caused a
+      // visible "jump up" as the scene re-centered. Matching the controls'
+      // default eliminates that jump.
+      const fov = size.width < 640 ? 44 : 36;
       targetPos.current.set(0, 1.5, 11);
-      targetFov.current = size.width < 640 ? 44 : 36;
+      targetFov.current = fov;
       camera.up.set(0, 1, 0);
+      camera.position.set(0, 1.5, 11);
+      const persp = camera as THREE.PerspectiveCamera;
+      if (persp.fov !== undefined) {
+        persp.fov = fov;
+        persp.updateProjectionMatrix();
+      }
+      camera.lookAt(0, 0, 0);
+      transitioning.current = false;
+      return;
     }
     transitioning.current = true;
     transitionStart.current = performance.now();
@@ -1338,9 +1438,10 @@ function GridScene({ snapshots, hoverIdx, selectedIdx, matchedIndices, legendHov
   [snapshots.length]);
 
   useFrame((_, delta) => {
-    groupRefs.current.forEach((g) => {
-      if (g) g.rotation.y += delta * 0.15;
-    });
+    // Grid cells are static. Earlier we rotated each cell around Y, but the
+    // block-crown lives in the XY plane and goes edge-on (invisible) every
+    // 180° of that rotation. Static 3D reads just fine — rotation is for
+    // detail view, where the camera orbits explicitly.
     pulseRef.current += delta;
     forceUpdate((n) => n + 1);
   });
@@ -1387,7 +1488,7 @@ function GridScene({ snapshots, hoverIdx, selectedIdx, matchedIndices, legendHov
           <group
             key={snap.id}
             position={[x, y, 0]}
-            rotation={[0, phaseOffsets[i], 0]}
+            rotation={[0, 0, phaseOffsets[i]]}
           >
             {/* Invisible hit target for reliable hover */}
             <mesh
@@ -1512,8 +1613,8 @@ function MiniSnapshot({ snapshot: s, opacity: dim, highlighted, legendHover }: {
         );
       })()}
 
-      {/* Hashrate vertical */}
-      {(() => {
+      {/* Hashrate vertical — only when CoinMetrics reports a value */}
+      {s.networkHashrateEh > 0 && (() => {
         const fillAngle = Math.PI * 2 * Math.max(0.02, hrNorm);
         const g = lhGlow("hashrate-ring");
         return (
@@ -1523,8 +1624,8 @@ function MiniSnapshot({ snapshot: s, opacity: dim, highlighted, legendHover }: {
         );
       })()}
 
-      {/* Difficulty vertical */}
-      {(() => {
+      {/* Difficulty vertical — only when blockchain.com reports a value */}
+      {s.difficulty > 0 && (() => {
         const fillAngle = Math.PI * 2 * Math.max(0.02, diffLog);
         const g = lhGlow("difficulty-ring");
         return (
@@ -1592,19 +1693,27 @@ function MiniSpine({ blocks, opacity: blockOpacity, highlighted }: { blocks: Blo
     if (!mesh || blocks.length === 0) return;
     const dummy = new THREE.Object3D();
     const color = new THREE.Color();
-    const spineH = 4;
-    const slot = spineH / count;
-    const bh = Math.max(0.005, Math.min(0.04, slot * 0.4));
+
+    // Radial "block crown" — same shape as the detail-view spine, just
+    // bigger/thicker here to remain visible at grid scale (each mini cell
+    // is rendered at ~0.28× scale inside the grid).
+    const INNER_R = 0.15;
+    const MIN_SPIKE = 0.25;
+    const MAX_SPIKE = 1.15;
 
     for (let i = 0; i < count; i++) {
       const [, size, weight, txs] = blocks[i];
       const wNorm = Math.min(weight / 4000000, 1);
       const sNorm = Math.min(size / 2000000, 1);
-      const w = 0.03 + wNorm * 0.18;
-      const dp = 0.02 + sNorm * 0.12;
-      const y = (i - (count - 1) / 2) * slot;
-      dummy.position.set(0, y, 0);
-      dummy.scale.set(w, bh, dp);
+
+      const spikeLen = MIN_SPIKE + MAX_SPIKE * wNorm;
+      const thickness = 0.04 + sNorm * 0.05;
+      const midR = INNER_R + spikeLen / 2;
+
+      const angle = (i / count) * Math.PI * 2;
+      dummy.position.set(Math.cos(angle) * midR, Math.sin(angle) * midR, 0);
+      dummy.lookAt(0, 0, 0);
+      dummy.scale.set(thickness, thickness, spikeLen);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
 
@@ -1830,8 +1939,9 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
         );
       })()}
 
-      {/* ═══ HASHRATE ARC — vertical ring (YZ plane, r=2.5) ═══ */}
-      {(() => {
+      {/* ═══ HASHRATE ARC — vertical ring (YZ plane, r=2.5). Hidden when
+           no hashrate data exists for this date (pre-2011 CoinMetrics). ═══ */}
+      {s.networkHashrateEh > 0 && (() => {
         const gid = "hashrate-ring";
         const g = glowMult(gid);
         const hrNorm = hrNormAnim;
@@ -1849,8 +1959,9 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
         );
       })()}
 
-      {/* ═══ DIFFICULTY ARC — vertical ring (XZ plane, r=3.0) ═══ */}
-      {(() => {
+      {/* ═══ DIFFICULTY ARC — vertical ring (XZ plane, r=3.0). Hidden when
+           blockchain.com doesn't have difficulty for this date. ═══ */}
+      {s.difficulty > 0 && (() => {
         const gid = "difficulty-ring";
         const g = glowMult(gid);
         // Log scale: difficulty spans 1 to 150T — linear would make early eras invisible
@@ -2058,7 +2169,12 @@ function BlockSpine({ blocks, opacity: blockOpacity = 1, frozen = false, highlig
   const count = blocks.length || 1;
   const maxTxs = useMemo(() => Math.max(...blocks.map(b => b[3]), 1), [blocks]);
 
-  // useLayoutEffect: set matrices synchronously before paint to prevent identity-matrix flash
+  // useLayoutEffect: set matrices synchronously before paint to prevent
+  // identity-matrix flash. Blocks are arranged as a radial "crown" in the
+  // XY plane — each block is a spike pointing outward from center, length
+  // driven by weight (fuller block = longer spike), thickness by size,
+  // color brightness by tx count. This reads legibly from any view angle
+  // instead of looking like a horizontal beam when seen from the side.
   useLayoutEffect(() => {
     const mesh = meshRef.current;
     if (!mesh || blocks.length === 0) return;
@@ -2066,21 +2182,25 @@ function BlockSpine({ blocks, opacity: blockOpacity = 1, frozen = false, highlig
     const color = new THREE.Color();
     hoveredRef.current = -1;
 
-    const spineH = 4;
-    const slot = spineH / count;
-    const bh = Math.max(0.005, Math.min(0.04, slot * 0.4));
+    const INNER_R = 0.3;
+    const MIN_SPIKE = 0.12;
+    const MAX_SPIKE = 1.35;
 
     for (let i = 0; i < count; i++) {
       const [, size, weight, txs] = blocks[i];
       const wNorm = Math.min(weight / 4000000, 1);
       const sNorm = Math.min(size / 2000000, 1);
 
-      const w = 0.03 + wNorm * 0.18;
-      const dp = 0.02 + sNorm * 0.12;
+      const spikeLen = MIN_SPIKE + MAX_SPIKE * wNorm;
+      const thickness = 0.012 + sNorm * 0.022;
+      const midR = INNER_R + spikeLen / 2;
 
-      const y = (i - (count - 1) / 2) * slot;
-      dummy.position.set(0, y, 0);
-      dummy.scale.set(w, bh, dp);
+      const angle = (i / count) * Math.PI * 2;
+      dummy.position.set(Math.cos(angle) * midR, Math.sin(angle) * midR, 0);
+      dummy.lookAt(0, 0, 0);
+      // After lookAt, local +Z faces outward from origin. Extend the box
+      // along Z for the spike length; width/height are the thin axes.
+      dummy.scale.set(thickness, thickness, spikeLen);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
 
@@ -2108,11 +2228,11 @@ function BlockSpine({ blocks, opacity: blockOpacity = 1, frozen = false, highlig
       mesh.instanceMatrix.needsUpdate = true;
     }
 
-    // Highlight new
+    // Highlight new — thicken the spike (cross-section grows) but keep its
+    // length unchanged so it never protrudes through the surrounding rings.
+    // Local X and Y are the thin axes; local Z is the radial length.
     if (idx >= 0 && idx < blocks.length) {
-      // Save original matrix
       mesh.getMatrixAt(idx, origMatrix.current);
-      // Scale up
       const m = origMatrix.current.clone();
       const pos = new THREE.Vector3();
       const quat = new THREE.Quaternion();
@@ -2120,7 +2240,7 @@ function BlockSpine({ blocks, opacity: blockOpacity = 1, frozen = false, highlig
       m.decompose(pos, quat, scl);
       dummy.position.copy(pos);
       dummy.quaternion.copy(quat);
-      dummy.scale.set(scl.x * 2.5, scl.y * 2.5, scl.z * 2.5);
+      dummy.scale.set(scl.x * 3.0, scl.y * 3.0, scl.z);
       dummy.updateMatrix();
       mesh.setMatrixAt(idx, dummy.matrix);
       mesh.instanceMatrix.needsUpdate = true;
