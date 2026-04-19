@@ -57,14 +57,15 @@ function App() {
   const [snapshots, setSnapshots] = useState<NetworkSnapshot[]>(staticSnapshots);
   const [activeIdx, setActiveIdx] = useState(0);
   const baseSnapshot = snapshots[Math.min(activeIdx, snapshots.length - 1)];
+  // False until the parquet load attempt settles (success or fail). Used to
+  // avoid flashing the static 25-snapshot count before the real 105 lands.
+  const [snapshotsSettled, setSnapshotsSettled] = useState(false);
 
-  // Attempt to load richer data from DuckDB-WASM parquet files (no-op if not present)
   useEffect(() => {
     loadSnapshots().then((loaded) => {
-      if (loaded && loaded.length > 0) {
-        setSnapshots(loaded);
-      }
-    }).catch((e) => { console.error("[App] loadSnapshots threw:", e); });
+      if (loaded && loaded.length > 0) setSnapshots(loaded);
+    }).catch((e) => { console.error("[App] loadSnapshots threw:", e); })
+    .finally(() => setSnapshotsSettled(true));
   }, []);
 
   // Blocks: pre-baked if present, otherwise fetched from blocks.parquet. On
@@ -234,9 +235,10 @@ function App() {
   const [rotationEnabled, setRotationEnabled] = useState(true);
   const rotationRef = useRef(rotationEnabled);
   rotationRef.current = rotationEnabled;
-  // Grid-mode orbit is opt-in (off by default — row scroll is the default
-  // interaction there). When on, TrackballControls mounts over the grid.
-  const [gridOrbitEnabled, setGridOrbitEnabled] = useState(false);
+  // Grid-mode orbit is disabled — row scrolling is the grid's native
+  // interaction and TrackballControls over a 21-row-tall scrollable grid
+  // never produced a usable view. Orbit remains available in detail view.
+  const gridOrbitEnabled = false;
 
   const onHover = useCallback((groupId: string | null) => {
     setActiveGroup(groupId);
@@ -333,8 +335,16 @@ function App() {
       const containerRect = container.getBoundingClientRect();
       const itemRect = item.getBoundingClientRect();
       const itemOffsetLeft = itemRect.left - containerRect.left + container.scrollLeft;
-      const target = itemOffsetLeft - (container.clientWidth - item.clientWidth) / 2;
-      container.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+      const itemRight = itemOffsetLeft + item.clientWidth;
+      const viewLeft = container.scrollLeft;
+      const viewRight = viewLeft + container.clientWidth;
+      // Only scroll if item is outside the visible viewport. Prevents the
+      // jumpiness that happens when hovering across adjacent cells — if
+      // the target is already visible, no re-centering is needed.
+      if (itemOffsetLeft < viewLeft + 8 || itemRight > viewRight - 8) {
+        const target = itemOffsetLeft - (container.clientWidth - item.clientWidth) / 2;
+        container.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+      }
     } else {
       const containerRect = container.getBoundingClientRect();
       const itemRect = item.getBoundingClientRect();
@@ -406,7 +416,7 @@ function App() {
         <color attach="background" args={["#020202"]} />
         {view === "detail" && <fog attach="fog" args={["#010101", 20, 45]} />}
         <CameraRig view={view} snapCount={snapshots.length} focusIdx={timelineHoverIdx ?? gridSelectedIdx} gridOrbitEnabled={gridOrbitEnabled} />
-        {view === "grid" ? (
+        {view === "grid" ? (snapshotsSettled ? (
           <GridScene
             snapshots={snapshotsWithBlocks}
             hoverIdx={gridHoverIdx}
@@ -429,7 +439,7 @@ function App() {
               }
             }}
           />
-        ) : (
+        ) : null) : (
           <PrimeRadiantScene
             snapshot={s}
             blocks={currentBlocks}
@@ -468,7 +478,6 @@ function App() {
           </EffectComposer>
         )}
         {view === "detail" && controlsReady && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={0.3} maxDistance={60} rotateSpeed={2} zoomSpeed={1.5} panSpeed={0.8} />}
-        {view === "grid" && gridOrbitEnabled && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={8} maxDistance={80} rotateSpeed={1.8} zoomSpeed={1.2} panSpeed={0.8} />}
       </Canvas>
 
       {/* ═══ TOP BANNER ═══ */}
@@ -479,7 +488,11 @@ function App() {
       {/* ═══ GRID VIEW SUBTITLE ═══ */}
       {view === "grid" && (
         <div className="hud grid-subtitle">
-          {snapshots.length} historical snapshots · hover any in the timeline or click to explore
+          {!snapshotsSettled
+            ? "Loading historical snapshots…"
+            : isMobile
+              ? `${snapshots.length} snapshots · tap a cell to select, double-tap to explore`
+              : `${snapshots.length} historical snapshots · hover any in the timeline or click to explore`}
         </div>
       )}
 
@@ -539,19 +552,14 @@ function App() {
             {playing ? "❚❚" : "▶"} {playing ? "Pause" : "Play"}
           </button>
 
-          {/* Rotate button — right. Grid view: toggles free-orbit
-              (TrackballControls); detail view: toggles ambient rotation. */}
+          {/* Rotate button — detail view only. Toggles ambient rotation.
+              Disabled in grid view (orbit proved impractical over a
+              21-row scrollable grid). */}
           <button
-            className={`rotate-toggle ${
-              (view === "detail" && rotationEnabled && !pinnedGroup) ||
-              (view === "grid" && gridOrbitEnabled)
-                ? "active" : ""
-            }`}
+            className={`rotate-toggle ${view === "detail" && rotationEnabled && !pinnedGroup ? "active" : ""}`}
+            disabled={view === "grid"}
             onClick={() => {
-              if (view === "grid") {
-                setGridOrbitEnabled((v) => !v);
-                return;
-              }
+              if (view === "grid") return;
               if (rotationEnabled && !pinnedGroup) {
                 setRotationEnabled(false);
               } else {
@@ -561,7 +569,7 @@ function App() {
               }
             }}
             type="button"
-            title={view === "grid" ? "Toggle orbit (drag to rotate)" : "Toggle rotation"}
+            title="Toggle rotation"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-20 12 12)" />
@@ -688,9 +696,12 @@ function App() {
           tabIndex={0}
           aria-label={mobileSheetExpanded ? "Collapse details" : "Expand details. Swipe up for full KPIs."}
         >
-          <span className="handle-title">
-            {selectionLabel ?? "Tap to see more"}
-          </span>
+          {!mobileSheetExpanded && (
+            <span className="handle-title">
+              {selectionLabel ?? "Tap to see more"}
+            </span>
+          )}
+          {mobileSheetExpanded && <span className="handle-title handle-title-min">Close</span>}
           {selectionLabel && (
             <button
               className="handle-clear-btn"
@@ -975,19 +986,16 @@ function App() {
                   <h4 className="guide-section-title">Derived Values</h4>
                   <p className="guide-paragraph">
                     A handful of scores — <em>block production stress</em>, <em>congestion</em>,{" "}
-                    <em>fee pressure</em>, <em>network health</em> — are computed from the raw fields
-                    above using simple piecewise formulas. They're <strong>not</strong> independent
-                    sources; they're just different lenses on the same data.
+                    <em>fee pressure</em>, <em>network health</em> — are computed from the raw
+                    fields above using simple piecewise formulas. They're <strong>not</strong>{" "}
+                    independent sources; they're just different lenses on the same data.
                   </p>
-                </div>
-
-                <div className="guide-section">
-                  <h4 className="guide-section-title">Visual-Only Fields</h4>
                   <p className="guide-paragraph">
-                    The fee-tier distribution (the four fee arc segments) is interpolated from fee
-                    pressure using anchor distributions. It's directionally correct but not a
-                    per-block histogram. Ring intensities and particle density are also derived,
-                    not sourced. None of these drive the KPI numbers in the right panel.
+                    The four fee-tier arcs are a <strong>shape projection</strong> of fee pressure:
+                    a single scalar (sats per transaction) is mapped to a four-bucket distribution
+                    via published anchor curves. It's still entirely data-driven — no decoration —
+                    but it's a projection, not a per-block histogram. A real histogram would
+                    require a separate BigQuery extract over the <code>transactions</code> table.
                   </p>
                 </div>
 
@@ -1198,6 +1206,29 @@ function CameraRig({ view, snapCount, focusIdx, gridOrbitEnabled }: { view: "gri
   // fight over camera.position.
   const orbitOn = useRef(gridOrbitEnabled);
   orbitOn.current = gridOrbitEnabled;
+
+  // When orbit flips ON in grid view, snap camera to a fixed overview pose
+  // that frames the whole grid from the front. TrackballControls' target is
+  // (0,0,0) by default; keeping the camera on the Z axis at a fixed distance
+  // makes rotation orbit cleanly around the grid center instead of producing
+  // the tall "stretched column" view that happens when you rotate while
+  // already scrolled to a far row.
+  useLayoutEffect(() => {
+    if (view !== "grid" || !gridOrbitEnabled) return;
+    const ROWS = Math.ceil(snapCount / COLS);
+    const gridFullH = (ROWS - 1) * SPACING_Y + 2;
+    const fov = size.width < 640 ? 55 : size.width < 900 ? 48 : 42;
+    const tanHalf = Math.tan((fov * Math.PI) / 360);
+    const dist = Math.min(gridFullH / (2 * tanHalf), 60);
+    camera.position.set(0, 0, dist);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(0, 0, 0);
+    const persp = camera as THREE.PerspectiveCamera;
+    if (persp.fov !== undefined) {
+      persp.fov = fov;
+      persp.updateProjectionMatrix();
+    }
+  }, [view, gridOrbitEnabled, snapCount, size.width, camera]);
 
   // Compute row-center world Y (rows are symmetric around 0, row 0 at top)
   const rowCenterY = useCallback((row: number) => {

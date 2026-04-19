@@ -11,13 +11,6 @@
 import * as duckdb from "@duckdb/duckdb-wasm";
 import type { NetworkSnapshot, BlockTuple } from "./types";
 
-// Self-host just the worker script (small — ~20 KB) and rely on jsDelivr for
-// the WASM module (34 MB — over Cloudflare Pages' 25 MiB per-file limit, so
-// can't be in dist/). This avoids the blob: Worker trick entirely, which was
-// the piece CSP was blocking.
-import duckdb_worker_eh from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
-import duckdb_worker_mvp from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url";
-
 // ─── Derived metric helpers (mirrors build_db.mjs formulas) ──────────────────
 
 function deriveFeeBuckets(feePressureIndex: number) {
@@ -88,18 +81,21 @@ let dbPromise: Promise<duckdb.AsyncDuckDB> | null = null;
 async function getDB(): Promise<duckdb.AsyncDuckDB> {
   if (dbPromise) return dbPromise;
   dbPromise = (async () => {
-    const jsdelivr = duckdb.getJsDelivrBundles();
-    // Use the jsDelivr-hosted WASM module (too large to self-host on Pages),
-    // but load the worker from our own origin. Direct worker URL avoids the
-    // blob: importScripts trick that CSP blocks.
-    const bundle = await duckdb.selectBundle({
-      mvp: { mainModule: jsdelivr.mvp.mainModule, mainWorker: duckdb_worker_mvp },
-      eh:  { mainModule: jsdelivr.eh!.mainModule,  mainWorker: duckdb_worker_eh  },
-    });
-    const worker = new Worker(bundle.mainWorker!);
+    // Let the package pick worker + WASM from jsDelivr. The package hardcodes
+    // its own version into these URLs, so worker and WASM are guaranteed to
+    // match regardless of what npm has installed. The blob: wrapper around
+    // importScripts is how duckdb-wasm recommends loading on CSP-restricted
+    // sites — browsers treat it as same-origin for purposes of CSP.
+    const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
+    const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
+    const workerUrl = URL.createObjectURL(
+      new Blob([`importScripts("${bundle.mainWorker!}");`], { type: "text/javascript" })
+    );
+    const worker = new Worker(workerUrl);
     const logger = new duckdb.ConsoleLogger(duckdb.LogLevel.WARNING);
     const db = new duckdb.AsyncDuckDB(logger, worker);
     await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+    URL.revokeObjectURL(workerUrl);
     return db;
   })();
   return dbPromise;
