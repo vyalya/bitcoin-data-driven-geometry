@@ -1327,9 +1327,23 @@ button, input, textarea { font: inherit; }
     padding: 6px 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.04);
     border-bottom: none;
+    position: relative;
   }
   .timeline-search input { font-size: 0.78rem; padding: 2px 0; }
   .timeline-search-count { display: none; }
+  /* Hints popover must escape the panel's overflow: hidden clip on mobile.
+     Float it as a fixed-position overlay just below the search row. */
+  .timeline-search-hints {
+    position: fixed;
+    top: 144px;
+    left: 12px;
+    right: 12px;
+    margin: 0;
+    z-index: 20;
+    max-height: calc(100vh - 160px);
+    overflow-y: auto;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+  }
   .grid-return-btn, .timeline-play-btn, .rotate-toggle {
     padding: 8px 10px;
     min-width: 38px;

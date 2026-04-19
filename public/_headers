@@ -18,7 +18,10 @@
   # worker bundle). 'wasm-unsafe-eval' is required for WebAssembly.
   # 'unsafe-inline' on style-src is needed for React inline-style props.
   # frame-ancestors 'none' = cannot be embedded in iframes anywhere.
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+  # DuckDB-WASM creates a Worker from a blob: URL that itself calls importScripts
+  # against jsDelivr, so script-src and worker-src both need blob: + jsDelivr.
+  # 'wasm-unsafe-eval' is required for WebAssembly instantiation.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; child-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
 
 # Parquet files are static — cache hard
 /data/*.parquet
