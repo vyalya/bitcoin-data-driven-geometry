@@ -182,6 +182,7 @@ function App() {
   const [hoverCtx, setHoverCtx] = useState<HoverContext>({ type: "none" });
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [showDataInfo, setShowDataInfo] = useState(false);
+  const [searchHelpOpen, setSearchHelpOpen] = useState(false);
   // Legacy legend state — the standalone legend modal was replaced by a tab
   // in the Info modal, but these values are still referenced by scene props.
   // Setters are intentionally unused.
@@ -563,7 +564,30 @@ function App() {
               aria-label="Clear search"
             >×</button>
           )}
+          <button
+            className={`timeline-search-help ${searchHelpOpen ? "open" : ""}`}
+            onClick={() => setSearchHelpOpen((v) => !v)}
+            type="button"
+            aria-label="Search syntax help"
+            aria-expanded={searchHelpOpen}
+          >?</button>
         </div>
+        {searchHelpOpen && (
+          <div className="timeline-search-hints" role="tooltip">
+            <div className="hints-title">Search syntax</div>
+            <dl>
+              <dt>Name</dt><dd><code>halving</code> · <code>mt gox</code></dd>
+              <dt>Year</dt><dd><code>2024</code></dd>
+              <dt>Year range</dt><dd><code>2020-2023</code></dd>
+              <dt>Month</dt><dd><code>2020-03</code></dd>
+              <dt>Date</dt><dd><code>2020-03-12</code></dd>
+              <dt>Precise range</dt><dd><code>2020-03-01..2020-06-30</code></dd>
+              <dt>Natural range</dt><dd><code>2017 to 2021</code> · <code>2025-11 to today</code></dd>
+              <dt>Combine</dt><dd><code>halving 2024 to today</code></dd>
+            </dl>
+            <div className="hints-note">Text terms are AND'd; date terms are OR'd. Use space to separate.</div>
+          </div>
+        )}
         {matchedIndices !== null && (
           <div className="timeline-search-count">
             {matchedIndices.size} of {snapshots.length}
