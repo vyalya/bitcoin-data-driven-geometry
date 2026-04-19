@@ -29,15 +29,17 @@ const dbAll = (conn, sql, ...args) => new Promise((res, rej) =>
 
 // ─── Derived metric formulas (mirrors the logic from old patch scripts) ────
 
-function feePressureIndex(totalFeesBtc, txCount) {
-  if (txCount == null || txCount === 0 || totalFeesBtc == null) return 0;
-  const satPerTx = (totalFeesBtc * 1e8) / txCount;
-  // Piecewise calibration: 0 sat/tx→0, 100→1, 5000→5, 50000→10
-  if (satPerTx <= 0)     return 0;
-  if (satPerTx <= 100)   return (satPerTx / 100) * 1;
-  if (satPerTx <= 5000)  return 1 + ((satPerTx - 100) / 4900) * 4;
-  if (satPerTx <= 50000) return 5 + ((satPerTx - 5000) / 45000) * 5;
-  return 10;
+// Fee pressure = total daily fees normalized to the historical peak. Using
+// satPerTx looked reasonable in theory but gets dominated by outliers on
+// low-tx days (e.g. Pizza Day: one enormous fee ÷ a few hundred txs pegged
+// the metric at max, which misrepresents network-wide fee demand that day).
+// Total daily BTC in fees is a direct, honest measure: when the fee market
+// is actually competitive, daily totals climb; when it's calm, they don't.
+// Peak: 2024-04-20 (~1206 BTC, halving + Runes launch).
+function feePressureIndex(totalFeesBtc) {
+  if (totalFeesBtc == null || totalFeesBtc <= 0) return 0;
+  const PEAK_DAILY_FEES_BTC = 1300;
+  return Math.min(10, (totalFeesBtc / PEAK_DAILY_FEES_BTC) * 10);
 }
 
 function congestionScore(mempoolTxCount) {
@@ -181,7 +183,7 @@ async function main() {
 
     // ── Derived scores ───────────────────────────────────────────────────
     const txCount4fee = cm.tx_count ?? bq.tx_count ?? null;
-    const fpi    = feePressureIndex(totalFeesBtc, txCount4fee);
+    const fpi    = feePressureIndex(totalFeesBtc);
     const cong   = congestionScore(mempoolTxCount);
     const stress = stressFromInterval(avgIntervalSecs);
     const health = networkHealthScore(cong, fpi, stress);
