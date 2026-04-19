@@ -1005,13 +1005,16 @@ function ContextPanel({ snapshot, hoverCtx, blocks }: { snapshot: NetworkSnapsho
   }
 
   if (hoverCtx.type === "hashrate") {
+    const hasData = s.networkHashrateEh > 0;
     return (
       <div className="ctx-content">
         <div className="ctx-title">Network Hashrate</div>
-        <CtxRow label="Hashrate" value={`${s.networkHashrateEh.toFixed(1)} EH/s`} />
-        <CtxRow label="Ring Fill" value={`${((s.networkHashrateEh / 1305.5) * 100).toFixed(1)}%`} />
+        <CtxRow label="Hashrate" value={hasData ? `${s.networkHashrateEh.toFixed(1)} EH/s` : "— (no data)"} />
+        <CtxRow label="Ring Fill" value={hasData ? `${((s.networkHashrateEh / 1305.5) * 100).toFixed(1)}%` : "—"} />
         <CtxRow label="Halving Era" value={`${Math.floor(s.blockHeight / 210000) + 1}`} />
-        <div className="ctx-notes"><p>Amber vertical ring. Arc length proportional to hashrate relative to the 2025 peak of ~1,305 EH/s. Measures total computational power securing the network. Sourced from CoinMetrics.</p></div>
+        <div className="ctx-notes"><p>{hasData
+          ? "Amber vertical ring. Arc length proportional to hashrate relative to the 2025 peak of ~1,305 EH/s. Measures total computational power securing the network. Sourced from CoinMetrics."
+          : "CoinMetrics hashrate coverage starts in 2011. For earlier dates, no estimate is reported — so the ring is hidden rather than shown as zero."}</p></div>
       </div>
     );
   }
@@ -1030,13 +1033,17 @@ function ContextPanel({ snapshot, hoverCtx, blocks }: { snapshot: NetworkSnapsho
   }
 
   if (hoverCtx.type === "difficulty") {
+    const hasDiff = s.difficulty > 0;
+    const hasHr = s.networkHashrateEh > 0;
     return (
       <div className="ctx-content">
         <div className="ctx-title">Mining Difficulty</div>
-        <CtxRow label="Difficulty" value={formatDifficulty(s.difficulty)} />
-        <CtxRow label="Hashrate" value={`${s.networkHashrateEh.toFixed(1)} EH/s`} />
+        <CtxRow label="Difficulty" value={hasDiff ? formatDifficulty(s.difficulty) : "— (no data)"} />
+        <CtxRow label="Hashrate" value={hasHr ? `${s.networkHashrateEh.toFixed(1)} EH/s` : "— (no data)"} />
         <CtxRow label="Difficulty Epoch" value={`${Math.floor(s.blockHeight / 2016)}`} />
-        <div className="ctx-notes"><p>Deep-gold vertical ring. Log-scaled arc — difficulty spans from 1 (Genesis) to 150 trillion (2025). Adjusts every 2,016 blocks to maintain ~10 min block times.</p></div>
+        <div className="ctx-notes"><p>{hasDiff
+          ? "Deep-gold vertical ring. Log-scaled arc — difficulty spans from 1 (Genesis) to 150 trillion (2025). Adjusts every 2,016 blocks to maintain ~10 min block times."
+          : "blockchain.com difficulty coverage doesn't reach this date. The ring is hidden rather than shown as zero."}</p></div>
       </div>
     );
   }
@@ -1050,8 +1057,8 @@ function ContextPanel({ snapshot, hoverCtx, blocks }: { snapshot: NetworkSnapsho
       <CtxRow label="Fee Pressure" value={`${s.feePressureIndex.toFixed(1)}/10`} />
       <CtxRow label="Congestion" value={`${s.congestionScore.toFixed(1)}/10`} />
       <CtxRow label="Block Stress" value={`${s.blockProductionStress.toFixed(1)}/10`} />
-      <CtxRow label="Hashrate" value={`${s.networkHashrateEh.toFixed(0)} EH/s`} />
-      <CtxRow label="Difficulty" value={formatDifficulty(s.difficulty)} />
+      <CtxRow label="Hashrate" value={s.networkHashrateEh > 0 ? `${s.networkHashrateEh.toFixed(0)} EH/s` : "—"} />
+      <CtxRow label="Difficulty" value={s.difficulty > 0 ? formatDifficulty(s.difficulty) : "—"} />
       <div className="ctx-divider" />
       <CtxRow label="Blocks" value={`${blocks.length}`} />
       <CtxRow label="Mempool" value={s.mempoolTxCount.toLocaleString()} />
@@ -1512,8 +1519,8 @@ function MiniSnapshot({ snapshot: s, opacity: dim, highlighted, legendHover }: {
         );
       })()}
 
-      {/* Hashrate vertical */}
-      {(() => {
+      {/* Hashrate vertical — only when CoinMetrics reports a value */}
+      {s.networkHashrateEh > 0 && (() => {
         const fillAngle = Math.PI * 2 * Math.max(0.02, hrNorm);
         const g = lhGlow("hashrate-ring");
         return (
@@ -1523,8 +1530,8 @@ function MiniSnapshot({ snapshot: s, opacity: dim, highlighted, legendHover }: {
         );
       })()}
 
-      {/* Difficulty vertical */}
-      {(() => {
+      {/* Difficulty vertical — only when blockchain.com reports a value */}
+      {s.difficulty > 0 && (() => {
         const fillAngle = Math.PI * 2 * Math.max(0.02, diffLog);
         const g = lhGlow("difficulty-ring");
         return (
@@ -1830,8 +1837,9 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
         );
       })()}
 
-      {/* ═══ HASHRATE ARC — vertical ring (YZ plane, r=2.5) ═══ */}
-      {(() => {
+      {/* ═══ HASHRATE ARC — vertical ring (YZ plane, r=2.5). Hidden when
+           no hashrate data exists for this date (pre-2011 CoinMetrics). ═══ */}
+      {s.networkHashrateEh > 0 && (() => {
         const gid = "hashrate-ring";
         const g = glowMult(gid);
         const hrNorm = hrNormAnim;
@@ -1849,8 +1857,9 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
         );
       })()}
 
-      {/* ═══ DIFFICULTY ARC — vertical ring (XZ plane, r=3.0) ═══ */}
-      {(() => {
+      {/* ═══ DIFFICULTY ARC — vertical ring (XZ plane, r=3.0). Hidden when
+           blockchain.com doesn't have difficulty for this date. ═══ */}
+      {s.difficulty > 0 && (() => {
         const gid = "difficulty-ring";
         const g = glowMult(gid);
         // Log scale: difficulty spans 1 to 150T — linear would make early eras invisible
