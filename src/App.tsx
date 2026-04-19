@@ -986,19 +986,16 @@ function App() {
                   <h4 className="guide-section-title">Derived Values</h4>
                   <p className="guide-paragraph">
                     A handful of scores — <em>block production stress</em>, <em>congestion</em>,{" "}
-                    <em>fee pressure</em>, <em>network health</em> — are computed from the raw fields
-                    above using simple piecewise formulas. They're <strong>not</strong> independent
-                    sources; they're just different lenses on the same data.
+                    <em>fee pressure</em>, <em>network health</em> — are computed from the raw
+                    fields above using simple piecewise formulas. They're <strong>not</strong>{" "}
+                    independent sources; they're just different lenses on the same data.
                   </p>
-                </div>
-
-                <div className="guide-section">
-                  <h4 className="guide-section-title">Visual-Only Fields</h4>
                   <p className="guide-paragraph">
-                    The fee-tier distribution (the four fee arc segments) is interpolated from fee
-                    pressure using anchor distributions. It's directionally correct but not a
-                    per-block histogram. Ring intensities and particle density are also derived,
-                    not sourced. None of these drive the KPI numbers in the right panel.
+                    The four fee-tier arcs are a <strong>shape projection</strong> of fee pressure:
+                    a single scalar (sats per transaction) is mapped to a four-bucket distribution
+                    via published anchor curves. It's still entirely data-driven — no decoration —
+                    but it's a projection, not a per-block histogram. A real histogram would
+                    require a separate BigQuery extract over the <code>transactions</code> table.
                   </p>
                 </div>
 
