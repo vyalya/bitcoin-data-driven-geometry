@@ -1480,6 +1480,12 @@ button, input, textarea { font: inherit; }
     letter-spacing: 0.08em;
     white-space: nowrap;
     overflow: hidden;
+  }
+  .handle-title-min {
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    font-weight: 500;
+    letter-spacing: 0.1em;
     text-overflow: ellipsis;
   }
   .handle-info-btn,

@@ -488,9 +488,11 @@ function App() {
       {/* ═══ GRID VIEW SUBTITLE ═══ */}
       {view === "grid" && (
         <div className="hud grid-subtitle">
-          {snapshotsSettled
-            ? `${snapshots.length} historical snapshots · hover any in the timeline or click to explore`
-            : "Loading historical snapshots…"}
+          {!snapshotsSettled
+            ? "Loading historical snapshots…"
+            : isMobile
+              ? `${snapshots.length} snapshots · tap a cell to select, double-tap to explore`
+              : `${snapshots.length} historical snapshots · hover any in the timeline or click to explore`}
         </div>
       )}
 
@@ -699,9 +701,12 @@ function App() {
           tabIndex={0}
           aria-label={mobileSheetExpanded ? "Collapse details" : "Expand details. Swipe up for full KPIs."}
         >
-          <span className="handle-title">
-            {selectionLabel ?? "Tap to see more"}
-          </span>
+          {!mobileSheetExpanded && (
+            <span className="handle-title">
+              {selectionLabel ?? "Tap to see more"}
+            </span>
+          )}
+          {mobileSheetExpanded && <span className="handle-title handle-title-min">Close</span>}
           {selectionLabel && (
             <button
               className="handle-clear-btn"
