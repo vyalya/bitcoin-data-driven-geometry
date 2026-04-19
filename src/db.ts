@@ -90,7 +90,7 @@ let dbPromise: Promise<duckdb.AsyncDuckDB> | null = null;
 // drift ahead of our bundled worker — causing a WebAssembly "function
 // signature mismatch" at instantiate time when worker and WASM speak
 // different FFI ABIs.
-const DUCKDB_WASM_VERSION = "1.33.1-dev45.0";
+const DUCKDB_WASM_VERSION = "1.32.0";
 const CDN_BASE = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${DUCKDB_WASM_VERSION}/dist`;
 
 async function getDB(): Promise<duckdb.AsyncDuckDB> {
