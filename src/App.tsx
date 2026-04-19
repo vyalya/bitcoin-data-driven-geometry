@@ -235,20 +235,10 @@ function App() {
   const [rotationEnabled, setRotationEnabled] = useState(true);
   const rotationRef = useRef(rotationEnabled);
   rotationRef.current = rotationEnabled;
-  // Grid-mode orbit is opt-in (off by default — row scroll is the default
-  // interaction there). When on, TrackballControls mounts over the grid.
-  const [gridOrbitEnabled, setGridOrbitEnabled] = useState(false);
-  // Defer mounting TrackballControls for orbit in grid view by one frame so
-  // our useLayoutEffect has repositioned the camera to the clean overview
-  // pose BEFORE the controls capture their initial state. Otherwise the
-  // controls latch onto whatever scroll Y the camera was at when orbit was
-  // toggled, and rotation orbits around the wrong target → tilted chaos.
-  const [gridOrbitReady, setGridOrbitReady] = useState(false);
-  useEffect(() => {
-    if (!gridOrbitEnabled || view !== "grid") { setGridOrbitReady(false); return; }
-    const id = setTimeout(() => setGridOrbitReady(true), 80);
-    return () => clearTimeout(id);
-  }, [gridOrbitEnabled, view]);
+  // Grid-mode orbit is disabled — row scrolling is the grid's native
+  // interaction and TrackballControls over a 21-row-tall scrollable grid
+  // never produced a usable view. Orbit remains available in detail view.
+  const gridOrbitEnabled = false;
 
   const onHover = useCallback((groupId: string | null) => {
     setActiveGroup(groupId);
@@ -488,7 +478,6 @@ function App() {
           </EffectComposer>
         )}
         {view === "detail" && controlsReady && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={0.3} maxDistance={60} rotateSpeed={2} zoomSpeed={1.5} panSpeed={0.8} />}
-        {view === "grid" && gridOrbitEnabled && gridOrbitReady && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={12} maxDistance={80} rotateSpeed={1.4} zoomSpeed={0.8} panSpeed={0.6} />}
       </Canvas>
 
       {/* ═══ TOP BANNER ═══ */}
@@ -563,19 +552,14 @@ function App() {
             {playing ? "❚❚" : "▶"} {playing ? "Pause" : "Play"}
           </button>
 
-          {/* Rotate button — right. Grid view: toggles free-orbit
-              (TrackballControls); detail view: toggles ambient rotation. */}
+          {/* Rotate button — detail view only. Toggles ambient rotation.
+              Disabled in grid view (orbit proved impractical over a
+              21-row scrollable grid). */}
           <button
-            className={`rotate-toggle ${
-              (view === "detail" && rotationEnabled && !pinnedGroup) ||
-              (view === "grid" && gridOrbitEnabled)
-                ? "active" : ""
-            }`}
+            className={`rotate-toggle ${view === "detail" && rotationEnabled && !pinnedGroup ? "active" : ""}`}
+            disabled={view === "grid"}
             onClick={() => {
-              if (view === "grid") {
-                setGridOrbitEnabled((v) => !v);
-                return;
-              }
+              if (view === "grid") return;
               if (rotationEnabled && !pinnedGroup) {
                 setRotationEnabled(false);
               } else {
@@ -585,7 +569,7 @@ function App() {
               }
             }}
             type="button"
-            title={view === "grid" ? "Toggle orbit (drag to rotate)" : "Toggle rotation"}
+            title="Toggle rotation"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-20 12 12)" />
