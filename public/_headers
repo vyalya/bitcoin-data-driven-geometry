@@ -14,14 +14,15 @@
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   # No Flash / Silverlight cross-domain policy
   X-Permitted-Cross-Domain-Policies: none
-  # DuckDB-WASM loading chain:
-  #   main thread → new Worker(blob: URL containing inline importScripts)
-  #                   → importScripts('https://cdn.jsdelivr.net/.../worker.js')
-  #                     → fetch('https://cdn.jsdelivr.net/.../duckdb-eh.wasm')
-  # 'unsafe-inline' on script-src is required because the blob: Worker's body
-  # is treated as an inline script. blob: covers the Worker URL itself;
-  # cdn.jsdelivr.net covers the importScripts target and the WASM fetch.
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdn.jsdelivr.net; connect-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+  # CSP intentionally omitted. Every combination we tried silently broke
+  # DuckDB-WASM's blob-Worker + importScripts(jsDelivr) loading chain in
+  # ways that didn't surface as CSP violations — just a silent WASM
+  # "function signature mismatch" because partially-loaded worker code
+  # couldn't construct the right imports. The headers above still harden
+  # the site (clickjacking blocked, no powerful features, HTTPS enforced,
+  # referrer minimized, no MIME sniffing, no Flash cross-domain). The
+  # app also never touches user input, cookies, or storage, so the XSS
+  # surface CSP would cover is effectively nil here.
 
 # Parquet files are static — cache hard
 /data/*.parquet
