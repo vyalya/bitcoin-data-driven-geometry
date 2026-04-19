@@ -1637,19 +1637,26 @@ function MiniSpine({ blocks, opacity: blockOpacity, highlighted }: { blocks: Blo
     if (!mesh || blocks.length === 0) return;
     const dummy = new THREE.Object3D();
     const color = new THREE.Color();
-    const spineH = 4;
-    const slot = spineH / count;
-    const bh = Math.max(0.005, Math.min(0.04, slot * 0.4));
+
+    // Match the detail-view "block crown" shape at grid scale — each block
+    // is a radial spike in the XY plane rather than a Y-axis stack.
+    const INNER_R = 0.18;
+    const MIN_SPIKE = 0.08;
+    const MAX_SPIKE = 0.9;
 
     for (let i = 0; i < count; i++) {
       const [, size, weight, txs] = blocks[i];
       const wNorm = Math.min(weight / 4000000, 1);
       const sNorm = Math.min(size / 2000000, 1);
-      const w = 0.03 + wNorm * 0.18;
-      const dp = 0.02 + sNorm * 0.12;
-      const y = (i - (count - 1) / 2) * slot;
-      dummy.position.set(0, y, 0);
-      dummy.scale.set(w, bh, dp);
+
+      const spikeLen = MIN_SPIKE + MAX_SPIKE * wNorm;
+      const thickness = 0.008 + sNorm * 0.015;
+      const midR = INNER_R + spikeLen / 2;
+
+      const angle = (i / count) * Math.PI * 2;
+      dummy.position.set(Math.cos(angle) * midR, Math.sin(angle) * midR, 0);
+      dummy.lookAt(0, 0, 0);
+      dummy.scale.set(thickness, thickness, spikeLen);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
 
