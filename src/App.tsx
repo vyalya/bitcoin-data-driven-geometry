@@ -62,10 +62,7 @@ function App() {
   useEffect(() => {
     loadSnapshots().then((loaded) => {
       if (loaded && loaded.length > 0) {
-        console.log(`[App] Loaded ${loaded.length} snapshots from parquet`);
         setSnapshots(loaded);
-      } else {
-        console.warn("[App] loadSnapshots returned null/empty — using static fallback");
       }
     }).catch((e) => { console.error("[App] loadSnapshots threw:", e); });
   }, []);
