@@ -85,16 +85,22 @@ function toISODate(v: unknown): string {
 
 let dbPromise: Promise<duckdb.AsyncDuckDB> | null = null;
 
+// Pin the jsDelivr WASM URL to the exact version of @duckdb/duckdb-wasm we
+// install from node_modules. getJsDelivrBundles() returns @latest which can
+// drift ahead of our bundled worker — causing a WebAssembly "function
+// signature mismatch" at instantiate time when worker and WASM speak
+// different FFI ABIs.
+const DUCKDB_WASM_VERSION = "1.33.1-dev45.0";
+const CDN_BASE = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${DUCKDB_WASM_VERSION}/dist`;
+
 async function getDB(): Promise<duckdb.AsyncDuckDB> {
   if (dbPromise) return dbPromise;
   dbPromise = (async () => {
-    const jsdelivr = duckdb.getJsDelivrBundles();
-    // Use the jsDelivr-hosted WASM module (too large to self-host on Pages),
-    // but load the worker from our own origin. Direct worker URL avoids the
-    // blob: importScripts trick that CSP blocks.
+    // Worker: self-hosted (same origin, no blob: indirection).
+    // WASM: jsDelivr-hosted (too big for Pages), pinned to our version.
     const bundle = await duckdb.selectBundle({
-      mvp: { mainModule: jsdelivr.mvp.mainModule, mainWorker: duckdb_worker_mvp },
-      eh:  { mainModule: jsdelivr.eh!.mainModule,  mainWorker: duckdb_worker_eh  },
+      mvp: { mainModule: `${CDN_BASE}/duckdb-mvp.wasm`, mainWorker: duckdb_worker_mvp },
+      eh:  { mainModule: `${CDN_BASE}/duckdb-eh.wasm`,  mainWorker: duckdb_worker_eh  },
     });
     const worker = new Worker(bundle.mainWorker!);
     const logger = new duckdb.ConsoleLogger(duckdb.LogLevel.WARNING);
