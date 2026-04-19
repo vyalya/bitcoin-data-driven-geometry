@@ -2197,11 +2197,11 @@ function BlockSpine({ blocks, opacity: blockOpacity = 1, frozen = false, highlig
       mesh.instanceMatrix.needsUpdate = true;
     }
 
-    // Highlight new
+    // Highlight new — thicken the spike (cross-section grows) but keep its
+    // length unchanged so it never protrudes through the surrounding rings.
+    // Local X and Y are the thin axes; local Z is the radial length.
     if (idx >= 0 && idx < blocks.length) {
-      // Save original matrix
       mesh.getMatrixAt(idx, origMatrix.current);
-      // Scale up
       const m = origMatrix.current.clone();
       const pos = new THREE.Vector3();
       const quat = new THREE.Quaternion();
@@ -2209,7 +2209,7 @@ function BlockSpine({ blocks, opacity: blockOpacity = 1, frozen = false, highlig
       m.decompose(pos, quat, scl);
       dummy.position.copy(pos);
       dummy.quaternion.copy(quat);
-      dummy.scale.set(scl.x * 2.5, scl.y * 2.5, scl.z * 2.5);
+      dummy.scale.set(scl.x * 3.0, scl.y * 3.0, scl.z);
       dummy.updateMatrix();
       mesh.setMatrixAt(idx, dummy.matrix);
       mesh.instanceMatrix.needsUpdate = true;
