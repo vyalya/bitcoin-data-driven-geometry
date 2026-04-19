@@ -4,32 +4,13 @@ import { EffectComposer, Bloom, Vignette, ChromaticAberration } from "@react-thr
 import { BlendFunction } from "postprocessing";
 import { useMemo, useRef, useState, useCallback, useEffect, useLayoutEffect } from "react";
 import * as THREE from "three";
-import { staticSnapshots, deriveRingBands } from "./data/staticSnapshots";
+import { staticSnapshots } from "./data/staticSnapshots";
 import { loadSnapshots, loadBlocksForDate } from "./db";
 import type { NetworkSnapshot, BlockTuple } from "./types";
 
 /* ═══════════════════════════════════════════════════════
    APP SHELL
    ═══════════════════════════════════════════════════════ */
-
-interface WhatIfParam {
-  key: string;
-  label: string;
-  min: number;
-  max: number;
-  step: number;
-  unit: string;
-  snapshotField: keyof NetworkSnapshot;
-}
-
-const WHAT_IF_PARAMS: WhatIfParam[] = [
-  { key: "hashrate", label: "Hashrate", min: 0, max: 1000, step: 5, unit: "EH/s", snapshotField: "networkHashrateEh" },
-  { key: "difficulty", label: "Difficulty", min: 0, max: 200000000000000, step: 1000000000000, unit: "", snapshotField: "difficulty" },
-  { key: "activeAddr", label: "Active Addresses", min: 0, max: 1500000, step: 1000, unit: "", snapshotField: "activeAddresses" },
-  { key: "feePressure", label: "Fee Pressure", min: 0, max: 10, step: 0.1, unit: "/10", snapshotField: "feePressureIndex" },
-  { key: "congestion", label: "Congestion", min: 0, max: 10, step: 0.1, unit: "/10", snapshotField: "congestionScore" },
-  { key: "blockStress", label: "Block Stress", min: 0, max: 10, step: 0.1, unit: "/10", snapshotField: "blockProductionStress" },
-];
 
 /* ─── Per-snapshot narration ─── */
 const NARRATION: Record<string, string> = {
@@ -102,38 +83,8 @@ function App() {
     ? baseSnapshot.blocks
     : (blocksByDate[activeDate] ?? []);
 
-  const [overrides, setOverrides] = useState<Record<string, number | null>>({});
-  const hasOverrides = Object.values(overrides).some((v) => v !== null && v !== undefined);
-  const setOverride = (key: string, value: number | null) => setOverrides((prev) => ({ ...prev, [key]: value }));
-  const resetOverrides = () => setOverrides({});
-
-  const effectiveSnapshot = useMemo<NetworkSnapshot>(() => {
-    if (!hasOverrides) return baseSnapshot;
-    const s = { ...baseSnapshot };
-    for (const param of WHAT_IF_PARAMS) {
-      const ov = overrides[param.key];
-      if (ov !== null && ov !== undefined) {
-        (s as Record<string, unknown>)[param.snapshotField] = ov;
-      }
-    }
-    // Composite health score derived from real verified inputs. Same formula
-    // used by scripts/derive_composites.mjs so the displayed value matches
-    // what's stored on disk for the base snapshot, and updates correctly when
-    // What-If sliders adjust congestion/fee pressure/stress.
-    s.networkHealthScore = Math.max(
-      0,
-      Math.min(
-        10,
-        10
-          - s.congestionScore * 0.3
-          - s.feePressureIndex * 0.3
-          - Math.max(0, s.blockProductionStress - 1) * 1.5
-      )
-    );
-    s.ringBands = deriveRingBands(s);
-    s.mempoolSizeMb = s.mempoolTxCount * 0.00028;
-    return s;
-  }, [baseSnapshot, overrides, hasOverrides]);
+  // All displayed values come directly from the snapshot — no overrides.
+  const effectiveSnapshot = baseSnapshot;
 
   // Search / filter — parses multi-qualifier queries. Every token is ANDed
   // with text and OR'd across date tokens.
@@ -301,7 +252,6 @@ function App() {
         }
         return next;
       });
-      resetOverrides();
     }, 2200);
     return () => clearInterval(timer);
   }, [playing]);
@@ -309,7 +259,6 @@ function App() {
   // Narration: show on every snapshot change
   const [showNarration, setShowNarration] = useState(true);
   const [mobileSheetExpanded, setMobileSheetExpanded] = useState(false);
-  const [whatIfExpanded, setWhatIfExpanded] = useState(false);
 
   // Viewport width for mobile-specific rendering decisions
   const [isMobile, setIsMobile] = useState<boolean>(() =>
@@ -629,7 +578,7 @@ function App() {
                       setView("detail");
                       setGridHoverIdx(null);
                     } else {
-                      setActiveIdx(i); resetOverrides(); clearSelection(); setPlaying(false);
+                      setActiveIdx(i); clearSelection(); setPlaying(false);
                     }
                   }}
                   type="button"
@@ -646,7 +595,7 @@ function App() {
         </div>
       </div>
 
-      {/* ═══ RIGHT PANEL: Context + What-If ═══ */}
+      {/* ═══ RIGHT PANEL: Context KPIs ═══ */}
       <div className={`hud hud-right-panel ${mobileSheetExpanded ? "mobile-expanded" : "mobile-collapsed"}`}>
         {/* Mobile-only collapsible handle */}
         <div
@@ -739,55 +688,6 @@ function App() {
             }
           />
         </div>
-        {view === "detail" && (
-          <div className={`whatif-collapsible ${whatIfExpanded ? "expanded" : "collapsed"}`}>
-            <div className="right-divider" />
-            <button
-              className="whatif-toggle"
-              onClick={() => setWhatIfExpanded(v => !v)}
-              type="button"
-            >
-              <span className="whatif-title">What-If Simulation</span>
-              <span className={`whatif-chevron ${whatIfExpanded ? "up" : "down"}`}>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4 L6 8 L10 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              </span>
-            </button>
-            {whatIfExpanded && (
-              <div className="whatif-section">
-                <div className="whatif-popover-header">
-                  <span className="whatif-popover-title">What-If Simulation</span>
-                  <div className="whatif-popover-actions">
-                    {hasOverrides && (
-                      <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>
-                    )}
-                    <button
-                      className="whatif-popover-close"
-                      onClick={() => setWhatIfExpanded(false)}
-                      type="button"
-                      aria-label="Close What-If"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-                {WHAT_IF_PARAMS.map((param) => {
-                  const baseVal = baseSnapshot[param.snapshotField] as number;
-                  const currentVal = overrides[param.key] ?? baseVal;
-                  const isOverridden = overrides[param.key] !== null && overrides[param.key] !== undefined;
-                  return (
-                    <div key={param.key} className={`slider-row ${isOverridden ? "overridden" : ""}`}>
-                      <div className="slider-header">
-                        <span className="slider-label">{param.label}</span>
-                        <span className="slider-value">{param.key === "difficulty" ? formatDifficulty(currentVal) : param.max > 100 ? currentVal.toLocaleString() : currentVal.toFixed(1)}<span className="slider-unit">{param.unit}</span></span>
-                      </div>
-                      <input type="range" min={param.min} max={param.max} step={param.step} value={currentVal} onChange={(e) => setOverride(param.key, parseFloat(e.target.value))} onDoubleClick={() => setOverride(param.key, null)} />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* ═══ NARRATION BUBBLE ═══ */}
@@ -839,8 +739,8 @@ function App() {
                   <p className="guide-paragraph">
                     Start with the <strong>Legend</strong> to learn what each element represents, then
                     <strong> How to Read</strong> to see how data moves the geometry. Scrub through
-                    history with the timeline, search by year or event, and try the <strong>What-If</strong>{" "}
-                    sliders to bend the numbers yourself and watch the geometry respond.
+                    history with the timeline, search by year or event, or orbit and zoom the scene
+                    directly to inspect a particular moment up close.
                   </p>
                 </div>
               </div>
@@ -943,7 +843,7 @@ function App() {
 
                     <span className="guide-map-data">Click a shape</span>
                     <span className="guide-map-arrow">→</span>
-                    <span className="guide-map-visual">Pins it; rotation pauses, KPIs lock, What-If sliders stay live</span>
+                    <span className="guide-map-visual">Pins it; rotation pauses and KPIs lock for inspection</span>
 
                     <span className="guide-map-data">Click empty space</span>
                     <span className="guide-map-arrow">→</span>
@@ -976,10 +876,6 @@ function App() {
                     <span className="guide-map-data">Rotation toggle (top-left)</span>
                     <span className="guide-map-arrow">→</span>
                     <span className="guide-map-visual">Turn ambient rotation on or off while exploring</span>
-
-                    <span className="guide-map-data">What-If sliders</span>
-                    <span className="guide-map-arrow">→</span>
-                    <span className="guide-map-visual">Bend the numbers yourself; rings and particles respond in real time</span>
                   </div>
                 </div>
               </div>
@@ -1407,7 +1303,11 @@ function CameraRig({ view, snapCount, focusIdx }: { view: "grid" | "detail"; sna
       persp.fov += (targetFov.current - persp.fov) * t;
       persp.updateProjectionMatrix();
     }
-    camera.lookAt(0, targetPos.current.y, 0);
+    // Track the camera's current Y rather than the target Y. Using the target
+    // would snap the line-of-sight on frame 1 while the camera is still far
+    // from target — visually the scene would "jump" into place. Following the
+    // camera's actual Y keeps it smooth throughout the descent.
+    camera.lookAt(0, camera.position.y, 0);
   });
 
   return null;
