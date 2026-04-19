@@ -234,6 +234,9 @@ function App() {
   const [rotationEnabled, setRotationEnabled] = useState(true);
   const rotationRef = useRef(rotationEnabled);
   rotationRef.current = rotationEnabled;
+  // Grid-mode orbit is opt-in (off by default — row scroll is the default
+  // interaction there). When on, TrackballControls mounts over the grid.
+  const [gridOrbitEnabled, setGridOrbitEnabled] = useState(false);
 
   const onHover = useCallback((groupId: string | null) => {
     setActiveGroup(groupId);
@@ -402,7 +405,7 @@ function App() {
       >
         <color attach="background" args={["#020202"]} />
         {view === "detail" && <fog attach="fog" args={["#010101", 20, 45]} />}
-        <CameraRig view={view} snapCount={snapshots.length} focusIdx={timelineHoverIdx ?? gridSelectedIdx} />
+        <CameraRig view={view} snapCount={snapshots.length} focusIdx={timelineHoverIdx ?? gridSelectedIdx} gridOrbitEnabled={gridOrbitEnabled} />
         {view === "grid" ? (
           <GridScene
             snapshots={snapshotsWithBlocks}
@@ -465,6 +468,7 @@ function App() {
           </EffectComposer>
         )}
         {view === "detail" && controlsReady && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={0.3} maxDistance={60} rotateSpeed={2} zoomSpeed={1.5} panSpeed={0.8} />}
+        {view === "grid" && gridOrbitEnabled && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={8} maxDistance={80} rotateSpeed={1.8} zoomSpeed={1.2} panSpeed={0.8} />}
       </Canvas>
 
       {/* ═══ TOP BANNER ═══ */}
@@ -535,12 +539,19 @@ function App() {
             {playing ? "❚❚" : "▶"} {playing ? "Pause" : "Play"}
           </button>
 
-          {/* Rotate button — right */}
+          {/* Rotate button — right. Grid view: toggles free-orbit
+              (TrackballControls); detail view: toggles ambient rotation. */}
           <button
-            className={`rotate-toggle ${view === "detail" && rotationEnabled && !pinnedGroup ? "active" : ""}`}
-            disabled={view === "grid"}
+            className={`rotate-toggle ${
+              (view === "detail" && rotationEnabled && !pinnedGroup) ||
+              (view === "grid" && gridOrbitEnabled)
+                ? "active" : ""
+            }`}
             onClick={() => {
-              if (view === "grid") return;
+              if (view === "grid") {
+                setGridOrbitEnabled((v) => !v);
+                return;
+              }
               if (rotationEnabled && !pinnedGroup) {
                 setRotationEnabled(false);
               } else {
@@ -550,7 +561,7 @@ function App() {
               }
             }}
             type="button"
-            title="Toggle rotation"
+            title={view === "grid" ? "Toggle orbit (drag to rotate)" : "Toggle rotation"}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-20 12 12)" />
@@ -1167,7 +1178,7 @@ interface SceneProps {
    CAMERA RIG — smoothly animates camera between grid and detail views
    ═══════════════════════════════════════════════════════ */
 
-function CameraRig({ view, snapCount, focusIdx }: { view: "grid" | "detail"; snapCount: number; focusIdx: number | null }) {
+function CameraRig({ view, snapCount, focusIdx, gridOrbitEnabled }: { view: "grid" | "detail"; snapCount: number; focusIdx: number | null; gridOrbitEnabled: boolean }) {
   const { camera, size, gl } = useThree();
   const targetPos = useRef(new THREE.Vector3(0, 0, 22));
   const targetFov = useRef(42);
@@ -1182,6 +1193,11 @@ function CameraRig({ view, snapCount, focusIdx }: { view: "grid" | "detail"; sna
   const snapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInGrid = useRef(view === "grid");
   isInGrid.current = view === "grid";
+  // When the user toggles orbit on in grid view, TrackballControls takes over
+  // wheel + touch — we must suppress the scroll-to-row handler so they don't
+  // fight over camera.position.
+  const orbitOn = useRef(gridOrbitEnabled);
+  orbitOn.current = gridOrbitEnabled;
 
   // Compute row-center world Y (rows are symmetric around 0, row 0 at top)
   const rowCenterY = useCallback((row: number) => {
@@ -1214,7 +1230,7 @@ function CameraRig({ view, snapCount, focusIdx }: { view: "grid" | "detail"; sna
       Math.max(botY + uiOffsetY.current, Math.min(topY + uiOffsetY.current, y));
 
     const handleWheel = (e: WheelEvent) => {
-      if (!isInGrid.current) return;
+      if (!isInGrid.current || orbitOn.current) return;
       e.preventDefault();
       targetPos.current.y = clamp(targetPos.current.y - e.deltaY * 0.018);
       if (snapTimer.current) clearTimeout(snapTimer.current);
@@ -1224,7 +1240,7 @@ function CameraRig({ view, snapCount, focusIdx }: { view: "grid" | "detail"; sna
     let touchY = 0;
     const handleTouchStart = (e: TouchEvent) => { touchY = e.touches[0].clientY; };
     const handleTouchMove = (e: TouchEvent) => {
-      if (!isInGrid.current) return;
+      if (!isInGrid.current || orbitOn.current) return;
       e.preventDefault();
       const dy = touchY - e.touches[0].clientY;
       touchY = e.touches[0].clientY;
@@ -1247,7 +1263,7 @@ function CameraRig({ view, snapCount, focusIdx }: { view: "grid" | "detail"; sna
 
   // Follow external focus (timeline hover/select) — scroll camera to that row
   useEffect(() => {
-    if (view !== "grid" || focusIdx == null) return;
+    if (view !== "grid" || focusIdx == null || gridOrbitEnabled) return;
     const ROWS = Math.ceil(snapCount / COLS);
     const minRow = Math.min(HALF_VIEW, ROWS - 1);
     const maxRow = Math.max(ROWS - 1 - HALF_VIEW, minRow);
@@ -1255,7 +1271,7 @@ function CameraRig({ view, snapCount, focusIdx }: { view: "grid" | "detail"; sna
     const clampedRow = Math.max(minRow, Math.min(maxRow, focusRow));
     targetPos.current.y = rowCenterY(clampedRow) + uiOffsetY.current;
     if (snapTimer.current) { clearTimeout(snapTimer.current); snapTimer.current = null; }
-  }, [focusIdx, view, snapCount, rowCenterY]);
+  }, [focusIdx, view, snapCount, rowCenterY, gridOrbitEnabled]);
 
 
   // useLayoutEffect (not useEffect): we need to reposition the camera
@@ -1373,6 +1389,9 @@ function CameraRig({ view, snapCount, focusIdx }: { view: "grid" | "detail"; sna
     const t = 1 - Math.pow(0.002, delta);
 
     if (view === "grid") {
+      // When orbit is enabled, TrackballControls owns the camera — don't
+      // fight it with the scroll lerp or the forward-facing lookAt.
+      if (gridOrbitEnabled) return;
       // Always smooth-lerp Y toward scroll target (even after transition settles)
       camera.position.y += (targetPos.current.y - camera.position.y) * t;
       // During initial transition: also lerp Z and FOV
