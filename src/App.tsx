@@ -238,6 +238,17 @@ function App() {
   // Grid-mode orbit is opt-in (off by default — row scroll is the default
   // interaction there). When on, TrackballControls mounts over the grid.
   const [gridOrbitEnabled, setGridOrbitEnabled] = useState(false);
+  // Defer mounting TrackballControls for orbit in grid view by one frame so
+  // our useLayoutEffect has repositioned the camera to the clean overview
+  // pose BEFORE the controls capture their initial state. Otherwise the
+  // controls latch onto whatever scroll Y the camera was at when orbit was
+  // toggled, and rotation orbits around the wrong target → tilted chaos.
+  const [gridOrbitReady, setGridOrbitReady] = useState(false);
+  useEffect(() => {
+    if (!gridOrbitEnabled || view !== "grid") { setGridOrbitReady(false); return; }
+    const id = setTimeout(() => setGridOrbitReady(true), 80);
+    return () => clearTimeout(id);
+  }, [gridOrbitEnabled, view]);
 
   const onHover = useCallback((groupId: string | null) => {
     setActiveGroup(groupId);
@@ -415,7 +426,7 @@ function App() {
         <color attach="background" args={["#020202"]} />
         {view === "detail" && <fog attach="fog" args={["#010101", 20, 45]} />}
         <CameraRig view={view} snapCount={snapshots.length} focusIdx={timelineHoverIdx ?? gridSelectedIdx} gridOrbitEnabled={gridOrbitEnabled} />
-        {view === "grid" ? (
+        {view === "grid" ? (snapshotsSettled ? (
           <GridScene
             snapshots={snapshotsWithBlocks}
             hoverIdx={gridHoverIdx}
@@ -438,7 +449,7 @@ function App() {
               }
             }}
           />
-        ) : (
+        ) : null) : (
           <PrimeRadiantScene
             snapshot={s}
             blocks={currentBlocks}
@@ -477,7 +488,7 @@ function App() {
           </EffectComposer>
         )}
         {view === "detail" && controlsReady && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={0.3} maxDistance={60} rotateSpeed={2} zoomSpeed={1.5} panSpeed={0.8} />}
-        {view === "grid" && gridOrbitEnabled && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={12} maxDistance={36} rotateSpeed={1.4} zoomSpeed={0.8} panSpeed={0.6} />}
+        {view === "grid" && gridOrbitEnabled && gridOrbitReady && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={12} maxDistance={80} rotateSpeed={1.4} zoomSpeed={0.8} panSpeed={0.6} />}
       </Canvas>
 
       {/* ═══ TOP BANNER ═══ */}
