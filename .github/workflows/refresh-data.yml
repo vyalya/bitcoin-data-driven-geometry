@@ -1,0 +1,57 @@
+name: Refresh Pipeline Data
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Weekly on Sunday at 04:00 UTC (off-peak, avoids API rate limits)
+    - cron: "0 4 * * 0"
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - run: npm ci
+
+      # Fetch from free APIs (no auth required)
+      - name: Fetch CoinMetrics
+        run: node pipeline/fetch_coinmetrics.mjs
+
+      - name: Fetch blockchain.com
+        run: node pipeline/fetch_blockchain.mjs
+
+      - name: Fetch mempool.space
+        run: node pipeline/fetch_mempool.mjs
+
+      # BQ CSV ingest: only runs if pipeline/raw/bq_*.csv are committed.
+      # For automated runs, commit fresh BQ exports before triggering this action.
+      - name: Ingest BigQuery CSVs (if present)
+        run: |
+          if [ -f pipeline/raw/bq_daily_agg.csv ] && [ -f pipeline/raw/bq_blocks.csv ]; then
+            node pipeline/ingest_bigquery.mjs
+          else
+            echo "BQ CSVs not present — skipping BigQuery ingest"
+          fi
+
+      - name: Build derived snapshots
+        run: node pipeline/build_db.mjs
+
+      - name: Export Parquet
+        run: node pipeline/export_parquet.mjs
+
+      - name: Commit updated Parquet files
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/snapshots.parquet public/data/blocks.parquet
+          git diff --cached --quiet || git commit -m "chore: refresh pipeline data [skip ci]"
+          git push

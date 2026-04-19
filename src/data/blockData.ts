@@ -1,4 +1,4 @@
-/** Per-block data from Strategy Mosaic — [height, sizeBytes, weight, txCount] */
+/** Per-block data — [height, sizeBytes, weight, txCount] */
 export type BlockTuple = [number, number, number, number];
 
 export const blockData: Record<string, BlockTuple[]> = {

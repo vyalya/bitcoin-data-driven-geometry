@@ -3,3 +3,12 @@ dist/
 *.tsbuildinfo
 vite.config.js
 vite.config.d.ts
+
+# Pipeline — local database and raw exports (large/sensitive)
+pipeline/bitcoin.duckdb
+pipeline/raw/*.csv
+
+# Parquet build artifacts — committed after pipeline runs, excluded during dev
+# Remove these two lines once you want to commit the parquet files
+# public/data/snapshots.parquet
+# public/data/blocks.parquet

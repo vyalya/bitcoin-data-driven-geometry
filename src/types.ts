@@ -46,5 +46,6 @@ export type NetworkSnapshot = {
   feeBuckets: FeeBucket[];
   ringBands: RingBand[];
   notes: string[];
+  narration?: string;
   blocks?: BlockTuple[];
 };

@@ -4,31 +4,13 @@ import { EffectComposer, Bloom, Vignette, ChromaticAberration } from "@react-thr
 import { BlendFunction } from "postprocessing";
 import { useMemo, useRef, useState, useCallback, useEffect, useLayoutEffect } from "react";
 import * as THREE from "three";
-import { mosaicSnapshots, deriveRingBands } from "./data/mosaicSnapshots";
+import { staticSnapshots } from "./data/staticSnapshots";
+import { loadSnapshots, loadBlocksForDate } from "./db";
 import type { NetworkSnapshot, BlockTuple } from "./types";
 
 /* ═══════════════════════════════════════════════════════
    APP SHELL
    ═══════════════════════════════════════════════════════ */
-
-interface WhatIfParam {
-  key: string;
-  label: string;
-  min: number;
-  max: number;
-  step: number;
-  unit: string;
-  snapshotField: keyof NetworkSnapshot;
-}
-
-const WHAT_IF_PARAMS: WhatIfParam[] = [
-  { key: "hashrate", label: "Hashrate", min: 0, max: 1000, step: 5, unit: "EH/s", snapshotField: "networkHashrateEh" },
-  { key: "difficulty", label: "Difficulty", min: 0, max: 200000000000000, step: 1000000000000, unit: "", snapshotField: "difficulty" },
-  { key: "activeAddr", label: "Active Addresses", min: 0, max: 1500000, step: 1000, unit: "", snapshotField: "activeAddresses" },
-  { key: "feePressure", label: "Fee Pressure", min: 0, max: 10, step: 0.1, unit: "/10", snapshotField: "feePressureIndex" },
-  { key: "congestion", label: "Congestion", min: 0, max: 10, step: 0.1, unit: "/10", snapshotField: "congestionScore" },
-  { key: "blockStress", label: "Block Stress", min: 0, max: 10, step: 0.1, unit: "/10", snapshotField: "blockProductionStress" },
-];
 
 /* ─── Per-snapshot narration ─── */
 const NARRATION: Record<string, string> = {
@@ -71,44 +53,130 @@ type HoverContext =
   | { type: "volume" };
 
 function App() {
+  // Start with static fallback, upgrade to DuckDB data if parquet is present
+  const [snapshots, setSnapshots] = useState<NetworkSnapshot[]>(staticSnapshots);
   const [activeIdx, setActiveIdx] = useState(0);
-  const baseSnapshot = mosaicSnapshots[activeIdx];
+  const baseSnapshot = snapshots[Math.min(activeIdx, snapshots.length - 1)];
 
-  // Blocks from pre-baked static data
-  const currentBlocks: BlockTuple[] = baseSnapshot.blocks ?? [];
+  // Attempt to load richer data from DuckDB-WASM parquet files (no-op if not present)
+  useEffect(() => {
+    loadSnapshots().then((loaded) => {
+      if (loaded && loaded.length > 0) {
+        console.log(`[App] Loaded ${loaded.length} snapshots from parquet`);
+        setSnapshots(loaded);
+      } else {
+        console.warn("[App] loadSnapshots returned null/empty — using static fallback");
+      }
+    }).catch((e) => { console.error("[App] loadSnapshots threw:", e); });
+  }, []);
 
-  const [overrides, setOverrides] = useState<Record<string, number | null>>({});
-  const hasOverrides = Object.values(overrides).some((v) => v !== null && v !== undefined);
-  const setOverride = (key: string, value: number | null) => setOverrides((prev) => ({ ...prev, [key]: value }));
-  const resetOverrides = () => setOverrides({});
+  // Blocks: pre-baked if present, otherwise fetch per-date from blocks.parquet
+  const [blocksByDate, setBlocksByDate] = useState<Record<string, BlockTuple[]>>({});
+  const activeDate = baseSnapshot.snapshotTime.slice(0, 10);
+  useEffect(() => {
+    if ((baseSnapshot.blocks && baseSnapshot.blocks.length > 0) || blocksByDate[activeDate]) return;
+    loadBlocksForDate(activeDate).then((blocks) => {
+      if (blocks.length > 0) setBlocksByDate((prev) => ({ ...prev, [activeDate]: blocks }));
+    }).catch((e) => console.error("[App] loadBlocksForDate threw:", e));
+  }, [activeDate, baseSnapshot.blocks, blocksByDate]);
+  const currentBlocks: BlockTuple[] = baseSnapshot.blocks && baseSnapshot.blocks.length > 0
+    ? baseSnapshot.blocks
+    : (blocksByDate[activeDate] ?? []);
 
-  const effectiveSnapshot = useMemo<NetworkSnapshot>(() => {
-    if (!hasOverrides) return baseSnapshot;
-    const s = { ...baseSnapshot };
-    for (const param of WHAT_IF_PARAMS) {
-      const ov = overrides[param.key];
-      if (ov !== null && ov !== undefined) {
-        (s as Record<string, unknown>)[param.snapshotField] = ov;
+  // All displayed values come directly from the snapshot — no overrides.
+  const effectiveSnapshot = baseSnapshot;
+
+  // Search / filter — parses multi-qualifier queries. Every token is ANDed
+  // with text and OR'd across date tokens.
+  //   YYYY                         single year          (2024)
+  //   YYYY-YYYY                    year range inclusive (2020-2023)
+  //   YYYY-MM                      single month         (2020-03)
+  //   YYYY-MM-DD                   single date          (2020-03-12)
+  //   YYYY-MM-DD..YYYY-MM-DD       date range           (2020-03-01..2020-06-30)
+  //   today                        today's date
+  //   <X> to <Y>                   range from X to Y    (e.g. "2025-11 to today")
+  //   anything else                free-text substring of label/id
+  const [searchQuery, setSearchQuery] = useState("");
+  const matchedIndices = useMemo<Set<number> | null>(() => {
+    const raw = searchQuery.trim();
+    if (!raw) return null;
+
+    const todayISO = new Date().toISOString().slice(0, 10);
+    // Resolve a "boundary" token (year / month / date / today) to an ISO date,
+    // expanding years/months to the first or last day based on which side of a
+    // range it sits on.
+    const resolveBoundary = (tok: string, side: "from" | "to"): string | null => {
+      if (tok === "today") return todayISO;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(tok)) return tok;
+      let m = tok.match(/^(\d{4})-(\d{2})$/);
+      if (m) {
+        if (side === "from") return `${tok}-01`;
+        const lastDay = new Date(Date.UTC(+m[1], +m[2], 0)).getUTCDate();
+        return `${tok}-${String(lastDay).padStart(2, "0")}`;
+      }
+      if (/^\d{4}$/.test(tok)) return side === "from" ? `${tok}-01-01` : `${tok}-12-31`;
+      return null;
+    };
+
+    // Tokenize, then compact "<X> to <Y>" triples into a single "X..Y" token
+    const rawTokens = raw.toLowerCase().split(/\s+/).filter(Boolean);
+    const tokens: string[] = [];
+    for (let i = 0; i < rawTokens.length; i++) {
+      if (i + 2 < rawTokens.length && rawTokens[i + 1] === "to") {
+        const from = resolveBoundary(rawTokens[i], "from");
+        const to   = resolveBoundary(rawTokens[i + 2], "to");
+        if (from && to) {
+          tokens.push(`${from}..${to}`);
+          i += 2;
+          continue;
+        }
+      }
+      tokens.push(rawTokens[i]);
+    }
+
+    const dateRanges: Array<[string, string]> = [];
+    const textTokens: string[] = [];
+
+    for (const t of tokens) {
+      let m: RegExpMatchArray | null;
+      if ((m = t.match(/^(.+)\.\.(.+)$/))) {
+        const from = resolveBoundary(m[1], "from");
+        const to   = resolveBoundary(m[2], "to");
+        if (from && to) {
+          const [lo, hi] = from <= to ? [from, to] : [to, from];
+          dateRanges.push([lo, hi]);
+          continue;
+        }
+      }
+      if (t === "today") { dateRanges.push([todayISO, todayISO]); continue; }
+      if ((m = t.match(/^(\d{4})-(\d{4})$/))) {
+        const [lo, hi] = +m[1] <= +m[2] ? [m[1], m[2]] : [m[2], m[1]];
+        dateRanges.push([`${lo}-01-01`, `${hi}-12-31`]);
+      } else if (/^\d{4}-\d{2}-\d{2}$/.test(t)) {
+        dateRanges.push([t, t]);
+      } else if ((m = t.match(/^(\d{4})-(\d{2})$/))) {
+        const y = m[1], mo = m[2];
+        const lastDay = new Date(Date.UTC(+y, +mo, 0)).getUTCDate();
+        dateRanges.push([`${y}-${mo}-01`, `${y}-${mo}-${String(lastDay).padStart(2, "0")}`]);
+      } else if (/^\d{4}$/.test(t)) {
+        dateRanges.push([`${t}-01-01`, `${t}-12-31`]);
+      } else {
+        textTokens.push(t);
       }
     }
-    // Composite health score derived from real verified inputs. Same formula
-    // used by scripts/derive_composites.mjs so the displayed value matches
-    // what's stored on disk for the base snapshot, and updates correctly when
-    // What-If sliders adjust congestion/fee pressure/stress.
-    s.networkHealthScore = Math.max(
-      0,
-      Math.min(
-        10,
-        10
-          - s.congestionScore * 0.3
-          - s.feePressureIndex * 0.3
-          - Math.max(0, s.blockProductionStress - 1) * 1.5
-      )
-    );
-    s.ringBands = deriveRingBands(s);
-    s.mempoolSizeMb = s.mempoolTxCount * 0.00028;
-    return s;
-  }, [baseSnapshot, overrides, hasOverrides]);
+
+    const out = new Set<number>();
+    snapshots.forEach((s, i) => {
+      const date = s.snapshotTime.slice(0, 10);
+      if (dateRanges.length > 0 && !dateRanges.some(([lo, hi]) => date >= lo && date <= hi)) return;
+      if (textTokens.length > 0) {
+        const hay = `${s.label} ${s.id}`.toLowerCase();
+        if (!textTokens.every((tok) => hay.includes(tok))) return;
+      }
+      out.add(i);
+    });
+    return out;
+  }, [searchQuery, snapshots]);
 
   // Hover/selection state
   const [hoverCtx, setHoverCtx] = useState<HoverContext>({ type: "none" });
@@ -123,7 +191,7 @@ function App() {
   const [gridHoverIdx, setGridHoverIdx] = useState<number | null>(null);
   // Grid-view selection: first tap previews, second tap (on same cell) enters detail
   const [gridSelectedIdx, setGridSelectedIdx] = useState<number | null>(null);
-  const [showGuideTab, setShowGuideTab] = useState<"legend" | "source" | "visual">("legend");
+  const [showGuideTab, setShowGuideTab] = useState<"about" | "legend" | "visual" | "source">("about");
 
   const [pinnedGroup, setPinnedGroup] = useState<string | null>(null);
   const preClickState = useRef({ wasPlaying: false, wasRotating: true });
@@ -178,13 +246,12 @@ function App() {
       if (!playRef.current) return;
       setActiveIdx((prev) => {
         const next = prev + 1;
-        if (next >= mosaicSnapshots.length) {
+        if (next >= snapshots.length) {
           setPlaying(false);
           return prev;
         }
         return next;
       });
-      resetOverrides();
     }, 2200);
     return () => clearInterval(timer);
   }, [playing]);
@@ -192,7 +259,6 @@ function App() {
   // Narration: show on every snapshot change
   const [showNarration, setShowNarration] = useState(true);
   const [mobileSheetExpanded, setMobileSheetExpanded] = useState(false);
-  const [whatIfExpanded, setWhatIfExpanded] = useState(false);
 
   // Viewport width for mobile-specific rendering decisions
   const [isMobile, setIsMobile] = useState<boolean>(() =>
@@ -207,25 +273,43 @@ function App() {
   // Touch-start Y for swipe-up gesture on the mobile sheet handle
   const sheetTouchStartY = useRef<number | null>(null);
 
-  // Refs for auto-scrolling the mobile timeline strip to the active item
+  // Refs for auto-scrolling the timeline to the currently focused item
   const timelineRef = useRef<HTMLDivElement>(null);
   const tlItemRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  // In grid view the active chip tracks the selected index; in detail view it
-  // tracks activeIdx. Either way we want the strip to center on it.
-  const scrollTargetIdx = view === "grid" ? (gridSelectedIdx ?? activeIdx) : activeIdx;
+  // True while the mouse is inside the timeline itself — we suppress
+  // auto-scroll in that case since the user is already looking at the row
+  // their cursor is on, and re-scrolling would yank the cell out from under.
+  const timelineHovered = useRef(false);
+  // In grid view, follow hover (desktop) or selected (mobile) or active.
+  // In detail view, always follow activeIdx.
+  const scrollTargetIdx = view === "grid"
+    ? (gridHoverIdx ?? gridSelectedIdx ?? activeIdx)
+    : activeIdx;
   useEffect(() => {
+    if (timelineHovered.current) return;
     const container = timelineRef.current;
     const item = tlItemRefs.current[scrollTargetIdx];
     if (!container || !item) return;
-    // Only scroll the horizontal strip (mobile). On desktop the strip is a
-    // vertical list with no horizontal scroll; detect by actual scrollable
-    // width rather than computed flex-direction (which is unreliable).
-    if (container.scrollWidth <= container.clientWidth + 1) return;
-    const containerRect = container.getBoundingClientRect();
-    const itemRect = item.getBoundingClientRect();
-    const itemOffsetLeft = itemRect.left - containerRect.left + container.scrollLeft;
-    const target = itemOffsetLeft - (container.clientWidth - item.clientWidth) / 2;
-    container.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+    const horizontal = container.scrollWidth > container.clientWidth + 1;
+    if (horizontal) {
+      const containerRect = container.getBoundingClientRect();
+      const itemRect = item.getBoundingClientRect();
+      const itemOffsetLeft = itemRect.left - containerRect.left + container.scrollLeft;
+      const target = itemOffsetLeft - (container.clientWidth - item.clientWidth) / 2;
+      container.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+    } else {
+      const containerRect = container.getBoundingClientRect();
+      const itemRect = item.getBoundingClientRect();
+      const itemTop = itemRect.top - containerRect.top + container.scrollTop;
+      const itemBottom = itemTop + item.clientHeight;
+      const viewTop = container.scrollTop;
+      const viewBottom = viewTop + container.clientHeight;
+      // Only scroll if item is outside the visible area — avoids jitter.
+      if (itemTop < viewTop || itemBottom > viewBottom) {
+        const target = itemTop - (container.clientHeight - item.clientHeight) / 2;
+        container.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
+      }
+    }
   }, [scrollTargetIdx]);
 
   // When a shape is selected on mobile, we only update the sheet handle title
@@ -283,12 +367,13 @@ function App() {
       >
         <color attach="background" args={["#020202"]} />
         {view === "detail" && <fog attach="fog" args={["#010101", 20, 45]} />}
-        <CameraRig view={view} />
+        <CameraRig view={view} snapCount={snapshots.length} focusIdx={gridHoverIdx ?? gridSelectedIdx} />
         {view === "grid" ? (
           <GridScene
-            snapshots={mosaicSnapshots}
+            snapshots={snapshots}
             hoverIdx={gridHoverIdx}
             selectedIdx={gridSelectedIdx}
+            matchedIndices={matchedIndices}
             legendHover={legendHover}
             onHover={setGridHoverIdx}
             onSelect={(i) => {
@@ -354,7 +439,7 @@ function App() {
       {/* ═══ GRID VIEW SUBTITLE ═══ */}
       {view === "grid" && (
         <div className="hud grid-subtitle">
-          25 historical snapshots · hover any in the timeline or click to explore
+          {snapshots.length} historical snapshots · hover any in the timeline or click to explore
         </div>
       )}
 
@@ -383,22 +468,30 @@ function App() {
             </svg>
           </button>
 
-          {/* Play button — middle */}
+          {/* Play button — middle. From grid view, always starts from Genesis
+              and switches into detail view. From detail view, resumes from the
+              current snapshot (or restarts if already at the end). */}
           <button
             className="timeline-play-btn"
-            disabled={view === "grid"}
             onClick={() => {
-              if (view === "grid") return;
               if (playing) {
                 setPlaying(false);
                 setRotationEnabled(false);
-              } else {
-                setPinnedGroup(null);
-                setActiveGroup(null);
-                if (activeIdx >= mosaicSnapshots.length - 1) setActiveIdx(0);
-                setPlaying(true);
-                setRotationEnabled(true);
+                return;
               }
+              setPinnedGroup(null);
+              setActiveGroup(null);
+              const startIdx = view === "grid"
+                ? 0
+                : (activeIdx >= snapshots.length - 1 ? 0 : activeIdx);
+              setActiveIdx(startIdx);
+              if (view === "grid") {
+                setGridHoverIdx(null);
+                setGridSelectedIdx(null);
+                setView("detail");
+              }
+              setPlaying(true);
+              setRotationEnabled(true);
             }}
             type="button"
           >
@@ -430,42 +523,79 @@ function App() {
           </button>
         </div>
 
-        <div className="timeline-vertical" ref={timelineRef}>
-          {mosaicSnapshots.map((snap, i) => {
-            // Active in grid view tracks hover (desktop) or selected (mobile).
-            // Active in detail view tracks the currently-viewed date.
-            const gridActiveIdx = gridHoverIdx ?? gridSelectedIdx;
-            const isActive = view === "grid" ? gridActiveIdx === i : i === activeIdx;
-            return (
-              <button
-                key={snap.id}
-                ref={(el) => { tlItemRefs.current[i] = el; }}
-                className={`tl-item ${isActive ? "active" : ""}`}
-                onMouseEnter={() => { if (view === "grid") setGridHoverIdx(i); }}
-                onMouseLeave={() => { if (view === "grid") setGridHoverIdx(null); }}
-                onClick={() => {
-                  if (view === "grid") {
-                    setActiveIdx(i);
-                    setView("detail");
-                    setGridHoverIdx(null);
-                  } else {
-                    setActiveIdx(i); resetOverrides(); clearSelection(); setPlaying(false);
-                  }
-                }}
-                type="button"
-              >
-                <span className="tl-dot" />
-                <div className="tl-text">
-                  <span className="tl-label">{snap.label}</span>
-                  <span className="tl-date">{snap.snapshotTime.slice(0, 10)}</span>
-                </div>
-              </button>
-            );
-          })}
+        <div className="timeline-search">
+          <svg className="timeline-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="7" />
+            <line x1="20" y1="20" x2="16.5" y2="16.5" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search name, year, or range…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search snapshots"
+          />
+          {searchQuery && (
+            <button
+              className="timeline-search-clear"
+              onClick={() => setSearchQuery("")}
+              type="button"
+              aria-label="Clear search"
+            >×</button>
+          )}
+        </div>
+        {matchedIndices !== null && (
+          <div className="timeline-search-count">
+            {matchedIndices.size} of {snapshots.length}
+          </div>
+        )}
+
+        <div
+          className="timeline-vertical"
+          ref={timelineRef}
+          onMouseEnter={() => { timelineHovered.current = true; }}
+          onMouseLeave={() => { timelineHovered.current = false; }}
+        >
+          {matchedIndices !== null && matchedIndices.size === 0 ? (
+            <div className="timeline-search-empty">No snapshots match “{searchQuery}”.</div>
+          ) : (
+            snapshots.map((snap, i) => {
+              if (matchedIndices !== null && !matchedIndices.has(i)) return null;
+              // Active in grid view tracks hover (desktop) or selected (mobile).
+              // Active in detail view tracks the currently-viewed date.
+              const gridActiveIdx = gridHoverIdx ?? gridSelectedIdx;
+              const isActive = view === "grid" ? gridActiveIdx === i : i === activeIdx;
+              return (
+                <button
+                  key={snap.id}
+                  ref={(el) => { tlItemRefs.current[i] = el; }}
+                  className={`tl-item ${isActive ? "active" : ""}`}
+                  onMouseEnter={() => { if (view === "grid") setGridHoverIdx(i); }}
+                  onMouseLeave={() => { if (view === "grid") setGridHoverIdx(null); }}
+                  onClick={() => {
+                    if (view === "grid") {
+                      setActiveIdx(i);
+                      setView("detail");
+                      setGridHoverIdx(null);
+                    } else {
+                      setActiveIdx(i); clearSelection(); setPlaying(false);
+                    }
+                  }}
+                  type="button"
+                >
+                  <span className="tl-dot" />
+                  <div className="tl-text">
+                    <span className="tl-label">{snap.label}</span>
+                    <span className="tl-date">{snap.snapshotTime.slice(0, 10)}</span>
+                  </div>
+                </button>
+              );
+            })
+          )}
         </div>
       </div>
 
-      {/* ═══ RIGHT PANEL: Context + What-If ═══ */}
+      {/* ═══ RIGHT PANEL: Context KPIs ═══ */}
       <div className={`hud hud-right-panel ${mobileSheetExpanded ? "mobile-expanded" : "mobile-collapsed"}`}>
         {/* Mobile-only collapsible handle */}
         <div
@@ -524,7 +654,7 @@ function App() {
             onClick={() => { setShowGuideTab("legend"); setShowDataInfo(true); }}
             type="button"
           >
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="5" height="3" rx="0.5" fill="#FF8C3A"/><line x1="8" y1="3.5" x2="15" y2="3.5" stroke="#777" strokeWidth="1.2"/><circle cx="3.5" cy="8.5" r="1.8" stroke="#FA660F" strokeWidth="1.2" fill="none"/><line x1="8" y1="8.5" x2="15" y2="8.5" stroke="#777" strokeWidth="1.2"/><circle cx="3.5" cy="13.5" r="1" fill="#FFAA55"/><line x1="8" y1="13.5" x2="15" y2="13.5" stroke="#777" strokeWidth="1.2"/></svg>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="5" height="3" rx="0.5" fill="#FFB547"/><line x1="8" y1="3.5" x2="15" y2="3.5" stroke="#777" strokeWidth="1.2"/><circle cx="3.5" cy="8.5" r="1.8" stroke="#F7931A" strokeWidth="1.2" fill="none"/><line x1="8" y1="8.5" x2="15" y2="8.5" stroke="#777" strokeWidth="1.2"/><circle cx="3.5" cy="13.5" r="1" fill="#FFCA6E"/><line x1="8" y1="13.5" x2="15" y2="13.5" stroke="#777" strokeWidth="1.2"/></svg>
             Legend
           </button>
           <button
@@ -538,83 +668,34 @@ function App() {
 
         <div className={`context-panel ${view === "grid" ? "context-full" : ""}`}>
           {/* Mobile-only: embed the narration at the top of the sheet content */}
-          {view === "detail" && NARRATION[baseSnapshot.id] && (
+          {view === "detail" && (NARRATION[baseSnapshot.id] ?? baseSnapshot.narration) && (
             <div className="mobile-narration">
               <span className="mobile-narration-label">Context</span>
-              <p>{NARRATION[baseSnapshot.id]}</p>
+              <p>{NARRATION[baseSnapshot.id] ?? baseSnapshot.narration}</p>
             </div>
           )}
           <ContextPanel
             snapshot={
               view === "grid"
-                ? mosaicSnapshots[gridHoverIdx ?? gridSelectedIdx ?? activeIdx]
+                ? snapshots[gridHoverIdx ?? gridSelectedIdx ?? activeIdx]
                 : s
             }
             hoverCtx={view === "grid" ? { type: "none" } : hoverCtx}
             blocks={
               view === "grid"
-                ? (mosaicSnapshots[gridHoverIdx ?? gridSelectedIdx ?? activeIdx].blocks ?? [])
+                ? (snapshots[gridHoverIdx ?? gridSelectedIdx ?? activeIdx]?.blocks ?? [])
                 : currentBlocks
             }
           />
         </div>
-        {view === "detail" && (
-          <div className={`whatif-collapsible ${whatIfExpanded ? "expanded" : "collapsed"}`}>
-            <div className="right-divider" />
-            <button
-              className="whatif-toggle"
-              onClick={() => setWhatIfExpanded(v => !v)}
-              type="button"
-            >
-              <span className="whatif-title">What-If Simulation</span>
-              <span className={`whatif-chevron ${whatIfExpanded ? "up" : "down"}`}>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4 L6 8 L10 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              </span>
-            </button>
-            {whatIfExpanded && (
-              <div className="whatif-section">
-                <div className="whatif-popover-header">
-                  <span className="whatif-popover-title">What-If Simulation</span>
-                  <div className="whatif-popover-actions">
-                    {hasOverrides && (
-                      <button className="reset-button" onClick={resetOverrides} type="button">Reset</button>
-                    )}
-                    <button
-                      className="whatif-popover-close"
-                      onClick={() => setWhatIfExpanded(false)}
-                      type="button"
-                      aria-label="Close What-If"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-                {WHAT_IF_PARAMS.map((param) => {
-                  const baseVal = baseSnapshot[param.snapshotField] as number;
-                  const currentVal = overrides[param.key] ?? baseVal;
-                  const isOverridden = overrides[param.key] !== null && overrides[param.key] !== undefined;
-                  return (
-                    <div key={param.key} className={`slider-row ${isOverridden ? "overridden" : ""}`}>
-                      <div className="slider-header">
-                        <span className="slider-label">{param.label}</span>
-                        <span className="slider-value">{param.key === "difficulty" ? formatDifficulty(currentVal) : param.max > 100 ? currentVal.toLocaleString() : currentVal.toFixed(1)}<span className="slider-unit">{param.unit}</span></span>
-                      </div>
-                      <input type="range" min={param.min} max={param.max} step={param.step} value={currentVal} onChange={(e) => setOverride(param.key, parseFloat(e.target.value))} onDoubleClick={() => setOverride(param.key, null)} />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* ═══ NARRATION BUBBLE ═══ */}
-      {view === "detail" && showNarration && NARRATION[baseSnapshot.id] && (
+      {view === "detail" && showNarration && (NARRATION[baseSnapshot.id] ?? baseSnapshot.narration) && (
         <div className="narration-bar">
           <div className="narration-content">
             <span className="narration-label">{baseSnapshot.label}</span>
-            <p className="narration-text">{NARRATION[baseSnapshot.id]}</p>
+            <p className="narration-text">{NARRATION[baseSnapshot.id] ?? baseSnapshot.narration}</p>
           </div>
           <button className="narration-close" onClick={() => setShowNarration(false)} type="button" title="Hide narration">✕</button>
         </div>
@@ -625,153 +706,227 @@ function App() {
         <div className="guide-overlay" onClick={() => setShowDataInfo(false)}>
           <div className="guide-modal" onClick={(e) => e.stopPropagation()}>
             <div className="guide-tabs">
+              <button className={`guide-tab ${showGuideTab === "about" ? "active" : ""}`} onClick={() => setShowGuideTab("about")} type="button">About</button>
               <button className={`guide-tab ${showGuideTab === "legend" ? "active" : ""}`} onClick={() => setShowGuideTab("legend")} type="button">Legend</button>
               <button className={`guide-tab ${showGuideTab === "visual" ? "active" : ""}`} onClick={() => setShowGuideTab("visual")} type="button">How to Read</button>
-              <button className={`guide-tab ${showGuideTab === "source" ? "active" : ""}`} onClick={() => setShowGuideTab("source")} type="button">Data Sources</button>
+              <button className={`guide-tab ${showGuideTab === "source" ? "active" : ""}`} onClick={() => setShowGuideTab("source")} type="button">Sources</button>
             </div>
 
-            {showGuideTab === "legend" && (
-              <div className="guide-body guide-legend-body">
-                {[
-                  { id: "spine", icon: <span className="legend-block" />, name: "Block", desc: "Each cuboid is one block; width = weight (up to 4 MWU), brightness = tx count." },
-                  { id: "fee-0", icon: <span className="legend-line" style={{ background: "#FF9933" }} />, name: "Fee Tiers", desc: "4 horizontal arcs showing fee distribution and pressure." },
-                  { id: "settlement", icon: <span className="legend-line" style={{ background: "#FA660F" }} />, name: "Settlement", desc: "Arc length = block production health (full = on schedule)." },
-                  { id: "congestion", icon: <span className="legend-line" style={{ background: "#FF4400" }} />, name: "Congestion", desc: "Red arc; length and thickness scale with network congestion." },
-                  { id: "volume", icon: <span className="legend-line" style={{ background: "#FFB040" }} />, name: "BTC Volume", desc: "Gold arc proportional to daily BTC transferred vs 4.6M BTC peak." },
-                  { id: "hashrate-ring", icon: <span className="legend-arc" />, name: "Hashrate", desc: "Vertical ring, proportional to hashrate vs 1305 EH/s peak." },
-                  { id: "difficulty-ring", icon: <span className="legend-arc dark" />, name: "Difficulty", desc: "Vertical ring, log-scaled from 1 to 150 trillion." },
-                  { id: "particles", icon: <span className="legend-dot" />, name: "Addresses", desc: "Each particle ≈ 1,000 active addresses; larger = whale activity." },
-                ].map((item) => (
-                  <div key={item.id} className="guide-legend-item">
-                    <div className="guide-legend-icon">{item.icon}</div>
-                    <div className="guide-legend-text">
-                      <strong>{item.name}</strong>
-                      <p>{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
+            {showGuideTab === "about" && (
+              <div className="guide-body">
+                <div className="guide-section">
+                  <h4 className="guide-section-title">What this is</h4>
+                  <p className="guide-paragraph">
+                    A <strong>data-driven portrait</strong> of the Bitcoin network at specific moments —
+                    halvings, halts, booms, busts, hacks, bans, ATHs. Each of the {snapshots.length} snapshots
+                    is a three-dimensional reading of one day's network state: how many blocks were mined,
+                    how full they were, what fees were paid, how much BTC moved, who was mining.
+                  </p>
+                </div>
+
+                <div className="guide-section">
+                  <h4 className="guide-section-title">The rule</h4>
+                  <p className="guide-paragraph">
+                    <em>Every shape maps to a real number.</em> Nothing in the scene is decorative —
+                    if it renders, it's tied to a specific metric pulled from a public, free-to-access
+                    source. No synthetic data, no smoothing for aesthetics, no filler geometry. Calm days
+                    look calm because the network was calm; crisis days look tortured because it was.
+                  </p>
+                </div>
+
+                <div className="guide-section">
+                  <h4 className="guide-section-title">How to explore</h4>
+                  <p className="guide-paragraph">
+                    Start with the <strong>Legend</strong> to learn what each element represents, then
+                    <strong> How to Read</strong> to see how data moves the geometry. Scrub through
+                    history with the timeline, search by year or event, or orbit and zoom the scene
+                    directly to inspect a particular moment up close.
+                  </p>
+                </div>
               </div>
             )}
 
-            {showGuideTab === "source" && (
-              <div className="guide-body source-body">
-                <p className="source-intro">
-                  25 historically significant dates from Genesis (January 2009) through 2025.
-                  Every numeric field below is traceable to a verified public source.
-                  Nothing is decorative.
+            {showGuideTab === "legend" && (
+              <div className="guide-body">
+                <p className="guide-lede">
+                  Every shape in the scene maps to one real metric. Here's what each element is
+                  and which number drives it.
                 </p>
 
-                <div className="source-tier">
-                  <div className="source-tier-header">
-                    <span className="source-tier-badge tier-1">Tier 1</span>
-                    <h4>Pulled directly from public sources</h4>
+                <div className="guide-section">
+                  <h4 className="guide-section-title">Elements of the scene</h4>
+                  <div className="guide-cards">
+                    {[
+                      { icon: <span className="legend-block" />, name: "Block Spine", desc: "A vertical stack of cuboids — one per block mined that day.", meta: "Width ← block weight (up to 4 MWU) · Brightness ← transaction count" },
+                      { icon: <span className="legend-line" style={{ background: "#FFBF5E" }} />, name: "Fee Tiers", desc: "Four horizontal arcs (r=2.2), one per fee bucket (1–10, 11–30, 31–80, 81+ sat/vB).", meta: "Thickness ← fee pressure · Segment share ← bucket distribution" },
+                      { icon: <span className="legend-line" style={{ background: "#F7931A" }} />, name: "Settlement", desc: "Horizontal arc (r=2.8). Full circle = blocks on schedule; shrinks when blocks arrive late.", meta: "Arc length ← average block interval vs 600 s target" },
+                      { icon: <span className="legend-line" style={{ background: "#D97706" }} />, name: "Congestion", desc: "Horizontal arc (r=3.3). Barely visible when the mempool is clear; blazes under load.", meta: "Thickness + intensity ← mempool transaction count" },
+                      { icon: <span className="legend-line" style={{ background: "#FFC850" }} />, name: "BTC Volume", desc: "Gold horizontal arc (r=3.8) along the far hemisphere.", meta: "Arc length ← daily BTC transferred vs the 4.6M BTC peak" },
+                      { icon: <span className="legend-arc" />, name: "Hashrate Ring", desc: "Vertical ring (YZ plane, r=2.5). Invisible at Genesis; near-full at peak security.", meta: "Arc length ← hashrate vs the ~1,305 EH/s peak" },
+                      { icon: <span className="legend-arc dark" />, name: "Difficulty Ring", desc: "Vertical ring (XZ plane, r=3.0). Spans 17 orders of magnitude on a log scale.", meta: "Arc length ← log₁₀(difficulty), from 1 to 150 trillion" },
+                      { icon: <span className="legend-dot" />, name: "Address Particles", desc: "Glowing dots around the core. Genesis has zero; bull peaks have 1,000+.", meta: "Count ← active addresses ÷ 1,000 · Size ← whale activity" },
+                    ].map((item, i) => (
+                      <div key={i} className="guide-card">
+                        <div className="guide-card-icon">{item.icon}</div>
+                        <div>
+                          <span className="guide-card-name">{item.name}</span>
+                          <p className="guide-card-desc">{item.desc}</p>
+                          <p className="guide-card-meta"><em>{item.meta}</em></p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <ul className="source-list">
-                    <li><span className="source-field">Hashrate</span><span className="source-arrow">→</span><span className="source-origin">CoinMetrics <code>HashRate</code></span></li>
-                    <li><span className="source-field">Active addresses</span><span className="source-arrow">→</span><span className="source-origin">CoinMetrics <code>AdrActCnt</code></span></li>
-                    <li><span className="source-field">Total fees (BTC)</span><span className="source-arrow">→</span><span className="source-origin">CoinMetrics <code>FeeTotNtv</code></span></li>
-                    <li><span className="source-field">Blocks per day</span><span className="source-arrow">→</span><span className="source-origin">CoinMetrics <code>BlkCnt</code></span></li>
-                    <li><span className="source-field">Difficulty</span><span className="source-arrow">→</span><span className="source-origin">blockchain.com <code>/charts/difficulty</code></span></li>
-                    <li><span className="source-field">Mempool count</span><span className="source-arrow">→</span><span className="source-origin">blockchain.com <code>/charts/mempool-count</code></span></li>
-                    <li><span className="source-field">Mempool size</span><span className="source-arrow">→</span><span className="source-origin">blockchain.com <code>/charts/mempool-size</code></span></li>
-                    <li><span className="source-field">Block heights, per-block spine</span><span className="source-arrow">→</span><span className="source-origin">Google BigQuery <code>crypto_bitcoin</code> via Strategy Mosaic</span></li>
-                  </ul>
-                </div>
-
-                <div className="source-tier">
-                  <div className="source-tier-header">
-                    <span className="source-tier-badge tier-2">Tier 2</span>
-                    <h4>Derived from Tier 1 with transparent formulas</h4>
-                  </div>
-                  <ul className="source-list source-list-formula">
-                    <li>
-                      <span className="source-field">Avg block interval</span>
-                      <code className="source-formula">= 86400 ÷ BlkCnt</code>
-                    </li>
-                    <li>
-                      <span className="source-field">Block production stress</span>
-                      <code className="source-formula">= piecewise(interval ÷ 600s)</code>
-                    </li>
-                    <li>
-                      <span className="source-field">Congestion score</span>
-                      <code className="source-formula">= clamp(mempoolTxCount ÷ 35,000 × 10)</code>
-                    </li>
-                    <li>
-                      <span className="source-field">Fee pressure index</span>
-                      <code className="source-formula">= clamp(totalFeesBtc ÷ 100)</code>
-                    </li>
-                    <li>
-                      <span className="source-field">Health score</span>
-                      <code className="source-formula">= 10 − congestion·0.3 − feePressure·0.3 − max(0, stress−1)·1.5</code>
-                    </li>
-                  </ul>
-                  <p className="source-footnote">All formulas live in <code>scripts/derive_composites.mjs</code>.</p>
-                </div>
-
-                <div className="source-tier">
-                  <div className="source-tier-header">
-                    <span className="source-tier-badge tier-3">Tier 3</span>
-                    <h4>Strategy Mosaic / BigQuery (canonical source, not individually re-verified)</h4>
-                  </div>
-                  <ul className="source-list">
-                    <li><span className="source-field">BTC transferred</span><span className="source-arrow">→</span><span className="source-origin">Mosaic over BigQuery — matches Glassnode "Transfer Volume" methodology (raw on-chain throughput, includes change outputs)</span></li>
-                    <li><span className="source-field">Whale outputs (1000+ BTC, 100+ BTC)</span><span className="source-arrow">→</span><span className="source-origin">Mosaic over BigQuery</span></li>
-                    <li><span className="source-field">Mid &amp; retail outputs, total outputs</span><span className="source-arrow">→</span><span className="source-origin">Mosaic over BigQuery</span></li>
-                    <li><span className="source-field">Fee tier distribution (4 buckets)</span><span className="source-arrow">→</span><span className="source-origin">Interpolated from feePressureIndex using 5 anchor distributions. Real per-block histogram needs a fresh BigQuery extract.</span></li>
-                  </ul>
-                  <p className="source-footnote">BigQuery's <code>crypto_bitcoin</code> dataset is the canonical Bitcoin blockchain. These fields were pulled via Strategy Mosaic's semantic layer over BigQuery in the original data extract and are trustworthy by source, but have not been individually re-fetched and diffed against external sources for each of the 25 snapshots.</p>
-                </div>
-
-                <div className="source-tier">
-                  <div className="source-tier-header">
-                    <span className="source-tier-badge tier-note">Note</span>
-                    <h4>About hashrate variance</h4>
-                  </div>
-                  <p className="source-paragraph">
-                    Bitcoin hashrate cannot be measured directly — it is always estimated from observed
-                    block production and difficulty. Different providers publish different values for
-                    the same day depending on smoothing window. Day-to-day numbers can swing ±15% from
-                    random block-timing variance. We use CoinMetrics' published value, which is the
-                    standard cited by Bloomberg, CoinDesk, and academic researchers.
-                  </p>
-                </div>
-
-                <div className="source-tier">
-                  <div className="source-tier-header">
-                    <span className="source-tier-badge tier-note">Audit</span>
-                    <h4>Re-fetch &amp; verify</h4>
-                  </div>
-                  <p className="source-paragraph">
-                    Data is patched in place via <code>scripts/patch_coinmetrics.mjs</code> (idempotent, re-runnable).
-                    The audit script <code>scripts/audit_data.mjs</code> cross-checks every Tier 1 field
-                    against its source and reports per-row deltas. As of the latest deploy, audit reports
-                    zero rows with &gt;10% deviation.
-                  </p>
                 </div>
               </div>
             )}
 
             {showGuideTab === "visual" && (
               <div className="guide-body">
-                <div className="data-info-section">
-                  <h4>Center Spine — Blocks</h4>
-                  <p>Each cuboid is one real block from that day. Width = block weight (wider = fuller, up to 4 MWU). Brightness = transaction count (brighter = more txs). Hover a block to see it scale up and show its exact data.</p>
+                <p className="guide-lede">
+                  The scene responds continuously to the data. Here's how each metric moves the
+                  geometry as it rises or falls.
+                </p>
+
+                <div className="guide-section">
+                  <h4 className="guide-section-title">Data → Geometry</h4>
+                  <div className="guide-map">
+                    <span className="guide-map-data">Hashrate climbs</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Vertical hashrate ring fills toward a full circle</span>
+
+                    <span className="guide-map-data">Difficulty climbs</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Vertical difficulty ring expands (log scale, so early growth is rapid)</span>
+
+                    <span className="guide-map-data">Fees paid per tx rise</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Fee-tier arcs thicken; share shifts from low to high tiers</span>
+
+                    <span className="guide-map-data">Blocks arrive late (&gt; 600 s)</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Settlement arc shrinks from a full circle</span>
+
+                    <span className="guide-map-data">Mempool fills</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Congestion arc thickens and brightens to a deep amber</span>
+
+                    <span className="guide-map-data">More BTC moved on-chain</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">BTC Volume arc grows longer and brighter</span>
+
+                    <span className="guide-map-data">More active users</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">More floating particles; larger ones mark whale-sized outputs</span>
+
+                    <span className="guide-map-data">Blocks carry more txs</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Central spine cuboids glow brighter; wider ones mean fuller blocks</span>
+                  </div>
                 </div>
-                <div className="data-info-section">
-                  <h4>Horizontal Rings — Transaction Metrics</h4>
-                  <p>Fee Tiers (r=2.2): four arcs showing fee distribution, thickness scales with fee pressure. Settlement (r=2.8): arc length = block production health (full circle = on schedule). Congestion (r=3.3): red arc, length scales with congestion score. BTC Volume (r=3.8): gold arc proportional to daily BTC transferred vs the 4.6M BTC/day peak.</p>
+
+                <div className="guide-section">
+                  <h4 className="guide-section-title">Reading Across Snapshots</h4>
+                  <p className="guide-paragraph">
+                    Compare two dates to see how an event reshaped the network. A <em>calm</em> day
+                    looks like a compact spine with rings sitting quiet. A <em>crisis</em> day — a
+                    bubble top, an Ordinals surge, an ETF approval — shows a thick congestion band,
+                    fat high-fee arcs, and a shrunken settlement circle even as hashrate keeps growing.
+                  </p>
                 </div>
-                <div className="data-info-section">
-                  <h4>Vertical Rings — Security Metrics</h4>
-                  <p>Hashrate (YZ plane, r=2.5): arc proportional to hashrate vs 1305 EH/s peak. Difficulty (XZ plane, r=3.0): log-scaled arc from 1 to 150 trillion. These rings grow dramatically from Genesis to 2025.</p>
+
+                <div className="guide-section">
+                  <h4 className="guide-section-title">How to Interact</h4>
+                  <div className="guide-map">
+                    <span className="guide-map-data">Hover any shape</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Right panel shows that element's underlying numbers</span>
+
+                    <span className="guide-map-data">Click a shape</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Pins it; rotation pauses and KPIs lock for inspection</span>
+
+                    <span className="guide-map-data">Click empty space</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Unpins and resumes the scene</span>
+
+                    <span className="guide-map-data">Drag the canvas</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Orbit the geometry in 3D — full 360° around any axis, no pole lock</span>
+
+                    <span className="guide-map-data">Scroll / pinch on canvas</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Zoom in and out; zoom far in to inspect individual blocks on the spine</span>
+
+                    <span className="guide-map-data">Right-click + drag</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Pan the scene sideways without rotating</span>
+
+                    <span className="guide-map-data">Grid icon (top-left)</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Zoom out to the full {snapshots.length}-snapshot overview; scroll to browse eras</span>
+
+                    <span className="guide-map-data">Timeline on the left</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Jump to any date; search by name, year, or range</span>
+
+                    <span className="guide-map-data">Play button</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Auto-advance through history from Genesis onward</span>
+
+                    <span className="guide-map-data">Rotation toggle (top-left)</span>
+                    <span className="guide-map-arrow">→</span>
+                    <span className="guide-map-visual">Turn ambient rotation on or off while exploring</span>
+                  </div>
                 </div>
-                <div className="data-info-section">
-                  <h4>Floating Particles — Active Addresses</h4>
-                  <p>Each particle represents ~1,000 active addresses. Genesis = zero particles. Bull market peaks = over a thousand glowing dots filling the space. Larger bright particles indicate whale activity (outputs over 100 BTC).</p>
+              </div>
+            )}
+
+            {showGuideTab === "source" && (
+              <div className="guide-body">
+                <p className="guide-lede">
+                  {snapshots.length} historically significant dates from Genesis (2009) through 2026.
+                  Every number comes from a public, free-to-access source. Nothing is made up.
+                </p>
+
+                <div className="guide-section">
+                  <h4 className="guide-section-title">Where the Numbers Come From</h4>
+                  <ul className="source-list">
+                    <li><span className="source-field">Hashrate, active addresses, total fees, block count</span><span className="source-arrow">→</span><span className="source-origin">CoinMetrics community API</span></li>
+                    <li><span className="source-field">Difficulty, mempool size &amp; count, BTC transferred</span><span className="source-arrow">→</span><span className="source-origin">blockchain.com Charts API</span></li>
+                    <li><span className="source-field">Miner concentration (HHI, 2021 onward)</span><span className="source-arrow">→</span><span className="source-origin">mempool.space mining pools API</span></li>
+                    <li><span className="source-field">Per-block spine (height, size, weight, tx count)</span><span className="source-arrow">→</span><span className="source-origin">Google BigQuery public <code>crypto_bitcoin</code> dataset</span></li>
+                  </ul>
                 </div>
-                <div className="data-info-section">
-                  <h4>Interaction</h4>
-                  <p>Hover any block or ring to see its data in the right panel. Use the timeline to travel through 25 historical events. Drag What-If sliders to simulate hypothetical network conditions — rings and particles respond in real time. Toggle rotation with the ⟳ button.</p>
+
+                <div className="guide-section">
+                  <h4 className="guide-section-title">Derived Values</h4>
+                  <p className="guide-paragraph">
+                    A handful of scores — <em>block production stress</em>, <em>congestion</em>,{" "}
+                    <em>fee pressure</em>, <em>network health</em> — are computed from the raw fields
+                    above using simple piecewise formulas. They're <strong>not</strong> independent
+                    sources; they're just different lenses on the same data.
+                  </p>
+                </div>
+
+                <div className="guide-section">
+                  <h4 className="guide-section-title">Visual-Only Fields</h4>
+                  <p className="guide-paragraph">
+                    The fee-tier distribution (the four fee arc segments) is interpolated from fee
+                    pressure using anchor distributions. It's directionally correct but not a
+                    per-block histogram. Ring intensities and particle density are also derived,
+                    not sourced. None of these drive the KPI numbers in the right panel.
+                  </p>
+                </div>
+
+                <div className="guide-section">
+                  <h4 className="guide-section-title">A Note on Hashrate</h4>
+                  <p className="guide-paragraph">
+                    Hashrate can't be measured directly — it's always estimated from block production
+                    and difficulty. Different providers publish different values for the same day
+                    depending on their smoothing window. Day-to-day numbers can swing ±15% from
+                    random block-timing variance. We use CoinMetrics' value, the one most analysts
+                    and news outlets cite.
+                  </p>
                 </div>
               </div>
             )}
@@ -842,7 +997,7 @@ function ContextPanel({ snapshot, hoverCtx, blocks }: { snapshot: NetworkSnapsho
       <div className="ctx-content">
         <div className="ctx-title">Block Settlement</div>
         <CtxRow label="Block Stress" value={`${s.blockProductionStress.toFixed(1)}/10`} />
-        <CtxRow label="Avg Interval" value={`${s.avgBlockIntervalSeconds}s`} />
+        <CtxRow label="Avg Interval" value={`${Math.round(s.avgBlockIntervalSeconds)}s`} />
         <CtxRow label="Blocks Mined" value={`${blocks.length}`} />
         <CtxRow label="Target" value="600s" />
       </div>
@@ -856,7 +1011,7 @@ function ContextPanel({ snapshot, hoverCtx, blocks }: { snapshot: NetworkSnapsho
         <CtxRow label="Hashrate" value={`${s.networkHashrateEh.toFixed(1)} EH/s`} />
         <CtxRow label="Ring Fill" value={`${((s.networkHashrateEh / 1305.5) * 100).toFixed(1)}%`} />
         <CtxRow label="Halving Era" value={`${Math.floor(s.blockHeight / 210000) + 1}`} />
-        <div className="ctx-notes"><p>Blue vertical ring. Arc length proportional to hashrate relative to the 2025 peak of ~1,305 EH/s. Measures total computational power securing the network. Sourced from CoinMetrics.</p></div>
+        <div className="ctx-notes"><p>Amber vertical ring. Arc length proportional to hashrate relative to the 2025 peak of ~1,305 EH/s. Measures total computational power securing the network. Sourced from CoinMetrics.</p></div>
       </div>
     );
   }
@@ -881,7 +1036,7 @@ function ContextPanel({ snapshot, hoverCtx, blocks }: { snapshot: NetworkSnapsho
         <CtxRow label="Difficulty" value={formatDifficulty(s.difficulty)} />
         <CtxRow label="Hashrate" value={`${s.networkHashrateEh.toFixed(1)} EH/s`} />
         <CtxRow label="Difficulty Epoch" value={`${Math.floor(s.blockHeight / 2016)}`} />
-        <div className="ctx-notes"><p>Purple vertical ring. Log-scaled arc — difficulty spans from 1 (Genesis) to 150 trillion (2025). Adjusts every 2,016 blocks to maintain ~10 min block times.</p></div>
+        <div className="ctx-notes"><p>Deep-gold vertical ring. Log-scaled arc — difficulty spans from 1 (Genesis) to 150 trillion (2025). Adjusts every 2,016 blocks to maintain ~10 min block times.</p></div>
       </div>
     );
   }
@@ -943,12 +1098,96 @@ interface SceneProps {
    CAMERA RIG — smoothly animates camera between grid and detail views
    ═══════════════════════════════════════════════════════ */
 
-function CameraRig({ view }: { view: "grid" | "detail" }) {
-  const { camera, size } = useThree();
+function CameraRig({ view, snapCount, focusIdx }: { view: "grid" | "detail"; snapCount: number; focusIdx: number | null }) {
+  const { camera, size, gl } = useThree();
   const targetPos = useRef(new THREE.Vector3(0, 0, 22));
   const targetFov = useRef(42);
   const transitioning = useRef(false);
   const transitionStart = useRef(0);
+
+  // Scroll state (grid mode only)
+  const COLS = 5;
+  const SPACING_Y = 3.2;
+  const uiOffsetY = useRef(0);   // sidebar-bias Y, set on each grid view entry
+  const gridDist = useRef(22);   // Z distance in grid mode, set on each grid view entry
+  const snapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isInGrid = useRef(view === "grid");
+  isInGrid.current = view === "grid";
+
+  // Compute row-center world Y (rows are symmetric around 0, row 0 at top)
+  const rowCenterY = useCallback((row: number) => {
+    const ROWS = Math.ceil(snapCount / COLS);
+    return ((ROWS - 1) / 2 - row) * SPACING_Y;
+  }, [snapCount]);
+
+  // Wheel + touch scroll handler. The camera shows ~5 rows at once, so the
+  // valid center-of-view row range is [HALF_VIEW, ROWS-1-HALF_VIEW]; scrolling
+  // beyond would push the grid off-screen at top or bottom.
+  const HALF_VIEW = 2;
+  useEffect(() => {
+    const ROWS = Math.ceil(snapCount / COLS);
+    const minRow = Math.min(HALF_VIEW, ROWS - 1);
+    const maxRow = Math.max(ROWS - 1 - HALF_VIEW, minRow);
+    const topY = rowCenterY(minRow);   // most "scrolled-up" center
+    const botY = rowCenterY(maxRow);   // most "scrolled-down" center
+
+    const doSnap = () => {
+      const relY = targetPos.current.y - uiOffsetY.current;
+      let closestRow = minRow, closestDist = Infinity;
+      for (let r = minRow; r <= maxRow; r++) {
+        const d = Math.abs(rowCenterY(r) - relY);
+        if (d < closestDist) { closestDist = d; closestRow = r; }
+      }
+      targetPos.current.y = rowCenterY(closestRow) + uiOffsetY.current;
+    };
+
+    const clamp = (y: number) =>
+      Math.max(botY + uiOffsetY.current, Math.min(topY + uiOffsetY.current, y));
+
+    const handleWheel = (e: WheelEvent) => {
+      if (!isInGrid.current) return;
+      e.preventDefault();
+      targetPos.current.y = clamp(targetPos.current.y - e.deltaY * 0.018);
+      if (snapTimer.current) clearTimeout(snapTimer.current);
+      snapTimer.current = setTimeout(doSnap, 300);
+    };
+
+    let touchY = 0;
+    const handleTouchStart = (e: TouchEvent) => { touchY = e.touches[0].clientY; };
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isInGrid.current) return;
+      e.preventDefault();
+      const dy = touchY - e.touches[0].clientY;
+      touchY = e.touches[0].clientY;
+      targetPos.current.y = clamp(targetPos.current.y - dy * 0.05);
+      if (snapTimer.current) clearTimeout(snapTimer.current);
+      snapTimer.current = setTimeout(doSnap, 300);
+    };
+
+    const canvas = gl.domElement;
+    canvas.addEventListener("wheel", handleWheel, { passive: false });
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: true });
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+    return () => {
+      canvas.removeEventListener("wheel", handleWheel);
+      canvas.removeEventListener("touchstart", handleTouchStart);
+      canvas.removeEventListener("touchmove", handleTouchMove);
+      if (snapTimer.current) clearTimeout(snapTimer.current);
+    };
+  }, [gl.domElement, snapCount, rowCenterY]);
+
+  // Follow external focus (timeline hover/select) — scroll camera to that row
+  useEffect(() => {
+    if (view !== "grid" || focusIdx == null) return;
+    const ROWS = Math.ceil(snapCount / COLS);
+    const minRow = Math.min(HALF_VIEW, ROWS - 1);
+    const maxRow = Math.max(ROWS - 1 - HALF_VIEW, minRow);
+    const focusRow = Math.floor(focusIdx / COLS);
+    const clampedRow = Math.max(minRow, Math.min(maxRow, focusRow));
+    targetPos.current.y = rowCenterY(clampedRow) + uiOffsetY.current;
+    if (snapTimer.current) { clearTimeout(snapTimer.current); snapTimer.current = null; }
+  }, [focusIdx, view, snapCount, rowCenterY]);
+
 
   useEffect(() => {
     if (view === "grid") {
@@ -993,35 +1232,34 @@ function CameraRig({ view }: { view: "grid" | "detail" }) {
       // Canvas aspect — what three.js uses for projection.
       const canvasAspect = vpW / vpH;
 
-      // Grid footprint: 5x5 at SPACING_X=3.6, SPACING_Y=3.2, cell radius ~1.4.
-      // Half-extents plus a bit of breathing room.
-      const gridHalfW = (4 * 3.6) / 2 + 1.6; // ~8.8
-      const gridHalfH = (4 * 3.2) / 2 + 1.6; // ~8.0
+      // Show ~5 rows at a time: cell radius ~1.4, 5 rows of SPACING_Y=3.2.
+      const gridHalfW = (4 * 3.6) / 2 + 1.6; // ~8.8 (5 cols)
+      const gridHalfH = (4 * 3.2) / 2 + 1.6; // ~8.0 (5 visible rows)
 
       // Pick a FOV: wider on narrow/mobile so the grid doesn't need a huge z.
       const fov = vpW < 640 ? 55 : vpW < 900 ? 48 : 42;
       const tanHalf = Math.tan((fov * Math.PI) / 360);
 
-      // We want the grid to fit inside the *usable* region at the focal plane.
-      // Visible half-height at distance d = d * tanHalf.
-      // Visible half-width at distance d = d * tanHalf * canvasAspect.
-      // Fraction of that width that's "usable" (not covered by sidebars)
-      // = usableW / vpW. Same for height = usableH / vpH.
       const usableFracW = usableW / vpW;
       const usableFracH = usableH / vpH;
       const distH = gridHalfH / (tanHalf * usableFracH);
       const distW = gridHalfW / (tanHalf * canvasAspect * usableFracW);
       const dist = Math.min(Math.max(distH, distW), 60);
 
-      // Center grid vertically within the usable region. Positive C_y → camera
-      // looks at a point above world origin → grid appears below screen center.
-      // Desktop has a small banner top → slight downshift. Mobile has a huge
-      // bottom sheet → large upshift.
+      // Center grid vertically within the usable region.
       const verticalShiftPx = (topReserve - bottomReserve) / 2;
       const worldPerPx = (dist * tanHalf * 2) / vpH;
       const offsetY = verticalShiftPx * worldPerPx;
 
-      targetPos.current.set(0, offsetY, dist);
+      uiOffsetY.current = offsetY;
+      gridDist.current = dist;
+
+      // Start with the top of the grid (rows 0..4) filling the viewport —
+      // center on row HALF_VIEW so rows 0..HALF_VIEW*2 fit without empty space above.
+      const ROWS = Math.ceil(snapCount / COLS);
+      const startRow = Math.min(HALF_VIEW, Math.max(0, ROWS - 1));
+      const startY = rowCenterY(startRow) + offsetY;
+      targetPos.current.set(0, startY, dist);
       targetFov.current = fov;
       // Reset up vector — TrackballControls modifies it during free rotation
       camera.up.set(0, 1, 0);
@@ -1032,26 +1270,44 @@ function CameraRig({ view }: { view: "grid" | "detail" }) {
     }
     transitioning.current = true;
     transitionStart.current = performance.now();
-  }, [view, camera, size.width, size.height]);
+  }, [view, camera, size.width, size.height, rowCenterY]);
 
   useFrame((_, delta) => {
-    if (!transitioning.current) return;
-    const elapsed = (performance.now() - transitionStart.current) / 1000;
-    // Transition for max 1 second — after that, stop fighting the user controls
-    if (elapsed > 1.0) {
-      transitioning.current = false;
+    const t = 1 - Math.pow(0.002, delta);
+
+    if (view === "grid") {
+      // Always smooth-lerp Y toward scroll target (even after transition settles)
+      camera.position.y += (targetPos.current.y - camera.position.y) * t;
+      // During initial transition: also lerp Z and FOV
+      if (transitioning.current) {
+        const elapsed = (performance.now() - transitionStart.current) / 1000;
+        if (elapsed > 1.0) transitioning.current = false;
+        camera.position.z += (gridDist.current - camera.position.z) * t;
+        const persp = camera as THREE.PerspectiveCamera;
+        if (persp.fov !== undefined) {
+          persp.fov += (targetFov.current - persp.fov) * t;
+          persp.updateProjectionMatrix();
+        }
+      }
+      camera.lookAt(0, camera.position.y, 0);
       return;
     }
-    const t = 1 - Math.pow(0.001, delta);
+
+    // Detail view: run transition lerp
+    if (!transitioning.current) return;
+    const elapsed = (performance.now() - transitionStart.current) / 1000;
+    if (elapsed > 1.0) { transitioning.current = false; return; }
     camera.position.lerp(targetPos.current, t);
     const persp = camera as THREE.PerspectiveCamera;
     if (persp.fov !== undefined) {
       persp.fov += (targetFov.current - persp.fov) * t;
       persp.updateProjectionMatrix();
     }
-    if (view === "grid") {
-      camera.lookAt(0, targetPos.current.y, 0);
-    }
+    // Track the camera's current Y rather than the target Y. Using the target
+    // would snap the line-of-sight on frame 1 while the camera is still far
+    // from target — visually the scene would "jump" into place. Following the
+    // camera's actual Y keeps it smooth throughout the descent.
+    camera.lookAt(0, camera.position.y, 0);
   });
 
   return null;
@@ -1061,10 +1317,11 @@ function CameraRig({ view }: { view: "grid" | "detail" }) {
    GRID SCENE — 5x5 landing page with simplified mini snapshots
    ═══════════════════════════════════════════════════════ */
 
-function GridScene({ snapshots, hoverIdx, selectedIdx, legendHover, onHover, onSelect }: {
+function GridScene({ snapshots, hoverIdx, selectedIdx, matchedIndices, legendHover, onHover, onSelect }: {
   snapshots: NetworkSnapshot[];
   hoverIdx: number | null;
   selectedIdx: number | null;
+  matchedIndices: Set<number> | null;
   legendHover: string | null;
   onHover: (i: number | null) => void;
   onSelect: (i: number) => void;
@@ -1074,9 +1331,10 @@ function GridScene({ snapshots, hoverIdx, selectedIdx, legendHover, onHover, onS
   // Used for the selected-cell pulse animation.
   const pulseRef = useRef(0);
 
-  // Staggered phase offsets so cells don't rotate in lockstep
+  // Staggered phase offsets — deterministic (golden-ratio seed) so cells don't
+  // re-randomize on every mount while still appearing visually distributed.
   const phaseOffsets = useMemo(() =>
-    Array.from({ length: snapshots.length }, () => Math.random() * Math.PI * 2),
+    Array.from({ length: snapshots.length }, (_, i) => Math.sin(i * 1.618) * Math.PI * 2),
   [snapshots.length]);
 
   useFrame((_, delta) => {
@@ -1087,10 +1345,11 @@ function GridScene({ snapshots, hoverIdx, selectedIdx, legendHover, onHover, onS
     forceUpdate((n) => n + 1);
   });
 
-  // 5x5 grid layout
+  // 21×5 scrollable grid layout
   const COLS = 5;
+  const ROWS = Math.ceil(snapshots.length / COLS);
   const SPACING_X = 3.6; // world units between cells (horizontal)
-  const SPACING_Y = 3.2; // world units between cells (vertical, tighter)
+  const SPACING_Y = 3.2; // world units between cells (vertical)
 
   // Gentle pulse for the selected cell (1.0 ± 0.06)
   const pulse = 1 + Math.sin(pulseRef.current * 3.2) * 0.06;
@@ -1099,24 +1358,28 @@ function GridScene({ snapshots, hoverIdx, selectedIdx, legendHover, onHover, onS
     <group position={[0, -0.3, 0]}>
       {/* Grid-wide lighting — shared across all cells */}
       <ambientLight intensity={0.15} />
-      <pointLight position={[0, 10, 15]} intensity={6} color="#FA660F" distance={60} decay={1.5} />
-      <pointLight position={[15, -5, 10]} intensity={4} color="#FF8C3A" distance={50} decay={1.5} />
-      <pointLight position={[-15, 5, 10]} intensity={4} color="#CC5500" distance={50} decay={1.5} />
+      <pointLight position={[0, 10, 15]} intensity={6} color="#F7931A" distance={60} decay={1.5} />
+      <pointLight position={[15, -5, 10]} intensity={4} color="#FFB547" distance={50} decay={1.5} />
+      <pointLight position={[-15, 5, 10]} intensity={4} color="#B87206" distance={50} decay={1.5} />
 
       {snapshots.map((snap, i) => {
         const col = i % COLS;
         const row = Math.floor(i / COLS);
         const x = (col - (COLS - 1) / 2) * SPACING_X;
-        const y = ((COLS - 1) / 2 - row) * SPACING_Y;
+        const y = ((ROWS - 1) / 2 - row) * SPACING_Y;
         const isHovered = hoverIdx === i;
         const isSelected = selectedIdx === i;
+        const isFilteredOut = matchedIndices !== null && !matchedIndices.has(i);
         // Dim non-hovered cells when hovering. If nothing is hovered but
-        // something is selected, dim the non-selected cells.
-        const dim = hoverIdx !== null
-          ? (isHovered ? 1 : 0.25)
-          : selectedIdx !== null
-            ? (isSelected ? 1 : 0.45)
-            : 1;
+        // something is selected, dim the non-selected cells. Filtered-out
+        // cells stay in place but fade heavily so history's shape is preserved.
+        const dim = isFilteredOut
+          ? 0.1
+          : hoverIdx !== null
+            ? (isHovered ? 1 : 0.25)
+            : selectedIdx !== null
+              ? (isSelected ? 1 : 0.45)
+              : 1;
         // Selected cell is larger and pulses; hovered cell is larger.
         const baseScale = isSelected ? 0.36 * pulse : isHovered ? 0.32 : 0.28;
 
@@ -1140,7 +1403,7 @@ function GridScene({ snapshots, hoverIdx, selectedIdx, legendHover, onHover, onS
             {isSelected && (
               <mesh rotation={[Math.PI / 2, 0, 0]}>
                 <ringGeometry args={[1.3, 1.38, 48]} />
-                <meshBasicMaterial color="#FA660F" transparent opacity={0.55 * pulse} side={THREE.DoubleSide} />
+                <meshBasicMaterial color="#F7931A" transparent opacity={0.55 * pulse} side={THREE.DoubleSide} />
               </mesh>
             )}
 
@@ -1178,7 +1441,7 @@ function MiniSnapshot({ snapshot: s, opacity: dim, highlighted, legendHover }: {
   const vol = Math.min(s.btcTransferred / maxBtcVolume, 1);
   const blocks = s.blocks ?? [];
 
-  const feeColors = ["#FF9933", "#FF7722", "#FF5511", "#FF3300"];
+  const feeColors = ["#FFBF5E", "#F2A63C", "#E08B15", "#C77000"];
   const op = dim * (highlighted ? 1 : 0.85);
 
   // Legend hover glow boost — matches the keys used in the legend overlay
@@ -1201,7 +1464,9 @@ function MiniSnapshot({ snapshot: s, opacity: dim, highlighted, legendHover }: {
         const arcSpan = Math.PI * 2 * bucket.txShare;
         let startAngle = 0;
         for (let j = 0; j < i; j++) startAngle += Math.PI * 2 * s.feeBuckets[j].txShare;
-        const thickness = 0.04 + fp * 0.12 + bucket.intensity * 0.08;
+        // Amplify thickness response to fee pressure so low-fee days look
+        // genuinely thin and high-fee days look genuinely fat. fp is 0..1.
+        const thickness = 0.02 + fp * 0.28 + bucket.intensity * 0.05;
         const gap = arcSpan * 0.04;
         const usable = arcSpan - gap;
         if (usable < 0.01) return null;
@@ -1220,7 +1485,7 @@ function MiniSnapshot({ snapshot: s, opacity: dim, highlighted, legendHover }: {
         const g = lhGlow("settlement");
         return (
           <group position={[0, 0, -bs * 0.15]}>
-            <ArcBand radius={2.8} thickness={0.03 + stressHealth * 0.08} depth={0.05} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#FA660F" emissiveIntensity={(0.25 + stressHealth * 0.5 + g.extra) * g.mult} opacity={0.75 * op * g.mult} />
+            <ArcBand radius={2.8} thickness={0.03 + stressHealth * 0.08} depth={0.05} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#F7931A" emissiveIntensity={(0.25 + stressHealth * 0.5 + g.extra) * g.mult} opacity={0.75 * op * g.mult} />
           </group>
         );
       })()}
@@ -1231,7 +1496,7 @@ function MiniSnapshot({ snapshot: s, opacity: dim, highlighted, legendHover }: {
         const g = lhGlow("congestion");
         return (
           <group position={[0, 0, cg * 0.2]}>
-            <ArcBand radius={3.3} thickness={0.02 + cg * 0.18} depth={0.05} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#FF4400" emissiveIntensity={(0.2 + cg * 0.8 + g.extra) * g.mult} opacity={(cg > 0.01 ? 0.65 + cg * 0.25 : 0.06) * op * g.mult} />
+            <ArcBand radius={3.3} thickness={0.02 + cg * 0.18} depth={0.05} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#D97706" emissiveIntensity={(0.2 + cg * 0.8 + g.extra) * g.mult} opacity={(cg > 0.01 ? 0.65 + cg * 0.25 : 0.06) * op * g.mult} />
           </group>
         );
       })()}
@@ -1242,7 +1507,7 @@ function MiniSnapshot({ snapshot: s, opacity: dim, highlighted, legendHover }: {
         const g = lhGlow("volume");
         return (
           <group position={[0, 0, vol * 0.15]}>
-            <ArcBand radius={3.8} thickness={0.02 + vol * 0.14} depth={0.05} startAngle={Math.PI - fillAngle / 2} endAngle={Math.PI + fillAngle / 2} color="#FFB040" emissiveIntensity={(0.2 + vol * 0.6 + g.extra) * g.mult} opacity={(0.4 + vol * 0.4) * op * g.mult} />
+            <ArcBand radius={3.8} thickness={0.02 + vol * 0.14} depth={0.05} startAngle={Math.PI - fillAngle / 2} endAngle={Math.PI + fillAngle / 2} color="#FFC850" emissiveIntensity={(0.2 + vol * 0.6 + g.extra) * g.mult} opacity={(0.4 + vol * 0.4) * op * g.mult} />
           </group>
         );
       })()}
@@ -1253,7 +1518,7 @@ function MiniSnapshot({ snapshot: s, opacity: dim, highlighted, legendHover }: {
         const g = lhGlow("hashrate-ring");
         return (
           <group rotation={[0, Math.PI / 2, 0]}>
-            <ArcBand radius={2.5} thickness={0.02 + hrNorm * 0.1} depth={0.04} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#FF7722" emissiveIntensity={(0.2 + hrNorm * 0.6 + g.extra) * g.mult} opacity={(0.5 + hrNorm * 0.35) * op * g.mult} />
+            <ArcBand radius={2.5} thickness={0.02 + hrNorm * 0.1} depth={0.04} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#F2A63C" emissiveIntensity={(0.2 + hrNorm * 0.6 + g.extra) * g.mult} opacity={(0.5 + hrNorm * 0.35) * op * g.mult} />
           </group>
         );
       })()}
@@ -1264,7 +1529,7 @@ function MiniSnapshot({ snapshot: s, opacity: dim, highlighted, legendHover }: {
         const g = lhGlow("difficulty-ring");
         return (
           <group rotation={[Math.PI / 2, 0, 0]}>
-            <ArcBand radius={3.0} thickness={0.02 + diffLog * 0.08} depth={0.04} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#CC6600" emissiveIntensity={(0.2 + diffLog * 0.5 + g.extra) * g.mult} opacity={(0.4 + diffLog * 0.4) * op * g.mult} />
+            <ArcBand radius={3.0} thickness={0.02 + diffLog * 0.08} depth={0.04} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#A8740A" emissiveIntensity={(0.2 + diffLog * 0.5 + g.extra) * g.mult} opacity={(0.4 + diffLog * 0.4) * op * g.mult} />
           </group>
         );
       })()}
@@ -1304,7 +1569,7 @@ function MiniParticles({ count, opacity, highlighted = false }: { count: number;
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial
-        color={highlighted ? "#FFFFFF" : "#FFAA55"}
+        color={highlighted ? "#FFFFFF" : "#FFCA6E"}
         size={highlighted ? 0.14 : 0.08}
         transparent
         opacity={(highlighted ? 0.95 : 0.5) * opacity}
@@ -1360,8 +1625,8 @@ function MiniSpine({ blocks, opacity: blockOpacity, highlighted }: { blocks: Blo
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
       <boxGeometry args={[1, 1, 1]} />
       <meshStandardMaterial
-        color={highlighted ? "#FFD080" : "#FF8C3A"}
-        emissive="#FA660F"
+        color={highlighted ? "#FFDF9E" : "#FFB547"}
+        emissive="#F7931A"
         emissiveIntensity={highlighted ? 0.25 : 0.08}
         metalness={0.85}
         roughness={0.15}
@@ -1451,7 +1716,7 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
   const glowMult = (gid: string) => activeGroup === gid ? 1.8 : 1;
   const glowExtra = (gid: string) => activeGroup === gid ? 0.5 : 0;
 
-  const feeColors = ["#FF9933", "#FF7722", "#FF5511", "#FF3300"];
+  const feeColors = ["#FFBF5E", "#F2A63C", "#E08B15", "#C77000"];
 
 
   return (
@@ -1459,13 +1724,13 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
       {/* Three-point lighting for cinematic depth */}
       <ambientLight intensity={0.03 + health * 0.03} />
       {/* Key light — warm orange from front-above */}
-      <pointLight position={[0, 3, 6]} intensity={4 + health * 3} color="#FA660F" distance={22} decay={1.8} />
+      <pointLight position={[0, 3, 6]} intensity={4 + health * 3} color="#F7931A" distance={22} decay={1.8} />
       {/* Fill light — softer, from the side */}
-      <pointLight position={[6, 1, 2]} intensity={2} color="#FF8C3A" distance={20} decay={2} />
+      <pointLight position={[6, 1, 2]} intensity={2} color="#FFB547" distance={20} decay={2} />
       {/* Rim light — behind and below for edge separation */}
-      <pointLight position={[-4, -4, -3]} intensity={3} color="#CC5500" distance={18} decay={1.8} />
+      <pointLight position={[-4, -4, -3]} intensity={3} color="#B87206" distance={18} decay={1.8} />
       {/* Core glow — inside the spine, pulses subtly with network health */}
-      <pointLight ref={coreLightRef} position={[0, 0, 0]} intensity={0.5 + health * 0.5} color="#FFAA44" distance={4} decay={2.5} />
+      <pointLight ref={coreLightRef} position={[0, 0, 0]} intensity={0.5 + health * 0.5} color="#F2B456" distance={4} decay={2.5} />
 
       {/* Background — no pointer events, just for click-away clearing */}
 
@@ -1487,7 +1752,9 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
         const arcSpan = Math.PI * 2 * bucket.txShare;
         let startAngle = 0;
         for (let j = 0; j < i; j++) startAngle += Math.PI * 2 * s.feeBuckets[j].txShare;
-        const thickness = 0.04 + fp * 0.12 + bucket.intensity * 0.08;
+        // Amplify thickness response to fee pressure so low-fee days look
+        // genuinely thin and high-fee days look genuinely fat. fp is 0..1.
+        const thickness = 0.02 + fp * 0.28 + bucket.intensity * 0.05;
         const z = i * 0.06;
         const gap = arcSpan * 0.04;
         const usable = arcSpan - gap;
@@ -1519,7 +1786,7 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
             onPointerOut={(e) => { onHover(null); if (e.pointerType === "mouse") onRingHover(null); }}
             onClick={(e) => { e.stopPropagation(); onClick(gid); }}
           >
-            <ArcBand radius={r} thickness={thickness} depth={0.05 + cg * 0.04} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#FF4400" emissiveIntensity={(0.2 + cg * 0.8 + glowExtra(gid)) * g} opacity={(cg > 0.01 ? 0.65 + cg * 0.25 : 0.06) * g} />
+            <ArcBand radius={r} thickness={thickness} depth={0.05 + cg * 0.04} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#D97706" emissiveIntensity={(0.2 + cg * 0.8 + glowExtra(gid)) * g} opacity={(cg > 0.01 ? 0.65 + cg * 0.25 : 0.06) * g} />
           </group>
         );
       })()}
@@ -1539,7 +1806,7 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
             onPointerOut={(e) => { onHover(null); if (e.pointerType === "mouse") onRingHover(null); }}
             onClick={(e) => { e.stopPropagation(); onClick(gid); }}
           >
-            <ArcBand radius={r} thickness={thickness} depth={0.05} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#FA660F" emissiveIntensity={(0.25 + stressHealth * 0.5 + glowExtra(gid)) * g} opacity={0.75 * g} />
+            <ArcBand radius={r} thickness={thickness} depth={0.05} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#F7931A" emissiveIntensity={(0.25 + stressHealth * 0.5 + glowExtra(gid)) * g} opacity={0.75 * g} />
           </group>
         );
       })()}
@@ -1558,7 +1825,7 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
             onPointerOut={(e) => { onHover(null); if (e.pointerType === "mouse") onRingHover(null); }}
             onClick={(e) => { e.stopPropagation(); onClick(gid); }}
           >
-            <ArcBand radius={r} thickness={thickness} depth={0.05 + vol * 0.03} startAngle={Math.PI - fillAngle / 2} endAngle={Math.PI + fillAngle / 2} color="#FFB040" emissiveIntensity={(0.2 + vol * 0.6 + glowExtra(gid)) * g} opacity={(0.4 + vol * 0.4) * g} />
+            <ArcBand radius={r} thickness={thickness} depth={0.05 + vol * 0.03} startAngle={Math.PI - fillAngle / 2} endAngle={Math.PI + fillAngle / 2} color="#FFC850" emissiveIntensity={(0.2 + vol * 0.6 + glowExtra(gid)) * g} opacity={(0.4 + vol * 0.4) * g} />
           </group>
         );
       })()}
@@ -1577,7 +1844,7 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
             onPointerOut={(e) => { onHover(null); if (e.pointerType === "mouse") onRingHover(null); }}
             onClick={(e) => { e.stopPropagation(); onClick(gid); }}
           >
-            <ArcBand radius={r} thickness={thickness} depth={0.04 + hrNorm * 0.02} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#FF7722" emissiveIntensity={(0.2 + hrNorm * 0.6 + glowExtra(gid)) * g} opacity={(0.5 + hrNorm * 0.35) * g} />
+            <ArcBand radius={r} thickness={thickness} depth={0.04 + hrNorm * 0.02} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#F2A63C" emissiveIntensity={(0.2 + hrNorm * 0.6 + glowExtra(gid)) * g} opacity={(0.5 + hrNorm * 0.35) * g} />
           </group>
         );
       })()}
@@ -1597,7 +1864,7 @@ function PrimeRadiantScene({ snapshot, blocks: currentBlocks, activeGroup, froze
             onPointerOut={(e) => { onHover(null); if (e.pointerType === "mouse") onRingHover(null); }}
             onClick={(e) => { e.stopPropagation(); onClick(gid); }}
           >
-            <ArcBand radius={r} thickness={thickness} depth={0.04 + diffLog * 0.02} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#CC6600" emissiveIntensity={(0.2 + diffLog * 0.5 + glowExtra(gid)) * g} opacity={(0.4 + diffLog * 0.4) * g} />
+            <ArcBand radius={r} thickness={thickness} depth={0.04 + diffLog * 0.02} startAngle={-fillAngle / 2} endAngle={fillAngle / 2} color="#A8740A" emissiveIntensity={(0.2 + diffLog * 0.5 + glowExtra(gid)) * g} opacity={(0.4 + diffLog * 0.4) * g} />
           </group>
         );
       })()}
@@ -1682,7 +1949,7 @@ function AddressParticles({ count, whaleRatio, paused = false }: { count: number
         <bufferAttribute attach="attributes-size" args={[sizes, 1]} />
       </bufferGeometry>
       <pointsMaterial
-        color="#FFAA55"
+        color="#FFCA6E"
         size={0.035}
         transparent
         opacity={0.55}
@@ -1906,8 +2173,8 @@ function BlockSpine({ blocks, opacity: blockOpacity = 1, frozen = false, highlig
       >
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial
-          color={highlighted ? "#FFD080" : "#FF8C3A"}
-          emissive={highlighted ? "#FFAA44" : "#FA660F"}
+          color={highlighted ? "#FFDF9E" : "#FFB547"}
+          emissive={highlighted ? "#F2B456" : "#F7931A"}
           emissiveIntensity={highlighted ? 0.4 : 0.1}
           metalness={0.85}
           roughness={0.1}
