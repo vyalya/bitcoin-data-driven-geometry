@@ -1,17 +1,17 @@
 /**
- * DuckDB-WASM data layer.
+ * Runtime data layer — plain fetch() of JSON artefacts produced by the
+ * offline pipeline. Replaces the previous DuckDB-WASM + Parquet setup,
+ * which was overkill for ~200 KB of data read once at mount.
  *
- * loadSnapshots() tries to read /data/snapshots.parquet via DuckDB-WASM.
- * If the file doesn't exist (development without a pipeline run), it returns
- * null and the caller falls back to the static snapshots import.
+ * loadSnapshots()  → reads /data/snapshots.json  (~100 KB, ~25 KB gzipped)
+ * loadAllBlocks()  → reads /data/blocks.json     (~430 KB, ~80 KB gzipped)
  *
- * loadBlocksForDate(date) similarly returns per-block spine data from
- * /data/blocks.parquet, falling back to the static blockData import.
+ * Both return null / {} on 404 so the caller falls back to the static
+ * 25-snapshot bundle committed in src/data/staticSnapshots.ts.
  */
-import * as duckdb from "@duckdb/duckdb-wasm";
 import type { NetworkSnapshot, BlockTuple } from "./types";
 
-// ─── Derived metric helpers (mirrors build_db.mjs formulas) ──────────────────
+// ─── Derived helpers (mirror build_db.mjs + match the previous shape) ───────
 
 function deriveFeeBuckets(feePressureIndex: number) {
   const anchors: Array<[number, [number, number, number, number]]> = [
@@ -49,218 +49,111 @@ function deriveRingBands(s: {
   const bs = s.blockProductionStress / 10, mp = Math.min(s.mempoolTxCount / 400000, 1);
   const health = s.networkHealthScore / 10;
   return [
-    { id: "rb-1", label: "Inner fee band",    radius: 2.0,  density: 0.4 + fp * 0.5, intensity: 0.3 + fp * 0.6, activeShare: 0.4 + fp * 0.5 },
+    { id: "rb-1", label: "Inner fee band",    radius: 2.0,  density: 0.4 + fp * 0.5,       intensity: 0.3 + fp * 0.6,     activeShare: 0.4 + fp * 0.5 },
     { id: "rb-2", label: "Settlement band",   radius: 2.85, density: 0.5 + (1 - bs) * 0.4, intensity: 0.4 + health * 0.4, activeShare: 0.5 + health * 0.35 },
-    { id: "rb-3", label: "Congestion band",   radius: 3.75, density: 0.35 + cg * 0.55, intensity: 0.3 + cg * 0.6, activeShare: 0.3 + mp * 0.6 },
-    { id: "rb-4", label: "Outer mempool band",radius: 4.85, density: 0.3 + mp * 0.6, intensity: 0.25 + cg * 0.5, activeShare: 0.35 + mp * 0.5 },
+    { id: "rb-3", label: "Congestion band",   radius: 3.75, density: 0.35 + cg * 0.55,     intensity: 0.3 + cg * 0.6,     activeShare: 0.3 + mp * 0.6 },
+    { id: "rb-4", label: "Outer mempool band",radius: 4.85, density: 0.3 + mp * 0.6,       intensity: 0.25 + cg * 0.5,    activeShare: 0.35 + mp * 0.5 },
   ];
 }
 
-// ─── Date coercion ───────────────────────────────────────────────────────────
-// DuckDB-WASM returns DATE columns via Arrow as either Date objects or numeric
-// values (ms / seconds / days since epoch). Normalize to "YYYY-MM-DD".
-function toISODate(v: unknown): string {
-  if (v instanceof Date) return v.toISOString().slice(0, 10);
-  if (typeof v === "number") {
-    const ms = v > 1e12 ? v          // already milliseconds
-             : v > 1e9  ? v * 1000   // Unix seconds
-             : v * 86400000;         // days since epoch
-    return new Date(ms).toISOString().slice(0, 10);
-  }
-  if (typeof v === "bigint") {
-    const n = Number(v);
-    return toISODate(n);
-  }
-  return String(v).slice(0, 10);
+// ─── Row shape written by pipeline/export_json.mjs ─────────────────────────
+
+interface SnapshotRow {
+  id: string;
+  label: string;
+  date: string;
+  narration: string | null;
+  notes: string[];
+  blockHeight: number;
+  avgBlockIntervalSeconds: number;
+  networkHashrateEh: number;
+  mempoolTxCount: number;
+  mempoolSizeMb: number;
+  feePressureIndex: number;
+  congestionScore: number;
+  blockProductionStress: number;
+  minerConcentrationScore: number | null;
+  networkHealthScore: number;
+  difficulty: number;
+  activeAddresses: number;
+  btcTransferred: number;
+  totalFeesBtc: number;
+  totalOutputs: number;
+  whaleOutputs1000: number;
+  whaleOutputs100: number;
+  midOutputs10: number;
+  retailOutputs: number;
 }
 
-// ─── DuckDB singleton ─────────────────────────────────────────────────────────
+// ─── Public API ─────────────────────────────────────────────────────────────
 
-let dbPromise: Promise<duckdb.AsyncDuckDB> | null = null;
-
-async function getDB(): Promise<duckdb.AsyncDuckDB> {
-  if (dbPromise) return dbPromise;
-  dbPromise = (async () => {
-    // Let the package pick worker + WASM from jsDelivr. The package hardcodes
-    // its own version into these URLs, so worker and WASM are guaranteed to
-    // match regardless of what npm has installed. The blob: wrapper around
-    // importScripts is how duckdb-wasm recommends loading on CSP-restricted
-    // sites — browsers treat it as same-origin for purposes of CSP.
-    const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
-    const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
-    const workerUrl = URL.createObjectURL(
-      new Blob([`importScripts("${bundle.mainWorker!}");`], { type: "text/javascript" })
-    );
-    const worker = new Worker(workerUrl);
-    const logger = new duckdb.ConsoleLogger(duckdb.LogLevel.WARNING);
-    const db = new duckdb.AsyncDuckDB(logger, worker);
-    await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-    URL.revokeObjectURL(workerUrl);
-    return db;
-  })();
-  return dbPromise;
-}
-
-// ─── Public API ───────────────────────────────────────────────────────────────
-
-/** Returns null if /data/snapshots.parquet doesn't exist — caller uses static fallback. */
 export async function loadSnapshots(): Promise<NetworkSnapshot[] | null> {
-  // Probe: does the parquet file exist?
   try {
-    const probe = await fetch("/data/snapshots.parquet", { method: "HEAD" });
-    if (!probe.ok) {
-      console.warn(`[db] snapshots.parquet HEAD probe returned ${probe.status} — falling back to static data`);
-      return null;
-    }
-  } catch (e) {
-    console.warn("[db] snapshots.parquet HEAD probe failed:", e);
-    return null;
-  }
-
-  const database = await getDB();
-  // Register the parquet as a virtual file so DuckDB-WASM can read it via HTTP range requests
-  const parquetUrl = new URL("/data/snapshots.parquet", window.location.origin).toString();
-  await database.registerFileURL("snapshots.parquet", parquetUrl, duckdb.DuckDBDataProtocol.HTTP, false);
-
-  const conn = await database.connect();
-
-  try {
-    await conn.query(`
-      CREATE OR REPLACE VIEW snapshots AS
-      SELECT * FROM parquet_scan('snapshots.parquet')
-    `);
-
-    const result = await conn.query(`SELECT * FROM snapshots ORDER BY date`);
-    const rows = result.toArray();
-
+    const res = await fetch("/data/snapshots.json");
+    if (!res.ok) return null;
+    const rows = (await res.json()) as SnapshotRow[];
     return rows.map((row): NetworkSnapshot => {
-      const fpi  = Number(row.fee_pressure_index   ?? 0);
-      const cong = Number(row.congestion_score      ?? 0);
-      const stress = Number(row.block_production_stress ?? 1);
-      const health = Number(row.network_health_score ?? 5);
-      const mempoolTx = Number(row.mempool_tx_count ?? 0);
-
+      const s = {
+        feePressureIndex:      row.feePressureIndex,
+        congestionScore:       row.congestionScore,
+        blockProductionStress: row.blockProductionStress,
+        mempoolTxCount:        row.mempoolTxCount,
+        networkHealthScore:    row.networkHealthScore,
+      };
       return {
-        id:    String(row.id),
-        label: String(row.label),
-        snapshotTime: `${toISODate(row.date)}T00:00:00Z`,
-        narration:    row.narration != null ? String(row.narration) : undefined,
+        id:    row.id,
+        label: row.label,
+        snapshotTime: `${row.date}T00:00:00Z`,
+        narration:    row.narration ?? undefined,
         mode: "historical",
-        blockHeight:             Number(row.block_height             ?? 0),
-        avgBlockIntervalSeconds: Number(row.avg_block_interval_secs  ?? 600),
-        networkHashrateEh:       Number(row.network_hashrate_eh      ?? 0),
-        mempoolTxCount:          mempoolTx,
-        mempoolSizeMb:           Number(row.mempool_size_mb          ?? 0),
-        feePressureIndex:        fpi,
-        congestionScore:         cong,
-        blockProductionStress:   stress,
-        minerConcentrationScore: row.miner_concentration_score != null ? Number(row.miner_concentration_score) : 0,
-        networkHealthScore:      health,
-        difficulty:              Number(row.difficulty               ?? 0),
-        activeAddresses:         Number(row.active_addresses         ?? 0),
-        uniqueSenders:           Number(row.unique_senders           ?? 0),
-        uniqueReceivers:         Number(row.unique_receivers         ?? 0),
-        btcTransferred:          Number(row.btc_transferred          ?? 0),
-        totalFeesBtc:            Number(row.total_fees_btc           ?? 0),
-        totalOutputs:            Number(row.total_outputs            ?? 0),
-        whaleOutputs1000:        Number(row.whale_outputs_1000       ?? 0),
-        whaleOutputs100:         Number(row.whale_outputs_100        ?? 0),
-        midOutputs10:            Number(row.mid_outputs_10           ?? 0),
-        retailOutputs:           Number(row.retail_outputs           ?? 0),
-        feeBuckets:              deriveFeeBuckets(fpi),
-        ringBands:               deriveRingBands({ feePressureIndex: fpi, congestionScore: cong, blockProductionStress: stress, mempoolTxCount: mempoolTx, networkHealthScore: health }),
-        notes:                   JSON.parse(String(row.notes ?? "[]")),
-        blocks:                  [],  // populated separately by loadBlocksForDate()
+        blockHeight:             row.blockHeight,
+        avgBlockIntervalSeconds: row.avgBlockIntervalSeconds,
+        networkHashrateEh:       row.networkHashrateEh,
+        mempoolTxCount:          row.mempoolTxCount,
+        mempoolSizeMb:           row.mempoolSizeMb,
+        feePressureIndex:        row.feePressureIndex,
+        congestionScore:         row.congestionScore,
+        blockProductionStress:   row.blockProductionStress,
+        minerConcentrationScore: row.minerConcentrationScore ?? 0,
+        networkHealthScore:      row.networkHealthScore,
+        difficulty:              row.difficulty,
+        activeAddresses:         row.activeAddresses,
+        uniqueSenders:           0,
+        uniqueReceivers:         0,
+        btcTransferred:          row.btcTransferred,
+        totalFeesBtc:            row.totalFeesBtc,
+        totalOutputs:            row.totalOutputs,
+        whaleOutputs1000:        row.whaleOutputs1000,
+        whaleOutputs100:         row.whaleOutputs100,
+        midOutputs10:            row.midOutputs10,
+        retailOutputs:           row.retailOutputs,
+        feeBuckets:              deriveFeeBuckets(row.feePressureIndex),
+        ringBands:               deriveRingBands(s),
+        notes:                   row.notes,
+        blocks:                  [],
       };
     });
-  } finally {
-    await conn.close();
+  } catch (e) {
+    console.warn("[db] snapshots.json fetch failed:", e);
+    return null;
   }
 }
 
-/** Fetches every date's blocks in one query and returns them keyed by date.
- * Used by grid view to render block crowns on every cell. Returns {} if the
- * parquet is missing. */
+/** Fetches every date's blocks in one JSON. Used by grid view to render
+ *  block crowns on every cell. Returns {} on miss. */
 export async function loadAllBlocks(): Promise<Record<string, BlockTuple[]>> {
   try {
-    const probe = await fetch("/data/blocks.parquet", { method: "HEAD" });
-    if (!probe.ok) return {};
-  } catch {
-    return {};
-  }
-
-  const database = await getDB();
-  const blocksUrl = new URL("/data/blocks.parquet", window.location.origin).toString();
-  await database.registerFileURL("blocks.parquet", blocksUrl, duckdb.DuckDBDataProtocol.HTTP, false);
-
-  const conn = await database.connect();
-  try {
-    await conn.query(`
-      CREATE OR REPLACE VIEW blocks AS
-      SELECT * FROM parquet_scan('blocks.parquet')
-    `);
-    const result = await conn.query(`
-      SELECT block_height, date, size_bytes, weight, tx_count
-      FROM blocks
-      ORDER BY date, block_height
-    `);
-    const out: Record<string, BlockTuple[]> = {};
-    for (const r of result.toArray()) {
-      const date = toISODate(r.date);
-      if (!out[date]) out[date] = [];
-      out[date].push([
-        Number(r.block_height),
-        Number(r.size_bytes),
-        Number(r.weight),
-        Number(r.tx_count),
-      ]);
-    }
-    return out;
+    const res = await fetch("/data/blocks.json");
+    if (!res.ok) return {};
+    return (await res.json()) as Record<string, BlockTuple[]>;
   } catch (e) {
-    console.error("[db] loadAllBlocks failed:", e);
+    console.warn("[db] blocks.json fetch failed:", e);
     return {};
-  } finally {
-    await conn.close();
   }
 }
 
-/** Returns per-block spine tuples for a given date from blocks.parquet, or [] on miss. */
+/** Compatibility shim — reads from the bulk map, one date out. */
 export async function loadBlocksForDate(date: string): Promise<BlockTuple[]> {
-  try {
-    const probe = await fetch("/data/blocks.parquet", { method: "HEAD" });
-    if (!probe.ok) return [];
-  } catch {
-    return [];
-  }
-
-  const database = await getDB();
-  const blocksUrl = new URL("/data/blocks.parquet", window.location.origin).toString();
-  await database.registerFileURL("blocks.parquet", blocksUrl, duckdb.DuckDBDataProtocol.HTTP, false);
-
-  const conn = await database.connect();
-
-  try {
-    await conn.query(`
-      CREATE OR REPLACE VIEW blocks AS
-      SELECT * FROM parquet_scan('blocks.parquet')
-    `);
-
-    const result = await conn.query(`
-      SELECT block_height, size_bytes, weight, tx_count
-      FROM blocks
-      WHERE date = '${date}'
-      ORDER BY block_height
-    `);
-
-    return result.toArray().map((r): BlockTuple => [
-      Number(r.block_height),
-      Number(r.size_bytes),
-      Number(r.weight),
-      Number(r.tx_count),
-    ]);
-  } catch {
-    return [];
-  } finally {
-    await conn.close();
-  }
+  const all = await loadAllBlocks();
+  return all[date] ?? [];
 }

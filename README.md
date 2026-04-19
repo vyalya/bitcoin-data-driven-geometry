@@ -42,7 +42,7 @@ Derived scores (fee pressure, congestion, block stress, network health) are comp
 │   mempool.space API    ─┤                       (staging)         │
 │   BigQuery CSVs        ─┘                          │              │
 │                                                    ▼              │
-│                                          public/data/*.parquet    │
+│                                          public/data/*.json       │
 │                                          (committed to git)       │
 │                                                                   │
 └───────────────────────────────────────────────────────────────────┘
@@ -58,22 +58,22 @@ Derived scores (fee pressure, congestion, block stress, network health) are comp
                                                      ▼
 ┌─ Browser runtime (every visitor, isolated) ──────────────────────┐
 │                                                                   │
-│   Page loads → DuckDB-WASM Worker runs locally                   │
-│               → reads parquet via HTTP range requests             │
-│               → queries + renders 3D scene in Three.js            │
+│   Page loads → fetch /data/snapshots.json (~25 KB gzipped)       │
+│               → fetch /data/blocks.json    (~80 KB gzipped)       │
+│               → render 3D scene in Three.js                       │
 │                                                                   │
 │   Zero backend. Zero shared state. Unlimited concurrency.        │
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-The `.duckdb` file is a local intermediate — never deployed, never served. Parquet files are the only data shipped to browsers.
+The `.duckdb` file is a local intermediate — never deployed, never served. JSON files are the only data shipped to browsers.
 
 ## Tech stack
 
 - **React 19** + **TypeScript 5.9**
 - **React Three Fiber 9** / **drei 10** / **postprocessing** for the 3D scene
-- **DuckDB-WASM 1.32.0** — runs entirely in a Web Worker in each visitor's browser
-- **Apache Parquet** — single-file columnar data, HTTP-range-request-scannable by DuckDB-WASM
+- **Plain JSON** for the snapshots + blocks artefacts at runtime — `fetch()` from the same origin, no runtime database, no WASM
+- **DuckDB (Node)** used offline in the pipeline only — to stage + join the raw API fetches before exporting to JSON
 - **Vite 7** build, **Cloudflare Pages** deploy, `wrangler` CLI for direct pushes
 
 ## Run locally
@@ -97,7 +97,7 @@ Direct deploy, no CI dependency.
 npm run pipeline     # fetch everything fresh + rebuild parquet
 ```
 
-Runs CoinMetrics → blockchain.com → mempool.space → BigQuery CSV ingest → build → parquet export. BigQuery step reads CSVs from `pipeline/raw/` (export manually via `bq` CLI).
+Runs CoinMetrics → blockchain.com → mempool.space → BigQuery CSV ingest → build → JSON export. BigQuery step reads CSVs from `pipeline/raw/` (export manually via `bq` CLI).
 
 ## Design principles
 
@@ -126,9 +126,9 @@ pipeline/
   fetch_*.mjs              Per-source fetchers
   ingest_bigquery.mjs      BQ CSV → DuckDB
   build_db.mjs             Derive metrics + join sources
-  export_parquet.mjs       DuckDB → parquet
+  export_json.mjs          DuckDB → JSON artefacts
 public/
-  data/snapshots.parquet   Full 105-snapshot dataset (committed)
-  data/blocks.parquet      Per-block spine (committed)
+  data/snapshots.json      Full 105-snapshot dataset (committed, ~100 KB)
+  data/blocks.json         Per-block spine indexed by date (committed, ~430 KB)
   _headers                 Cloudflare Pages security headers
 ```
