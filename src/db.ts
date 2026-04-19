@@ -3,7 +3,7 @@
  *
  * loadSnapshots() tries to read /data/snapshots.parquet via DuckDB-WASM.
  * If the file doesn't exist (development without a pipeline run), it returns
- * null and the caller falls back to the static mosaicSnapshots import.
+ * null and the caller falls back to the static snapshots import.
  *
  * loadBlocksForDate(date) similarly returns per-block spine data from
  * /data/blocks.parquet, falling back to the static blockData import.
@@ -56,6 +56,24 @@ function deriveRingBands(s: {
   ];
 }
 
+// ─── Date coercion ───────────────────────────────────────────────────────────
+// DuckDB-WASM returns DATE columns via Arrow as either Date objects or numeric
+// values (ms / seconds / days since epoch). Normalize to "YYYY-MM-DD".
+function toISODate(v: unknown): string {
+  if (v instanceof Date) return v.toISOString().slice(0, 10);
+  if (typeof v === "number") {
+    const ms = v > 1e12 ? v          // already milliseconds
+             : v > 1e9  ? v * 1000   // Unix seconds
+             : v * 86400000;         // days since epoch
+    return new Date(ms).toISOString().slice(0, 10);
+  }
+  if (typeof v === "bigint") {
+    const n = Number(v);
+    return toISODate(n);
+  }
+  return String(v).slice(0, 10);
+}
+
 // ─── DuckDB singleton ─────────────────────────────────────────────────────────
 
 let dbPromise: Promise<duckdb.AsyncDuckDB> | null = null;
@@ -84,18 +102,27 @@ export async function loadSnapshots(): Promise<NetworkSnapshot[] | null> {
   // Probe: does the parquet file exist?
   try {
     const probe = await fetch("/data/snapshots.parquet", { method: "HEAD" });
-    if (!probe.ok) return null;
-  } catch {
+    if (!probe.ok) {
+      console.warn(`[db] snapshots.parquet HEAD probe returned ${probe.status} — falling back to static data`);
+      return null;
+    }
+  } catch (e) {
+    console.warn("[db] snapshots.parquet HEAD probe failed:", e);
     return null;
   }
+  console.log("[db] snapshots.parquet found — loading via DuckDB-WASM…");
 
   const database = await getDB();
+  // Register the parquet as a virtual file so DuckDB-WASM can read it via HTTP range requests
+  const parquetUrl = new URL("/data/snapshots.parquet", window.location.origin).toString();
+  await database.registerFileURL("snapshots.parquet", parquetUrl, duckdb.DuckDBDataProtocol.HTTP, false);
+
   const conn = await database.connect();
 
   try {
     await conn.query(`
-      CREATE VIEW IF NOT EXISTS snapshots AS
-      SELECT * FROM parquet_scan('/data/snapshots.parquet')
+      CREATE OR REPLACE VIEW snapshots AS
+      SELECT * FROM parquet_scan('snapshots.parquet')
     `);
 
     const result = await conn.query(`SELECT * FROM snapshots ORDER BY date`);
@@ -111,7 +138,8 @@ export async function loadSnapshots(): Promise<NetworkSnapshot[] | null> {
       return {
         id:    String(row.id),
         label: String(row.label),
-        snapshotTime: `${String(row.date)}T00:00:00Z`,
+        snapshotTime: `${toISODate(row.date)}T00:00:00Z`,
+        narration:    row.narration != null ? String(row.narration) : undefined,
         mode: "historical",
         blockHeight:             Number(row.block_height             ?? 0),
         avgBlockIntervalSeconds: Number(row.avg_block_interval_secs  ?? 600),
@@ -155,12 +183,15 @@ export async function loadBlocksForDate(date: string): Promise<BlockTuple[]> {
   }
 
   const database = await getDB();
+  const blocksUrl = new URL("/data/blocks.parquet", window.location.origin).toString();
+  await database.registerFileURL("blocks.parquet", blocksUrl, duckdb.DuckDBDataProtocol.HTTP, false);
+
   const conn = await database.connect();
 
   try {
     await conn.query(`
-      CREATE VIEW IF NOT EXISTS blocks AS
-      SELECT * FROM parquet_scan('/data/blocks.parquet')
+      CREATE OR REPLACE VIEW blocks AS
+      SELECT * FROM parquet_scan('blocks.parquet')
     `);
 
     const result = await conn.query(`

@@ -5,9 +5,9 @@
       <stop offset="100%" stop-color="#000000"/>
     </radialGradient>
     <radialGradient id="core" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#FFD080"/>
-      <stop offset="40%" stop-color="#FA660F"/>
-      <stop offset="100%" stop-color="#FA660F" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#FFDF9E"/>
+      <stop offset="40%" stop-color="#F7931A"/>
+      <stop offset="100%" stop-color="#F7931A" stop-opacity="0"/>
     </radialGradient>
   </defs>
 
@@ -15,7 +15,7 @@
   <rect width="64" height="64" rx="10" fill="url(#bg)"/>
 
   <!-- Starfield -->
-  <g fill="#FFAA55" opacity="0.7">
+  <g fill="#FFCA6E" opacity="0.7">
     <circle cx="8" cy="12" r="0.5"/>
     <circle cx="14" cy="6" r="0.4"/>
     <circle cx="22" cy="10" r="0.3"/>
@@ -34,32 +34,32 @@
   </g>
 
   <!-- Outer gold ring -->
-  <circle cx="32" cy="32" r="26" fill="none" stroke="#FFB040" stroke-width="2.2" opacity="0.85"/>
+  <circle cx="32" cy="32" r="26" fill="none" stroke="#FFC850" stroke-width="2.2" opacity="0.85"/>
 
   <!-- Middle orange ring (with gap on right) -->
-  <circle cx="32" cy="32" r="20" fill="none" stroke="#FA660F" stroke-width="2" opacity="0.95"
+  <circle cx="32" cy="32" r="20" fill="none" stroke="#F7931A" stroke-width="2" opacity="0.95"
           stroke-dasharray="110 8 8 8" stroke-dashoffset="28"/>
 
   <!-- Horizontal equatorial band (ellipse in perspective) -->
-  <ellipse cx="32" cy="32" rx="22" ry="3" fill="none" stroke="#CC5500" stroke-width="1.6" opacity="0.7"/>
-  <ellipse cx="32" cy="32" rx="22" ry="3" fill="none" stroke="#FF8C3A" stroke-width="0.6" opacity="0.5"/>
+  <ellipse cx="32" cy="32" rx="22" ry="3" fill="none" stroke="#B87206" stroke-width="1.6" opacity="0.7"/>
+  <ellipse cx="32" cy="32" rx="22" ry="3" fill="none" stroke="#FFB547" stroke-width="0.6" opacity="0.5"/>
 
   <!-- Central block spine -->
   <g>
-    <rect x="30.5" y="10" width="3" height="44" fill="#FA660F" opacity="0.85"/>
+    <rect x="30.5" y="10" width="3" height="44" fill="#F7931A" opacity="0.85"/>
     <!-- Segmented block highlights -->
-    <rect x="30.5" y="12" width="3" height="1.5" fill="#FFAA44"/>
-    <rect x="30.5" y="18" width="3" height="1.5" fill="#FFAA44"/>
-    <rect x="30.5" y="26" width="3" height="1.5" fill="#FFD080"/>
-    <rect x="30.5" y="34" width="3" height="1.5" fill="#FFAA44"/>
-    <rect x="30.5" y="42" width="3" height="1.5" fill="#FFAA44"/>
-    <rect x="30.5" y="48" width="3" height="1.5" fill="#FFAA44"/>
+    <rect x="30.5" y="12" width="3" height="1.5" fill="#F2B456"/>
+    <rect x="30.5" y="18" width="3" height="1.5" fill="#F2B456"/>
+    <rect x="30.5" y="26" width="3" height="1.5" fill="#FFDF9E"/>
+    <rect x="30.5" y="34" width="3" height="1.5" fill="#F2B456"/>
+    <rect x="30.5" y="42" width="3" height="1.5" fill="#F2B456"/>
+    <rect x="30.5" y="48" width="3" height="1.5" fill="#F2B456"/>
   </g>
 
   <!-- Core glow at center -->
   <circle cx="32" cy="32" r="6" fill="url(#core)"/>
-  <circle cx="32" cy="32" r="1.4" fill="#FFD080"/>
+  <circle cx="32" cy="32" r="1.4" fill="#FFDF9E"/>
 
   <!-- Top highlight flare on outer ring -->
-  <circle cx="32" cy="6" r="2.2" fill="#FFD080" opacity="0.9"/>
+  <circle cx="32" cy="6" r="2.2" fill="#FFDF9E" opacity="0.9"/>
 </svg>

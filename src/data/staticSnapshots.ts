@@ -1,7 +1,7 @@
 /**
- * Real Bitcoin network data from Strategy Mosaic semantic layer.
- * Model: "bitcoin network and mining pools daily analytics"
- * 25 historically significant events, all data queried via Mosaic MCP.
+ * Static fallback snapshots (25 historically significant events) used only when
+ * /data/snapshots.parquet isn't available. The full 105-snapshot dataset lives
+ * in the parquet file and is loaded at runtime via src/db.ts.
  */
 import type { NetworkSnapshot } from "../types";
 import { blockData } from "./blockData";
@@ -41,8 +41,8 @@ function bkt(s0: number, s1: number, s2: number, s3: number) {
 }
 
 /**
- * Derive a 4-tier fee distribution from the Mosaic feePressureIndex (0–10).
- * Real per-tier breakdowns aren't in the Mosaic snapshot model — they live in
+ * Derive a 4-tier fee distribution from the pipeline feePressureIndex (0–10).
+ * Real per-tier breakdowns aren't in the pipeline snapshot model — they live in
  * BigQuery and would require a separate extract. This synthesizes a plausible
  * distribution that's directionally correct: low pressure → most txs in the
  * cheap tier, high pressure → majority shifts into higher-fee tiers.
@@ -83,11 +83,11 @@ function deriveFeeBucketsFromPressure(feePressureIndex: number) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   MOSAIC — all network metrics sourced from Strategy Mosaic semantic layer
-   Every value below was pulled via Mosaic MCP queries.
+   STATIC FALLBACK — 25-snapshot dataset used when parquet isn't loaded.
+   Runtime data comes from public/data/snapshots.parquet via src/db.ts.
    ═══════════════════════════════════════════════════════════════════ */
 
-interface MosaicMetrics {
+interface StaticMetrics {
   blockHeight: number;
   avgBlockIntervalSeconds: number;
   networkHashrateEh: number;
@@ -101,8 +101,8 @@ interface MosaicMetrics {
   difficulty: number;
 }
 
-/* Network metrics keyed by date — all from Mosaic */
-const MOSAIC: Record<string, MosaicMetrics> = {
+/* Network metrics keyed by date — all from pipeline */
+const METRICS: Record<string, StaticMetrics> = {
   "2009-01-09": { blockHeight: 14, avgBlockIntervalSeconds: 4547.368, networkHashrateEh: 0, mempoolTxCount: 0, mempoolSizeMb: 0, feePressureIndex: 0, congestionScore: 0, blockProductionStress: 4, minerConcentrationScore: 4.007, networkHealthScore: 5.5, difficulty: 1 },
   "2010-05-22": { blockHeight: 57093, avgBlockIntervalSeconds: 443.077, networkHashrateEh: 0, mempoolTxCount: 0, mempoolSizeMb: 0, feePressureIndex: 0.01, congestionScore: 0, blockProductionStress: 0.715, minerConcentrationScore: 4.007, networkHealthScore: 10, difficulty: 11.846 },
   "2011-06-19": { blockHeight: 131934, avgBlockIntervalSeconds: 387.444, networkHashrateEh: 0, mempoolTxCount: 0, mempoolSizeMb: 0, feePressureIndex: 0.25, congestionScore: 0, blockProductionStress: 0.887, minerConcentrationScore: 4.007, networkHealthScore: 9.92, difficulty: 876954.494 },
@@ -130,7 +130,7 @@ const MOSAIC: Record<string, MosaicMetrics> = {
   "2025-10-10": { blockHeight: 918497, avgBlockIntervalSeconds: 654.545, networkHashrateEh: 989.772, mempoolTxCount: 15220, mempoolSizeMb: 3.527, feePressureIndex: 0.04, congestionScore: 4.35, blockProductionStress: 0.856, minerConcentrationScore: 3.577, networkHealthScore: 8.68, difficulty: 150839487445891.53 },
 };
 
-/* GBQ address/value data per snapshot — from BigQuery crypto_bitcoin via Mosaic */
+/* GBQ address/value data per snapshot — from BigQuery crypto_bitcoin via pipeline */
 interface GbqData {
   activeAddresses: number;
   uniqueSenders: number;
@@ -173,9 +173,9 @@ const GBQ: Record<string, GbqData> = {
 };
 
 function mk(id: string, label: string, date: string, notes: string[]): NetworkSnapshot {
-  const m = MOSAIC[date];
+  const m = METRICS[date];
   const g = GBQ[date] ?? GBQ["2009-01-09"];
-  if (!m) throw new Error(`Missing Mosaic metrics for ${date}`);
+  if (!m) throw new Error(`Missing pipeline metrics for ${date}`);
   const s = { feePressureIndex: m.feePressureIndex, congestionScore: m.congestionScore, blockProductionStress: m.blockProductionStress, mempoolTxCount: m.mempoolTxCount, networkHealthScore: m.networkHealthScore };
   return {
     id, label,
@@ -191,10 +191,10 @@ function mk(id: string, label: string, date: string, notes: string[]): NetworkSn
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   25 EVENTS — chronological, all from Mosaic
+   25 EVENTS — chronological, all from pipeline
    ═══════════════════════════════════════════════════════════════════ */
 
-export const mosaicSnapshots: NetworkSnapshot[] = [
+export const staticSnapshots: NetworkSnapshot[] = [
   mk("genesis", "Genesis Era", "2009-01-09",
     ["6 days after genesis block. Satoshi mining alone on a CPU.", "14 blocks mined. One node, one miner, zero real transactions."]),
   mk("pizza", "Pizza Day", "2010-05-22",
