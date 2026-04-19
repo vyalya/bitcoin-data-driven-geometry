@@ -765,28 +765,28 @@ button, input, textarea { font: inherit; }
 .guide-section { margin-bottom: 28px; }
 .guide-section:last-child { margin-bottom: 4px; }
 .guide-section-title {
-  font-size: 0.72rem;
+  font-size: 0.86rem;
   font-weight: 700;
   color: var(--text);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  margin: 0 0 12px;
-  padding-bottom: 8px;
+  margin: 0 0 14px;
+  padding-bottom: 10px;
   border-bottom: 1px solid rgba(247, 147, 26, 0.15);
 }
 .guide-lede {
-  font-size: 0.9rem;
-  line-height: 1.65;
+  font-size: 1.02rem;
+  line-height: 1.6;
   color: var(--text-secondary);
-  margin: 0 0 22px;
-  padding-bottom: 16px;
+  margin: 0 0 24px;
+  padding-bottom: 18px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 .guide-paragraph {
-  font-size: 0.85rem;
+  font-size: 0.98rem;
   line-height: 1.65;
   color: var(--text-secondary);
-  padding: 12px 14px;
+  padding: 14px 16px;
   background: rgba(255, 255, 255, 0.015);
   border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 6px;
@@ -796,7 +796,7 @@ button, input, textarea { font: inherit; }
 .guide-paragraph em { color: var(--text); font-style: normal; font-weight: 500; }
 .guide-paragraph strong { color: var(--accent); font-weight: 600; }
 .guide-paragraph code {
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   color: var(--accent);
   background: rgba(247, 147, 26, 0.06);
   padding: 1px 5px;
@@ -825,22 +825,22 @@ button, input, textarea { font: inherit; }
 }
 .guide-card-name {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 .guide-card-desc {
-  font-size: 0.82rem;
-  line-height: 1.5;
+  font-size: 0.96rem;
+  line-height: 1.55;
   color: var(--text-secondary);
-  margin: 0 0 6px;
+  margin: 0 0 8px;
 }
 .guide-card-meta {
-  font-size: 0.72rem;
-  line-height: 1.5;
+  font-size: 0.86rem;
+  line-height: 1.55;
   color: var(--text-tertiary);
   margin: 0;
 }
@@ -859,20 +859,20 @@ button, input, textarea { font: inherit; }
 }
 .guide-map-data {
   color: var(--text);
-  font-size: 0.82rem;
-  line-height: 1.5;
+  font-size: 0.96rem;
+  line-height: 1.55;
   font-weight: 500;
 }
 .guide-map-arrow {
   color: var(--accent);
   opacity: 0.5;
-  font-size: 0.78rem;
+  font-size: 0.92rem;
   text-align: center;
 }
 .guide-map-visual {
   color: var(--text-secondary);
-  font-size: 0.82rem;
-  line-height: 1.5;
+  font-size: 0.96rem;
+  line-height: 1.55;
 }
 
 /* Data-sources "Where from" table (reuses source-list) — keep compatible */
@@ -969,11 +969,11 @@ button, input, textarea { font: inherit; }
   display: grid;
   grid-template-columns: minmax(140px, 1fr) 16px 2fr;
   align-items: baseline;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: 12px;
+  padding: 12px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  font-size: 0.84rem;
-  line-height: 1.5;
+  font-size: 0.96rem;
+  line-height: 1.55;
 }
 .source-list li:last-child { border-bottom: none; }
 .source-field {
@@ -983,13 +983,13 @@ button, input, textarea { font: inherit; }
 .source-arrow {
   color: var(--text-tertiary);
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.96rem;
 }
 .source-origin {
   color: var(--text-secondary);
 }
 .source-origin code {
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   color: var(--accent);
   background: rgba(247, 147, 26, 0.06);
   padding: 1px 5px;
@@ -1295,7 +1295,9 @@ button, input, textarea { font: inherit; }
   .hud-powered { font-size: 0.5rem; }
 
   /* Left panel → grid layout: controls + timeline strip on top row,
-     search input spanning full width on bottom row. */
+     search input spanning full width on bottom row. Search row is taller
+     than before so the input is comfortably tappable and the hint text
+     is legible without zooming. */
   .hud-left-panel {
     top: 56px;
     left: 8px;
@@ -1303,7 +1305,7 @@ button, input, textarea { font: inherit; }
     bottom: auto;
     width: auto;
     height: auto;
-    max-height: 84px;
+    max-height: 102px;
     display: grid;
     grid-template-columns: auto 1fr;
     grid-template-rows: 44px auto;
@@ -1324,26 +1326,48 @@ button, input, textarea { font: inherit; }
   .hud-left-panel .timeline-vertical { grid-area: timeline; }
   .hud-left-panel .timeline-search {
     grid-area: search;
-    padding: 6px 10px;
+    padding: 10px 12px;
+    gap: 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.04);
     border-bottom: none;
     position: relative;
   }
-  .timeline-search input { font-size: 0.78rem; padding: 2px 0; }
+  /* iOS Safari auto-zooms any input whose font-size < 16px when it gains
+     focus. 16px prevents that zoom entirely. Padding gives a comfortable
+     tap target. */
+  .timeline-search input {
+    font-size: 16px;
+    padding: 4px 0;
+  }
+  .timeline-search-icon { width: 16px; height: 16px; }
+  .timeline-search-clear,
+  .timeline-search-help {
+    width: 26px;
+    height: 26px;
+    font-size: 0.9rem;
+  }
   .timeline-search-count { display: none; }
   /* Hints popover must escape the panel's overflow: hidden clip on mobile.
-     Float it as a fixed-position overlay just below the search row. */
+     Float it as a fixed-position overlay just below the search row with
+     a visible backdrop so it reads as a proper sheet. */
   .timeline-search-hints {
     position: fixed;
-    top: 144px;
-    left: 12px;
-    right: 12px;
+    top: 162px;
+    left: 10px;
+    right: 10px;
     margin: 0;
     z-index: 20;
-    max-height: calc(100vh - 160px);
+    max-height: calc(100vh - 180px);
     overflow-y: auto;
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+    padding: 14px 16px;
+    font-size: 0.86rem;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.7);
   }
+  .timeline-search-hints .hints-title { font-size: 0.78rem; margin-bottom: 10px; }
+  .timeline-search-hints dt { font-size: 0.82rem; padding: 3px 0; }
+  .timeline-search-hints dd { padding: 3px 0; }
+  .timeline-search-hints code { font-size: 0.82rem; }
+  .timeline-search-hints .hints-note { font-size: 0.78rem; padding-top: 10px; margin-top: 6px; }
   .grid-return-btn, .timeline-play-btn, .rotate-toggle {
     padding: 8px 10px;
     min-width: 38px;

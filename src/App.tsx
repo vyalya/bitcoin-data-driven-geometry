@@ -334,8 +334,16 @@ function App() {
       const containerRect = container.getBoundingClientRect();
       const itemRect = item.getBoundingClientRect();
       const itemOffsetLeft = itemRect.left - containerRect.left + container.scrollLeft;
-      const target = itemOffsetLeft - (container.clientWidth - item.clientWidth) / 2;
-      container.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+      const itemRight = itemOffsetLeft + item.clientWidth;
+      const viewLeft = container.scrollLeft;
+      const viewRight = viewLeft + container.clientWidth;
+      // Only scroll if item is outside the visible viewport. Prevents the
+      // jumpiness that happens when hovering across adjacent cells — if
+      // the target is already visible, no re-centering is needed.
+      if (itemOffsetLeft < viewLeft + 8 || itemRight > viewRight - 8) {
+        const target = itemOffsetLeft - (container.clientWidth - item.clientWidth) / 2;
+        container.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+      }
     } else {
       const containerRect = container.getBoundingClientRect();
       const itemRect = item.getBoundingClientRect();
@@ -1201,6 +1209,29 @@ function CameraRig({ view, snapCount, focusIdx, gridOrbitEnabled }: { view: "gri
   // fight over camera.position.
   const orbitOn = useRef(gridOrbitEnabled);
   orbitOn.current = gridOrbitEnabled;
+
+  // When orbit flips ON in grid view, snap camera to a fixed overview pose
+  // that frames the whole grid from the front. TrackballControls' target is
+  // (0,0,0) by default; keeping the camera on the Z axis at a fixed distance
+  // makes rotation orbit cleanly around the grid center instead of producing
+  // the tall "stretched column" view that happens when you rotate while
+  // already scrolled to a far row.
+  useLayoutEffect(() => {
+    if (view !== "grid" || !gridOrbitEnabled) return;
+    const ROWS = Math.ceil(snapCount / COLS);
+    const gridFullH = (ROWS - 1) * SPACING_Y + 2;
+    const fov = size.width < 640 ? 55 : size.width < 900 ? 48 : 42;
+    const tanHalf = Math.tan((fov * Math.PI) / 360);
+    const dist = Math.min(gridFullH / (2 * tanHalf), 60);
+    camera.position.set(0, 0, dist);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(0, 0, 0);
+    const persp = camera as THREE.PerspectiveCamera;
+    if (persp.fov !== undefined) {
+      persp.fov = fov;
+      persp.updateProjectionMatrix();
+    }
+  }, [view, gridOrbitEnabled, snapCount, size.width, camera]);
 
   // Compute row-center world Y (rows are symmetric around 0, row 0 at top)
   const rowCenterY = useCallback((row: number) => {
