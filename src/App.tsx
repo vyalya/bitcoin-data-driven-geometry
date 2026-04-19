@@ -1488,7 +1488,7 @@ function GridScene({ snapshots, hoverIdx, selectedIdx, matchedIndices, legendHov
           <group
             key={snap.id}
             position={[x, y, 0]}
-            rotation={[0, phaseOffsets[i], 0]}
+            rotation={[0, 0, phaseOffsets[i]]}
           >
             {/* Invisible hit target for reliable hover */}
             <mesh
