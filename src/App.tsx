@@ -1407,9 +1407,10 @@ function GridScene({ snapshots, hoverIdx, selectedIdx, matchedIndices, legendHov
   [snapshots.length]);
 
   useFrame((_, delta) => {
-    groupRefs.current.forEach((g) => {
-      if (g) g.rotation.y += delta * 0.15;
-    });
+    // Grid cells are static. Earlier we rotated each cell around Y, but the
+    // block-crown lives in the XY plane and goes edge-on (invisible) every
+    // 180° of that rotation. Static 3D reads just fine — rotation is for
+    // detail view, where the camera orbits explicitly.
     pulseRef.current += delta;
     forceUpdate((n) => n + 1);
   });
@@ -1662,11 +1663,12 @@ function MiniSpine({ blocks, opacity: blockOpacity, highlighted }: { blocks: Blo
     const dummy = new THREE.Object3D();
     const color = new THREE.Color();
 
-    // Match the detail-view "block crown" shape at grid scale — each block
-    // is a radial spike in the XY plane rather than a Y-axis stack.
-    const INNER_R = 0.18;
-    const MIN_SPIKE = 0.08;
-    const MAX_SPIKE = 0.9;
+    // Radial "block crown" — same shape as the detail-view spine, just
+    // bigger/thicker here to remain visible at grid scale (each mini cell
+    // is rendered at ~0.28× scale inside the grid).
+    const INNER_R = 0.15;
+    const MIN_SPIKE = 0.25;
+    const MAX_SPIKE = 1.15;
 
     for (let i = 0; i < count; i++) {
       const [, size, weight, txs] = blocks[i];
@@ -1674,7 +1676,7 @@ function MiniSpine({ blocks, opacity: blockOpacity, highlighted }: { blocks: Blo
       const sNorm = Math.min(size / 2000000, 1);
 
       const spikeLen = MIN_SPIKE + MAX_SPIKE * wNorm;
-      const thickness = 0.008 + sNorm * 0.015;
+      const thickness = 0.04 + sNorm * 0.05;
       const midR = INNER_R + spikeLen / 2;
 
       const angle = (i / count) * Math.PI * 2;
