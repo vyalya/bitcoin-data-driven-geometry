@@ -4,6 +4,36 @@ All notable changes to this project. Dates are local.
 
 ## 2026-04
 
+### Runtime simplification: dropped DuckDB-WASM + Parquet for plain JSON
+
+Audit of the runtime data layer revealed DuckDB-WASM was overkill. Every
+visitor was downloading a ~500 KB worker bundle + 34 MB WASM binary
+(cached at jsDelivr) to execute two `SELECT *` queries against 200 KB of
+static data — no joins, no aggregations, no interactive SQL.
+
+Replaced with plain `fetch()` of JSON artefacts:
+
+- `pipeline/export_parquet.mjs` → `pipeline/export_json.mjs`
+- `public/data/*.parquet` (~200 KB) → `public/data/*.json` (~540 KB,
+  ~105 KB gzipped on the wire)
+- `@duckdb/duckdb-wasm` removed from dependencies
+- Main JS bundle shrunk ~200 KB (~50 KB gzipped)
+- Removed: blob-URL Worker shim, CSP carve-outs for jsDelivr, version
+  pinning to avoid worker/WASM signature drift, diagnostic banners,
+  `snapshotsSettled` state + "Loading…" subtitle (fetch is so fast now
+  the fallback is invisible)
+
+The offline pipeline is unchanged — DuckDB (Node) still stages the API
+fetches, joins the tables, derives the scores. Only the runtime
+transport swapped from Parquet to JSON. Every piece of data is still
+pipeline-generated from public sources; every shape still maps to a
+real metric.
+
+Trade-off: JSON is ~2.5× larger on disk than Parquet (without ZSTD
+compression available to us on the Pages CDN), but gzipped over HTTP
+the delta is small and the wins (no runtime WASM, no worker, no CSP
+edge cases, simpler debug surface) dominate for this data size.
+
 ### Data pipeline + architecture overhaul
 - **Expanded from 25 to 105 historically significant dates** — Genesis (2009) → April 2026. Added ~80 new snapshots spanning every halving, bubble, hack, bear, exchange collapse, ETF, ATH, correction.
 - **New data pipeline** at `pipeline/*.mjs`:

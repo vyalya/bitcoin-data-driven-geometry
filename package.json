@@ -7,12 +7,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "pipeline": "node pipeline/fetch_coinmetrics.mjs && node pipeline/fetch_blockchain.mjs && node pipeline/fetch_mempool.mjs && node pipeline/ingest_bigquery.mjs && node pipeline/build_db.mjs && node pipeline/export_parquet.mjs",
-    "pipeline:build-only": "node pipeline/build_db.mjs && node pipeline/export_parquet.mjs",
-    "pipeline:export": "node pipeline/export_parquet.mjs"
+    "pipeline": "node pipeline/fetch_coinmetrics.mjs && node pipeline/fetch_blockchain.mjs && node pipeline/fetch_mempool.mjs && node pipeline/ingest_bigquery.mjs && node pipeline/build_db.mjs && node pipeline/export_json.mjs",
+    "pipeline:build-only": "node pipeline/build_db.mjs && node pipeline/export_json.mjs",
+    "pipeline:export": "node pipeline/export_json.mjs"
   },
   "dependencies": {
-    "@duckdb/duckdb-wasm": "1.32.0",
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.4.0",
     "@react-three/postprocessing": "^3.0.4",
