@@ -173,6 +173,52 @@ export async function loadSnapshots(): Promise<NetworkSnapshot[] | null> {
   }
 }
 
+/** Fetches every date's blocks in one query and returns them keyed by date.
+ * Used by grid view to render block crowns on every cell. Returns {} if the
+ * parquet is missing. */
+export async function loadAllBlocks(): Promise<Record<string, BlockTuple[]>> {
+  try {
+    const probe = await fetch("/data/blocks.parquet", { method: "HEAD" });
+    if (!probe.ok) return {};
+  } catch {
+    return {};
+  }
+
+  const database = await getDB();
+  const blocksUrl = new URL("/data/blocks.parquet", window.location.origin).toString();
+  await database.registerFileURL("blocks.parquet", blocksUrl, duckdb.DuckDBDataProtocol.HTTP, false);
+
+  const conn = await database.connect();
+  try {
+    await conn.query(`
+      CREATE OR REPLACE VIEW blocks AS
+      SELECT * FROM parquet_scan('blocks.parquet')
+    `);
+    const result = await conn.query(`
+      SELECT block_height, date, size_bytes, weight, tx_count
+      FROM blocks
+      ORDER BY date, block_height
+    `);
+    const out: Record<string, BlockTuple[]> = {};
+    for (const r of result.toArray()) {
+      const date = toISODate(r.date);
+      if (!out[date]) out[date] = [];
+      out[date].push([
+        Number(r.block_height),
+        Number(r.size_bytes),
+        Number(r.weight),
+        Number(r.tx_count),
+      ]);
+    }
+    return out;
+  } catch (e) {
+    console.error("[db] loadAllBlocks failed:", e);
+    return {};
+  } finally {
+    await conn.close();
+  }
+}
+
 /** Returns per-block spine tuples for a given date from blocks.parquet, or [] on miss. */
 export async function loadBlocksForDate(date: string): Promise<BlockTuple[]> {
   try {

@@ -5,7 +5,7 @@ import { BlendFunction } from "postprocessing";
 import { useMemo, useRef, useState, useCallback, useEffect, useLayoutEffect } from "react";
 import * as THREE from "three";
 import { staticSnapshots } from "./data/staticSnapshots";
-import { loadSnapshots, loadBlocksForDate } from "./db";
+import { loadSnapshots, loadBlocksForDate, loadAllBlocks } from "./db";
 import type { NetworkSnapshot, BlockTuple } from "./types";
 
 /* ═══════════════════════════════════════════════════════
@@ -70,9 +70,29 @@ function App() {
     }).catch((e) => { console.error("[App] loadSnapshots threw:", e); });
   }, []);
 
-  // Blocks: pre-baked if present, otherwise fetch per-date from blocks.parquet
+  // Blocks: pre-baked if present, otherwise fetched from blocks.parquet. On
+  // mount we pull the full blocks table in one query and index by date so
+  // every grid cell has its crown from the start.
   const [blocksByDate, setBlocksByDate] = useState<Record<string, BlockTuple[]>>({});
+  useEffect(() => {
+    loadAllBlocks().then((all) => {
+      if (Object.keys(all).length > 0) setBlocksByDate(all);
+    }).catch((e) => console.error("[App] loadAllBlocks threw:", e));
+  }, []);
+
+  // Inject blocks into every snapshot so downstream components (grid cells,
+  // detail view) all just read snap.blocks without needing prop drilling.
+  const snapshotsWithBlocks = useMemo<NetworkSnapshot[]>(() => {
+    return snapshots.map((s) => {
+      if (s.blocks && s.blocks.length > 0) return s;
+      const date = s.snapshotTime.slice(0, 10);
+      const blocks = blocksByDate[date];
+      if (!blocks || blocks.length === 0) return s;
+      return { ...s, blocks };
+    });
+  }, [snapshots, blocksByDate]);
   const activeDate = baseSnapshot.snapshotTime.slice(0, 10);
+  // Fallback: if the bulk load missed the active date, fetch per-date.
   useEffect(() => {
     if ((baseSnapshot.blocks && baseSnapshot.blocks.length > 0) || blocksByDate[activeDate]) return;
     loadBlocksForDate(activeDate).then((blocks) => {
@@ -205,7 +225,6 @@ function App() {
   const [timelineHoverIdx, setTimelineHoverIdx] = useState<number | null>(null);
   const [cellHoverIdx, setCellHoverIdx] = useState<number | null>(null);
   const gridHoverIdx = timelineHoverIdx ?? cellHoverIdx;
-  const setGridHoverIdx = setCellHoverIdx; // legacy alias — cell is the default "hover" source
   // Grid-view selection: first tap previews, second tap (on same cell) enters detail
   const [gridSelectedIdx, setGridSelectedIdx] = useState<number | null>(null);
   const [showGuideTab, setShowGuideTab] = useState<"about" | "legend" | "visual" | "source">("about");
@@ -389,7 +408,7 @@ function App() {
         <CameraRig view={view} snapCount={snapshots.length} focusIdx={timelineHoverIdx ?? gridSelectedIdx} />
         {view === "grid" ? (
           <GridScene
-            snapshots={snapshots}
+            snapshots={snapshotsWithBlocks}
             hoverIdx={gridHoverIdx}
             selectedIdx={gridSelectedIdx}
             matchedIndices={matchedIndices}
@@ -1242,7 +1261,12 @@ function CameraRig({ view, snapCount, focusIdx }: { view: "grid" | "detail"; sna
   }, [focusIdx, view, snapCount, rowCenterY]);
 
 
-  useEffect(() => {
+  // useLayoutEffect (not useEffect): we need to reposition the camera
+  // synchronously after the view switches, before the browser paints. A plain
+  // useEffect fires after paint, leaving one frame where the new scene is
+  // rendered with the camera still at the old (grid) position — the visible
+  // "snap" on entering detail view.
+  useLayoutEffect(() => {
     if (view === "grid") {
       // Account for side panels covering part of the canvas. These must match
       // the responsive panel widths declared in styles.css.
