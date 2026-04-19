@@ -110,7 +110,6 @@ export async function loadSnapshots(): Promise<NetworkSnapshot[] | null> {
     console.warn("[db] snapshots.parquet HEAD probe failed:", e);
     return null;
   }
-  console.log("[db] snapshots.parquet found — loading via DuckDB-WASM…");
 
   const database = await getDB();
   // Register the parquet as a virtual file so DuckDB-WASM can read it via HTTP range requests
