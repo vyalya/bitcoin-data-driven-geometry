@@ -57,21 +57,15 @@ function App() {
   const [snapshots, setSnapshots] = useState<NetworkSnapshot[]>(staticSnapshots);
   const [activeIdx, setActiveIdx] = useState(0);
   const baseSnapshot = snapshots[Math.min(activeIdx, snapshots.length - 1)];
-  const [dbError, setDbError] = useState<string | null>(null);
+  // False until the parquet load attempt settles (success or fail). Used to
+  // avoid flashing the static 25-snapshot count before the real 105 lands.
+  const [snapshotsSettled, setSnapshotsSettled] = useState(false);
 
-  // Attempt to load richer data from DuckDB-WASM parquet files (no-op if not present)
   useEffect(() => {
     loadSnapshots().then((loaded) => {
-      if (loaded && loaded.length > 0) {
-        setSnapshots(loaded);
-      } else {
-        setDbError("Parquet not found (HEAD probe failed). Using static 25-snapshot fallback.");
-      }
-    }).catch((e) => {
-      const msg = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
-      console.error("[App] loadSnapshots threw:", e);
-      setDbError(msg);
-    });
+      if (loaded && loaded.length > 0) setSnapshots(loaded);
+    }).catch((e) => { console.error("[App] loadSnapshots threw:", e); })
+    .finally(() => setSnapshotsSettled(true));
   }, []);
 
   // Blocks: pre-baked if present, otherwise fetched from blocks.parquet. On
@@ -475,7 +469,7 @@ function App() {
           </EffectComposer>
         )}
         {view === "detail" && controlsReady && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={0.3} maxDistance={60} rotateSpeed={2} zoomSpeed={1.5} panSpeed={0.8} />}
-        {view === "grid" && gridOrbitEnabled && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={8} maxDistance={80} rotateSpeed={1.8} zoomSpeed={1.2} panSpeed={0.8} />}
+        {view === "grid" && gridOrbitEnabled && <TrackballControls noPan={false} noZoom={false} noRotate={false} minDistance={12} maxDistance={36} rotateSpeed={1.4} zoomSpeed={0.8} panSpeed={0.6} />}
       </Canvas>
 
       {/* ═══ TOP BANNER ═══ */}
@@ -483,29 +477,12 @@ function App() {
         <h1 className="hud-title">The Bitcoin Network as Data Driven Geometry</h1>
       </div>
 
-      {/* Temporary diagnostic banner — surfaces DuckDB-WASM load errors so we
-          can see why the parquet isn't being read in prod. Remove once fixed. */}
-      {dbError && (
-        <div style={{
-          position: "fixed", top: 64, left: "50%", transform: "translateX(-50%)",
-          maxWidth: "min(90vw, 700px)", zIndex: 1000,
-          background: "rgba(30, 10, 0, 0.95)", color: "#FFCA6E",
-          border: "1px solid rgba(247, 147, 26, 0.5)", borderRadius: 8,
-          padding: "10px 14px", fontSize: "0.75rem", lineHeight: 1.5,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.6)", pointerEvents: "auto",
-        }}>
-          <strong>DuckDB load status:</strong> {dbError}
-          <button onClick={() => setDbError(null)} style={{
-            marginLeft: 12, background: "transparent", border: "none",
-            color: "#FFCA6E", cursor: "pointer", fontSize: "1rem",
-          }}>×</button>
-        </div>
-      )}
-
       {/* ═══ GRID VIEW SUBTITLE ═══ */}
       {view === "grid" && (
         <div className="hud grid-subtitle">
-          {snapshots.length} historical snapshots · hover any in the timeline or click to explore
+          {snapshotsSettled
+            ? `${snapshots.length} historical snapshots · hover any in the timeline or click to explore`
+            : "Loading historical snapshots…"}
         </div>
       )}
 
