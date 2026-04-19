@@ -57,14 +57,21 @@ function App() {
   const [snapshots, setSnapshots] = useState<NetworkSnapshot[]>(staticSnapshots);
   const [activeIdx, setActiveIdx] = useState(0);
   const baseSnapshot = snapshots[Math.min(activeIdx, snapshots.length - 1)];
+  const [dbError, setDbError] = useState<string | null>(null);
 
   // Attempt to load richer data from DuckDB-WASM parquet files (no-op if not present)
   useEffect(() => {
     loadSnapshots().then((loaded) => {
       if (loaded && loaded.length > 0) {
         setSnapshots(loaded);
+      } else {
+        setDbError("Parquet not found (HEAD probe failed). Using static 25-snapshot fallback.");
       }
-    }).catch((e) => { console.error("[App] loadSnapshots threw:", e); });
+    }).catch((e) => {
+      const msg = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+      console.error("[App] loadSnapshots threw:", e);
+      setDbError(msg);
+    });
   }, []);
 
   // Blocks: pre-baked if present, otherwise fetched from blocks.parquet. On
@@ -475,6 +482,25 @@ function App() {
       <div className="hud hud-banner">
         <h1 className="hud-title">The Bitcoin Network as Data Driven Geometry</h1>
       </div>
+
+      {/* Temporary diagnostic banner — surfaces DuckDB-WASM load errors so we
+          can see why the parquet isn't being read in prod. Remove once fixed. */}
+      {dbError && (
+        <div style={{
+          position: "fixed", top: 64, left: "50%", transform: "translateX(-50%)",
+          maxWidth: "min(90vw, 700px)", zIndex: 1000,
+          background: "rgba(30, 10, 0, 0.95)", color: "#FFCA6E",
+          border: "1px solid rgba(247, 147, 26, 0.5)", borderRadius: 8,
+          padding: "10px 14px", fontSize: "0.75rem", lineHeight: 1.5,
+          boxShadow: "0 4px 20px rgba(0,0,0,0.6)", pointerEvents: "auto",
+        }}>
+          <strong>DuckDB load status:</strong> {dbError}
+          <button onClick={() => setDbError(null)} style={{
+            marginLeft: 12, background: "transparent", border: "none",
+            color: "#FFCA6E", cursor: "pointer", fontSize: "1rem",
+          }}>×</button>
+        </div>
+      )}
 
       {/* ═══ GRID VIEW SUBTITLE ═══ */}
       {view === "grid" && (
