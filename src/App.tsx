@@ -1516,13 +1516,6 @@ function GridScene({ snapshots, hoverIdx, selectedIdx, matchedIndices, legendHov
               <meshBasicMaterial colorWrite={false} depthWrite={false} />
             </mesh>
 
-            {/* Selection ring — subtle orange circle around the selected cell */}
-            {isSelected && (
-              <mesh rotation={[Math.PI / 2, 0, 0]}>
-                <ringGeometry args={[1.3, 1.38, 48]} />
-                <meshBasicMaterial color="#F7931A" transparent opacity={0.55 * pulse} side={THREE.DoubleSide} />
-              </mesh>
-            )}
 
             <group
               ref={(r) => { groupRefs.current[i] = r; }}
