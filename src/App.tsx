@@ -416,7 +416,7 @@ function App() {
       >
         <color attach="background" args={["#020202"]} />
         {view === "detail" && <fog attach="fog" args={["#010101", 20, 45]} />}
-        <CameraRig view={view} snapCount={snapshots.length} focusIdx={timelineHoverIdx ?? gridSelectedIdx} gridOrbitEnabled={gridOrbitEnabled} />
+        <CameraRig view={view} snapCount={matchedIndices !== null ? matchedIndices.size : snapshots.length} focusIdx={timelineHoverIdx ?? gridSelectedIdx} gridOrbitEnabled={gridOrbitEnabled} searchActive={matchedIndices !== null} />
         {view === "grid" ? (snapshotsSettled ? (
           <GridScene
             snapshots={snapshotsWithBlocks}
@@ -1172,7 +1172,7 @@ interface SceneProps {
    CAMERA RIG — smoothly animates camera between grid and detail views
    ═══════════════════════════════════════════════════════ */
 
-function CameraRig({ view, snapCount, focusIdx, gridOrbitEnabled }: { view: "grid" | "detail"; snapCount: number; focusIdx: number | null; gridOrbitEnabled: boolean }) {
+function CameraRig({ view, snapCount, focusIdx, gridOrbitEnabled, searchActive }: { view: "grid" | "detail"; snapCount: number; focusIdx: number | null; gridOrbitEnabled: boolean; searchActive?: boolean }) {
   const { camera, size, gl } = useThree();
   const targetPos = useRef(new THREE.Vector3(0, 0, 22));
   const targetFov = useRef(42);
@@ -1278,9 +1278,11 @@ function CameraRig({ view, snapCount, focusIdx, gridOrbitEnabled }: { view: "gri
     };
   }, [gl.domElement, snapCount, rowCenterY]);
 
-  // Follow external focus (timeline hover/select) — scroll camera to that row
+  // Follow external focus (timeline hover/select) — scroll camera to that row.
+  // Skipped while search is active; the filtered grid repacks cells by display
+  // index, so the real focusIdx no longer maps to its original row.
   useEffect(() => {
-    if (view !== "grid" || focusIdx == null || gridOrbitEnabled) return;
+    if (view !== "grid" || focusIdx == null || gridOrbitEnabled || searchActive) return;
     const ROWS = Math.ceil(snapCount / COLS);
     const minRow = Math.min(HALF_VIEW, ROWS - 1);
     const maxRow = Math.max(ROWS - 1 - HALF_VIEW, minRow);
@@ -1288,7 +1290,17 @@ function CameraRig({ view, snapCount, focusIdx, gridOrbitEnabled }: { view: "gri
     const clampedRow = Math.max(minRow, Math.min(maxRow, focusRow));
     targetPos.current.y = rowCenterY(clampedRow) + uiOffsetY.current;
     if (snapTimer.current) { clearTimeout(snapTimer.current); snapTimer.current = null; }
-  }, [focusIdx, view, snapCount, rowCenterY, gridOrbitEnabled]);
+  }, [focusIdx, view, snapCount, rowCenterY, gridOrbitEnabled, searchActive]);
+
+  // When search activates or the match count changes, snap the camera back to
+  // the top of the (now compact) packed grid so filtered results appear in view.
+  useEffect(() => {
+    if (view !== "grid" || !searchActive || gridOrbitEnabled) return;
+    const ROWS = Math.ceil(snapCount / COLS);
+    const minRow = Math.min(HALF_VIEW, ROWS - 1);
+    targetPos.current.y = rowCenterY(minRow) + uiOffsetY.current;
+    if (snapTimer.current) { clearTimeout(snapTimer.current); snapTimer.current = null; }
+  }, [searchActive, snapCount, view, rowCenterY, gridOrbitEnabled]);
 
 
   // useLayoutEffect (not useEffect): we need to reposition the camera
@@ -1481,9 +1493,24 @@ function GridScene({ snapshots, hoverIdx, selectedIdx, matchedIndices, legendHov
 
   // 21×5 scrollable grid layout
   const COLS = 5;
-  const ROWS = Math.ceil(snapshots.length / COLS);
   const SPACING_X = 3.6; // world units between cells (horizontal)
   const SPACING_Y = 3.2; // world units between cells (vertical)
+  // When filtering, repack matched cells into the top of the grid so the user
+  // doesn't have to scroll. Map real index → display index (0, 1, 2, …) for
+  // just the matched cells.
+  const displayIndexMap = useMemo(() => {
+    const m = new Map<number, number>();
+    let d = 0;
+    snapshots.forEach((_, i) => {
+      if (matchedIndices === null || matchedIndices.has(i)) {
+        m.set(i, d);
+        d++;
+      }
+    });
+    return m;
+  }, [snapshots, matchedIndices]);
+  const effectiveCount = matchedIndices !== null ? matchedIndices.size : snapshots.length;
+  const ROWS = Math.max(1, Math.ceil(effectiveCount / COLS));
 
   // Gentle pulse for the selected cell (1.0 ± 0.06)
   const pulse = 1 + Math.sin(pulseRef.current * 3.2) * 0.06;
@@ -1497,10 +1524,10 @@ function GridScene({ snapshots, hoverIdx, selectedIdx, matchedIndices, legendHov
       <pointLight position={[-15, 5, 10]} intensity={4} color="#B87206" distance={50} decay={1.5} />
 
       {snapshots.map((snap, i) => {
-        const isFilteredOut = matchedIndices !== null && !matchedIndices.has(i);
-        if (isFilteredOut) return null;
-        const col = i % COLS;
-        const row = Math.floor(i / COLS);
+        const d = displayIndexMap.get(i);
+        if (d === undefined) return null;
+        const col = d % COLS;
+        const row = Math.floor(d / COLS);
         const x = (col - (COLS - 1) / 2) * SPACING_X;
         const y = ((ROWS - 1) / 2 - row) * SPACING_Y;
         const isHovered = hoverIdx === i;
