@@ -1,28 +1,28 @@
 {
-  "checkedAt": "2026-10-21T05:48:29.492Z",
-  "testsPassed": 23,
+  "checkedAt": "2026-10-21T05:58:21.217Z",
+  "testsPassed": 25,
   "typecheck": "passed",
   "productionBuild": "passed",
   "dataAudit": {
     "snapshots": 150,
     "blocks": 22374
   },
-  "renderedBrowserChecks": "Current caption release: initial server-render and caption projection checks pass. Assistant browser visual inspection remains blocked. The user manually tested the preceding release.",
+  "renderedBrowserChecks": "Current hover release: initial server rendering, caption rendering, and direct ring event-handler checks pass. Browser visual inspection remains blocked.",
   "buildFiles": {
-    "dist/index.html": "9b2e52bae76fb352f8f99c7e3bb69a58d1b240535bd6c29d1c9d41d3081316d2",
+    "dist/index.html": "2bab0168b3e3321001671903073f05870dcb66ae11c798a70ea449d7e1663298",
     "dist/data/snapshots.json": "7d8d8b400d61659f80ca1d701a5ce4e1a5cb253cfc17d718f2e9767531b05a23",
     "dist/data/blocks.json": "0ab2192a81c5272cfce722f84e767f78955c46bc8a0f7da74c55ea5b78f414a7",
     "dist/data/provenance.json": "02937ce69d322d0b7425be5848484242ac6d762fb2769740f417df53764217b1",
-    "dist/assets/index-Cb-8AeAe.js": "4e1d8e1b98d83fac012fae2955e7150cf4fc81cae2b87f8770953ed064c5de2b",
-    "dist/assets/index-xeslledf.css": "1ca2fd95e93b38197f4ce0975ab164a8d658d3a495e4e48ded0163abb06c0aec"
+    "dist/assets/index-DbLrzQ9_.js": "04ecb1e175fecf78ec2b95b7784dd4f2ffdd9613f7c288098d4f43547776c200",
+    "dist/assets/index-BVlUMbNl.css": "b33a0bbe1e5e6a426442cbb2ae61161bb922f6f578be97c344b419107b0a9f33"
   },
   "productionVerification": {
     "url": "https://bitcoin-geometry.com",
-    "verifiedAt": "2026-10-21T05:48:29.492Z",
+    "verifiedAt": "2026-10-21T05:58:21.217Z",
     "checked": 162,
     "expected": 162,
     "errors": []
   },
-  "sourceCommit": "fe9307955d97a0554f8a533d751f4c9544ade42c",
-  "captionValidation": "audit/caption-release-validation.json"
+  "sourceCommit": "43bbfbe645f0acd223c01d619c462c94af5145da",
+  "captionValidation": "audit/hover-interaction-validation.json"
 }
