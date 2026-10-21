@@ -9,6 +9,7 @@ import { resetCameraPose, gridLayout } from "./camera";
 import { setBlockInstances, POINT_HIT_THRESHOLD } from "./geometry";
 import type { FormStyle } from "./geometry";
 import { sameSelection } from "./selection";
+import { SnapshotCaption } from "./SnapshotCaption";
 import { normalized, difficultyFill, formatMetric, randomFor } from "./metrics";
 import { staticSnapshots } from "./data/staticSnapshots";
 import { loadSnapshots, loadAllBlocks, loadBlockDetailsForDate } from "./db";
@@ -28,7 +29,7 @@ function App() {
   const [snapshots, setSnapshots] = useState<NetworkSnapshot[]>(staticSnapshots);
   const [activeIdx, setActiveIdx] = useState(0);
   const [resetVersion, setResetVersion] = useState(0);
-  const [panelsHidden,setPanelsHidden]=useState(false);
+  const [panelsHidden,setPanelsHidden]=useState(true);
   const [formStyle, setFormStyle] = useState<FormStyle>("atom");
   const baseSnapshot = snapshots[Math.min(activeIdx, snapshots.length - 1)];
   // False until the JSON load attempt settles (success or fail). Used to
@@ -463,6 +464,11 @@ function App() {
         )}
         {view === "detail" && <TrackballControls key={resetVersion} staticMoving={false} dynamicDampingFactor={0.14} noPan={false} noZoom={false} noRotate={false} minDistance={0.8} maxDistance={45} rotateSpeed={1.5} zoomSpeed={1.1} panSpeed={0.65} />}
       </Canvas>
+      {view === "detail" && panelsHidden && snapshotsSettled && (
+        <div className="scene-day-marker" aria-live={playing ? "off" : "polite"}>
+          <SnapshotCaption snapshot={baseSnapshot} variant="detail" />
+        </div>
+      )}
       </div>
       {formStyle === "atom" && <div className="space-atmosphere" aria-hidden="true"/>}
 
@@ -478,7 +484,7 @@ function App() {
             ? "Loading historical snapshots…"
             : isMobile
               ? `${snapshots.length} snapshots · tap to select, tap again to explore`
-              : `${snapshots.length} historical snapshots · hover any in the timeline or click to explore`}
+              : `${snapshots.length} historical snapshots · scroll through time · click a day to explore`}
         </div>
       )}
 
@@ -823,7 +829,7 @@ function GuideContent({tab,formStyle,snapshot,count}:{tab:"about"|"legend"|"visu
   </div>;
   if(tab==="visual"){
     const steps=[
-      ["Explore","Choose a historical day in the timeline or grid. On a phone, tap once to preview, again to open. Search events, categories, years or ranges such as “war”, “AI” or “2020–2022” (use a hyphen when searching). Play visits the curated dates, not consecutive days."],
+      ["Explore","Start in the labeled Atom grid. Scroll through days; click one to explore. On a phone, tap once to preview, again to open. Show side panels for the timeline, search and figures. Search events, categories, years or ranges such as “war”, “AI” or “2020–2022” (use a hyphen). Play visits curated dates, not consecutive days."],
       ["Inspect","Select a metric row to highlight its geometry. Hover a tooth for its real block figures. Click or tap to pin; Previous / Next moves between blocks. Click the same tooth or empty space to release. On mobile, expand the bottom sheet to read the figures."],
       ["Navigate","In detail, drag to orbit and scroll or pinch to zoom. Use two fingers to pan. In the grid, scroll or swipe through rows. Reset view restores framing. Hide panels keeps Grid, Play and Orbit visible while giving the geometry more room."],
       ["Compare","Both styles use the same measurements. Transactions, fees and hashrate use shared linear scales; difficulty uses a logarithmic scale. Zero and missing data both have no arc; the numeric panel distinguishes them. Event-day differences do not establish cause and effect."],
@@ -978,7 +984,11 @@ function GridScene({ formStyle, snapshots, hoverIdx, selectedIdx, matchedIndices
   onSelect: (i: number) => void;
 }) {
   const {size}=useThree();
-  const COLS=gridLayout(size.width,size.height,snapshots.length).columns;
+  const layout=gridLayout(size.width,size.height,matchedIndices?.size ?? snapshots.length);
+  const COLS=layout.columns;
+  // The camera can fit vertically on short screens, leaving cells narrower
+  // than width / columns. Use their projected spacing to keep captions apart.
+  const captionWidth=Math.max(72,Math.min(156,3.6*size.height/(2*layout.distance*Math.tan(21*Math.PI/180))-16));
   const phaseOffsets=useMemo(()=>Array.from({length:snapshots.length},(_,i)=>Math.sin(i*1.618)*Math.PI*2),[snapshots.length]);
   const SPACING_X = 3.6; // world units between cells (horizontal)
   const SPACING_Y = 3.2; // world units between cells (vertical)
@@ -1029,7 +1039,6 @@ function GridScene({ formStyle, snapshots, hoverIdx, selectedIdx, matchedIndices
           <group
             key={snap.id}
             position={[x, y, 0]}
-            rotation={[0, 0, phaseOffsets[i]]}
           >
             {/* Invisible hit target for reliable hover */}
             <mesh
@@ -1044,9 +1053,13 @@ function GridScene({ formStyle, snapshots, hoverIdx, selectedIdx, matchedIndices
 
             <group
               scale={baseScale}
+              rotation={[0, 0, phaseOffsets[i]]}
             >
               <MiniSnapshot formStyle={formStyle} snapshot={snap} opacity={dim} highlighted={isHovered || isSelected} legendHover={legendHover} />
             </group>
+            <Html center position={[0, -1.25, 0]} zIndexRange={[1, 0]} style={{ width: captionWidth, pointerEvents: "none" }}>
+              <SnapshotCaption snapshot={snap} variant="grid" highlighted={isHovered || isSelected} />
+            </Html>
           </group>
         );
       })}

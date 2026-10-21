@@ -33,6 +33,8 @@ The browser uses validated static JSON. No runtime database is needed. Missing o
 
 Atom arranges the teeth around a spherical nucleus with four crossing orange orbits. Classic keeps the circular gear and crossed outer rings. Layout, color, lighting and animation are presentation choices. No additional quantities are encoded by tooth thickness or brightness. Zero and missing values produce no arc; the numeric panel distinguishes them. Small positive values can be imperceptible. Maxima are shared across this release and may change in later releases.
 
+The default view is the Atom grid with side panels hidden. Each sculpture has a subtle UTC date and event caption; focused views retain the selected day at the lower left. Use Show side panels to reveal the timeline, search and inspector.
+
 Hover a tooth for its exact block figures, or tap to pin it; Previous / Next supports inspection without precise pointer targeting. The inspector shows height, size, weight, transactions, fees, difficulty and header time, with a block-explorer link. Additional records load only for the active day. Grid, Play, Orbit, Reset view and Hide panels control navigation. Mobile uses a responsive grid, top timeline strip, pinch zoom and a collapsible bottom inspector.
 
 ## Sources and dates
