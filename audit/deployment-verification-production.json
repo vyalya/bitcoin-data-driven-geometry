@@ -1,19 +1,19 @@
 {
   "url": "https://bitcoin-geometry.com",
-  "verifiedAt": "2026-10-21T03:21:24.516Z",
+  "verifiedAt": "2026-10-21T05:48:29.492Z",
   "checked": 162,
   "expected": 162,
   "errors": [],
   "files": [
     {
-      "file": "assets/index-ChgDyQyY.css",
-      "sha256": "334db6ebd9827f541059517995334a190971440f6570c25fd6f6e19a0827dd21",
-      "bytes": 44438
+      "file": "assets/index-Cb-8AeAe.js",
+      "sha256": "4e1d8e1b98d83fac012fae2955e7150cf4fc81cae2b87f8770953ed064c5de2b",
+      "bytes": 1221879
     },
     {
-      "file": "assets/index-DFvfGNXD.js",
-      "sha256": "085e053a506dcca2cbfee7506cc1a4e64c64973612938fba81fa97fc3aee0fce",
-      "bytes": 1221016
+      "file": "assets/index-xeslledf.css",
+      "sha256": "1ca2fd95e93b38197f4ce0975ab164a8d658d3a495e4e48ded0163abb06c0aec",
+      "bytes": 45739
     },
     {
       "file": "data/.gitkeep",
@@ -792,7 +792,7 @@
     },
     {
       "file": "index.html",
-      "sha256": "1c9e7b0e5f5af20b626728d6013545e7937ec57014c45522b2ec6b60f06a7ce1",
+      "sha256": "9b2e52bae76fb352f8f99c7e3bb69a58d1b240535bd6c29d1c9d41d3081316d2",
       "bytes": 2564
     },
     {
