@@ -1,0 +1,822 @@
+{
+  "checked": 150,
+  "method": "Different daily timestamp windows; discrepancy does not establish provider error. Difference computed in satoshis.",
+  "mismatch": [
+    {
+      "date": "2011-03-11",
+      "coinmetrics": 5.61222915,
+      "blockFees": 6.58222915,
+      "differenceSat": 97000000
+    },
+    {
+      "date": "2011-04-16",
+      "coinmetrics": 3.69088576,
+      "blockFees": 3.66088576,
+      "differenceSat": -3000000
+    },
+    {
+      "date": "2011-06-19",
+      "coinmetrics": 25.34181596,
+      "blockFees": 25.89261141,
+      "differenceSat": 55079545
+    },
+    {
+      "date": "2011-08-05",
+      "coinmetrics": 6.62537998,
+      "blockFees": 6.37744951,
+      "differenceSat": -24793047
+    },
+    {
+      "date": "2011-09-06",
+      "coinmetrics": 6.63597124,
+      "blockFees": 6.52405064,
+      "differenceSat": -11192060
+    },
+    {
+      "date": "2011-11-18",
+      "coinmetrics": 3.21931668,
+      "blockFees": 3.35692678,
+      "differenceSat": 13761010
+    },
+    {
+      "date": "2012-03-01",
+      "coinmetrics": 6.45537862,
+      "blockFees": 6.71836722,
+      "differenceSat": 26298860
+    },
+    {
+      "date": "2012-07-26",
+      "coinmetrics": 18.05062605,
+      "blockFees": 18.18252407,
+      "differenceSat": 13189802
+    },
+    {
+      "date": "2012-09-27",
+      "coinmetrics": 15.85641623,
+      "blockFees": 16.11576529,
+      "differenceSat": 25934906
+    },
+    {
+      "date": "2012-11-06",
+      "coinmetrics": 26.32854853,
+      "blockFees": 25.68602625,
+      "differenceSat": -64252228
+    },
+    {
+      "date": "2012-11-28",
+      "coinmetrics": 44.06351997,
+      "blockFees": 43.59397007,
+      "differenceSat": -46954990
+    },
+    {
+      "date": "2013-03-11",
+      "coinmetrics": 63.03792027,
+      "blockFees": 49.91899256,
+      "differenceSat": -1311892771
+    },
+    {
+      "date": "2013-03-25",
+      "coinmetrics": 43.03076237,
+      "blockFees": 44.37006807,
+      "differenceSat": 133930570
+    },
+    {
+      "date": "2013-04-10",
+      "coinmetrics": 64.84173132,
+      "blockFees": 64.66733147,
+      "differenceSat": -17439985
+    },
+    {
+      "date": "2013-06-06",
+      "coinmetrics": 40.94894235,
+      "blockFees": 41.26218009,
+      "differenceSat": 31323774
+    },
+    {
+      "date": "2013-10-02",
+      "coinmetrics": 39.35322586,
+      "blockFees": 39.92303312,
+      "differenceSat": 56980726
+    },
+    {
+      "date": "2013-11-19",
+      "coinmetrics": 29.42445949,
+      "blockFees": 31.59785609,
+      "differenceSat": 217339660
+    },
+    {
+      "date": "2013-12-18",
+      "coinmetrics": 18.68442803,
+      "blockFees": 18.64447134,
+      "differenceSat": -3995669
+    },
+    {
+      "date": "2014-02-24",
+      "coinmetrics": 15.40597851,
+      "blockFees": 15.21980169,
+      "differenceSat": -18617682
+    },
+    {
+      "date": "2014-03-18",
+      "coinmetrics": 9.96117055,
+      "blockFees": 9.7413767,
+      "differenceSat": -21979385
+    },
+    {
+      "date": "2014-03-25",
+      "coinmetrics": 14.78010341,
+      "blockFees": 14.55404643,
+      "differenceSat": -22605698
+    },
+    {
+      "date": "2014-06-27",
+      "coinmetrics": 10.67664091,
+      "blockFees": 10.70192844,
+      "differenceSat": 2528753
+    },
+    {
+      "date": "2014-08-08",
+      "coinmetrics": 11.0942202,
+      "blockFees": 11.16762997,
+      "differenceSat": 7340977
+    },
+    {
+      "date": "2014-10-06",
+      "coinmetrics": 12.96602005,
+      "blockFees": 12.61174465,
+      "differenceSat": -35427540
+    },
+    {
+      "date": "2015-01-14",
+      "coinmetrics": 15.62269978,
+      "blockFees": 15.22479663,
+      "differenceSat": -39790315
+    },
+    {
+      "date": "2015-01-15",
+      "coinmetrics": 17.11757064,
+      "blockFees": 17.25104955,
+      "differenceSat": 13347891
+    },
+    {
+      "date": "2015-07-04",
+      "coinmetrics": 17.68514497,
+      "blockFees": 17.84510252,
+      "differenceSat": 15995755
+    },
+    {
+      "date": "2015-08-24",
+      "coinmetrics": 26.48478287,
+      "blockFees": 26.21538332,
+      "differenceSat": -26939955
+    },
+    {
+      "date": "2015-10-31",
+      "coinmetrics": 28.67008753,
+      "blockFees": 28.54469017,
+      "differenceSat": -12539736
+    },
+    {
+      "date": "2015-11-13",
+      "coinmetrics": 24.98945743,
+      "blockFees": 25.62122509,
+      "differenceSat": 63176766
+    },
+    {
+      "date": "2016-01-14",
+      "coinmetrics": 31.74043995,
+      "blockFees": 31.82088874,
+      "differenceSat": 8044879
+    },
+    {
+      "date": "2016-03-09",
+      "coinmetrics": 53.78147081,
+      "blockFees": 54.68048263,
+      "differenceSat": 89901182
+    },
+    {
+      "date": "2016-06-17",
+      "coinmetrics": 77.8969392001575,
+      "blockFees": 78.90209509,
+      "differenceSat": 100515589
+    },
+    {
+      "date": "2016-06-24",
+      "coinmetrics": 74.1131858401363,
+      "blockFees": 74.11847429,
+      "differenceSat": 528845
+    },
+    {
+      "date": "2016-07-09",
+      "coinmetrics": 46.6341364900515,
+      "blockFees": 47.40040469,
+      "differenceSat": 76626820
+    },
+    {
+      "date": "2016-08-02",
+      "coinmetrics": 81.871074590077,
+      "blockFees": 81.38920804,
+      "differenceSat": -48186655
+    },
+    {
+      "date": "2016-11-08",
+      "coinmetrics": 88.8859690400742,
+      "blockFees": 89.25535917,
+      "differenceSat": 36939013
+    },
+    {
+      "date": "2017-03-10",
+      "coinmetrics": 255.244075449606,
+      "blockFees": 257.91797636,
+      "differenceSat": 267390091
+    },
+    {
+      "date": "2017-04-01",
+      "coinmetrics": 192.370090819802,
+      "blockFees": 190.64263242,
+      "differenceSat": -172745840
+    },
+    {
+      "date": "2017-05-12",
+      "coinmetrics": 320.073601689626,
+      "blockFees": 322.05057537,
+      "differenceSat": 197697368
+    },
+    {
+      "date": "2017-07-31",
+      "coinmetrics": 189.357151579958,
+      "blockFees": 194.86886623,
+      "differenceSat": 551171465
+    },
+    {
+      "date": "2017-08-01",
+      "coinmetrics": 74.0234784999857,
+      "blockFees": 75.94662047,
+      "differenceSat": 192314197
+    },
+    {
+      "date": "2017-08-09",
+      "coinmetrics": 160.442777880009,
+      "blockFees": 157.95191308,
+      "differenceSat": -249086480
+    },
+    {
+      "date": "2017-08-24",
+      "coinmetrics": 386.440831650013,
+      "blockFees": 385.99923422,
+      "differenceSat": -44159743
+    },
+    {
+      "date": "2017-09-04",
+      "coinmetrics": 325.457121789867,
+      "blockFees": 325.4016802,
+      "differenceSat": -5544159
+    },
+    {
+      "date": "2017-12-17",
+      "coinmetrics": 532.369267059864,
+      "blockFees": 535.43867532,
+      "differenceSat": 306940826
+    },
+    {
+      "date": "2017-12-20",
+      "coinmetrics": 920.784714080414,
+      "blockFees": 911.59174277,
+      "differenceSat": -919297131
+    },
+    {
+      "date": "2018-01-17",
+      "coinmetrics": 674.358294110125,
+      "blockFees": 675.09668652,
+      "differenceSat": 73839241
+    },
+    {
+      "date": "2018-06-10",
+      "coinmetrics": 16.61912053,
+      "blockFees": 16.7009531,
+      "differenceSat": 8183257
+    },
+    {
+      "date": "2018-12-15",
+      "coinmetrics": 18.26744053,
+      "blockFees": 18.37318136,
+      "differenceSat": 10574083
+    },
+    {
+      "date": "2018-12-19",
+      "coinmetrics": 32.64506125,
+      "blockFees": 32.92958464,
+      "differenceSat": 28452339
+    },
+    {
+      "date": "2019-02-18",
+      "coinmetrics": 29.94112352,
+      "blockFees": 29.40410079,
+      "differenceSat": -53702273
+    },
+    {
+      "date": "2019-04-02",
+      "coinmetrics": 115.44123629,
+      "blockFees": 114.48978878,
+      "differenceSat": -95144751
+    },
+    {
+      "date": "2019-06-26",
+      "coinmetrics": 187.18671172,
+      "blockFees": 184.06503874,
+      "differenceSat": -312167298
+    },
+    {
+      "date": "2019-10-23",
+      "coinmetrics": 30.72843106,
+      "blockFees": 31.07041069,
+      "differenceSat": 34197963
+    },
+    {
+      "date": "2019-10-24",
+      "coinmetrics": 29.90063186,
+      "blockFees": 28.9599249,
+      "differenceSat": -94070696
+    },
+    {
+      "date": "2020-01-30",
+      "coinmetrics": 19.90003677,
+      "blockFees": 19.64580869,
+      "differenceSat": -25422808
+    },
+    {
+      "date": "2020-02-13",
+      "coinmetrics": 34.63479347,
+      "blockFees": 35.47858608,
+      "differenceSat": 84379261
+    },
+    {
+      "date": "2020-03-11",
+      "coinmetrics": 30.50425847,
+      "blockFees": 29.56150425,
+      "differenceSat": -94275422
+    },
+    {
+      "date": "2020-03-12",
+      "coinmetrics": 60.27268581,
+      "blockFees": 59.16829292,
+      "differenceSat": -110439289
+    },
+    {
+      "date": "2020-03-15",
+      "coinmetrics": 42.20753235,
+      "blockFees": 44.30830399,
+      "differenceSat": 210077164
+    },
+    {
+      "date": "2020-04-08",
+      "coinmetrics": 22.45575263,
+      "blockFees": 22.6627845,
+      "differenceSat": 20703187
+    },
+    {
+      "date": "2020-04-20",
+      "coinmetrics": 21.88057006,
+      "blockFees": 21.97670283,
+      "differenceSat": 9613277
+    },
+    {
+      "date": "2020-05-11",
+      "coinmetrics": 92.13805594,
+      "blockFees": 88.60442418,
+      "differenceSat": -353363176
+    },
+    {
+      "date": "2020-07-01",
+      "coinmetrics": 62.00664121,
+      "blockFees": 62.82571084,
+      "differenceSat": 81906963
+    },
+    {
+      "date": "2020-08-11",
+      "coinmetrics": 151.46100591,
+      "blockFees": 151.68404592,
+      "differenceSat": 22304001
+    },
+    {
+      "date": "2020-10-08",
+      "coinmetrics": 103.39374193,
+      "blockFees": 103.13964018,
+      "differenceSat": -25410175
+    },
+    {
+      "date": "2020-11-03",
+      "coinmetrics": 283.29122639,
+      "blockFees": 289.30998956,
+      "differenceSat": 601876317
+    },
+    {
+      "date": "2020-12-16",
+      "coinmetrics": 83.08817579,
+      "blockFees": 79.9044725,
+      "differenceSat": -318370329
+    },
+    {
+      "date": "2021-01-03",
+      "coinmetrics": 85.00530179,
+      "blockFees": 86.41999352,
+      "differenceSat": 141469173
+    },
+    {
+      "date": "2021-01-06",
+      "coinmetrics": 128.44155786,
+      "blockFees": 128.51898515,
+      "differenceSat": 7742729
+    },
+    {
+      "date": "2021-02-08",
+      "coinmetrics": 138.95588944,
+      "blockFees": 134.17229408,
+      "differenceSat": -478359536
+    },
+    {
+      "date": "2021-02-19",
+      "coinmetrics": 160.89002525,
+      "blockFees": 160.8057528,
+      "differenceSat": -8427245
+    },
+    {
+      "date": "2021-04-14",
+      "coinmetrics": 136.06365792,
+      "blockFees": 136.184935,
+      "differenceSat": 12127708
+    },
+    {
+      "date": "2021-05-12",
+      "coinmetrics": 77.2088848,
+      "blockFees": 76.98423673,
+      "differenceSat": -22464807
+    },
+    {
+      "date": "2021-06-28",
+      "coinmetrics": 51.90601631,
+      "blockFees": 53.65438019,
+      "differenceSat": 174836388
+    },
+    {
+      "date": "2021-09-07",
+      "coinmetrics": 18.85074144,
+      "blockFees": 18.45604694,
+      "differenceSat": -39469450
+    },
+    {
+      "date": "2021-09-20",
+      "coinmetrics": 14.15860665,
+      "blockFees": 13.88693201,
+      "differenceSat": -27167464
+    },
+    {
+      "date": "2021-09-24",
+      "coinmetrics": 15.59573586,
+      "blockFees": 16.13218851,
+      "differenceSat": 53645265
+    },
+    {
+      "date": "2021-11-10",
+      "coinmetrics": 18.41248483,
+      "blockFees": 18.41489098,
+      "differenceSat": 240615
+    },
+    {
+      "date": "2021-11-14",
+      "coinmetrics": 8.81751712,
+      "blockFees": 8.67145475,
+      "differenceSat": -14606237
+    },
+    {
+      "date": "2021-12-04",
+      "coinmetrics": 17.86675665,
+      "blockFees": 17.45400848,
+      "differenceSat": -41274817
+    },
+    {
+      "date": "2022-02-24",
+      "coinmetrics": 10.42032497,
+      "blockFees": 10.24872082,
+      "differenceSat": -17160415
+    },
+    {
+      "date": "2022-05-09",
+      "coinmetrics": 20.60049855,
+      "blockFees": 19.78760376,
+      "differenceSat": -81289479
+    },
+    {
+      "date": "2022-06-13",
+      "coinmetrics": 28.93135694,
+      "blockFees": 28.14786917,
+      "differenceSat": -78348777
+    },
+    {
+      "date": "2022-06-15",
+      "coinmetrics": 25.34349663,
+      "blockFees": 25.76594979,
+      "differenceSat": 42245316
+    },
+    {
+      "date": "2022-07-13",
+      "coinmetrics": 23.81414434,
+      "blockFees": 23.02288103,
+      "differenceSat": -79126331
+    },
+    {
+      "date": "2022-09-15",
+      "coinmetrics": 17.3230453,
+      "blockFees": 17.30599694,
+      "differenceSat": -1704836
+    },
+    {
+      "date": "2022-11-11",
+      "coinmetrics": 21.32007332,
+      "blockFees": 21.93111017,
+      "differenceSat": 61103685
+    },
+    {
+      "date": "2022-11-30",
+      "coinmetrics": 27.77862908,
+      "blockFees": 27.12249692,
+      "differenceSat": -65613216
+    },
+    {
+      "date": "2022-12-30",
+      "coinmetrics": 21.70292619,
+      "blockFees": 21.7942512,
+      "differenceSat": 9132501
+    },
+    {
+      "date": "2023-01-14",
+      "coinmetrics": 13.5821861,
+      "blockFees": 14.0260069,
+      "differenceSat": 44382080
+    },
+    {
+      "date": "2023-02-06",
+      "coinmetrics": 18.8160648,
+      "blockFees": 18.42761143,
+      "differenceSat": -38845337
+    },
+    {
+      "date": "2023-03-10",
+      "coinmetrics": 43.24846249,
+      "blockFees": 43.94455143,
+      "differenceSat": 69608894
+    },
+    {
+      "date": "2023-03-14",
+      "coinmetrics": 37.56809492,
+      "blockFees": 37.16891206,
+      "differenceSat": -39918286
+    },
+    {
+      "date": "2023-05-25",
+      "coinmetrics": 91.38298565,
+      "blockFees": 91.86642856,
+      "differenceSat": 48344291
+    },
+    {
+      "date": "2023-06-15",
+      "coinmetrics": 41.37895146,
+      "blockFees": 41.02129533,
+      "differenceSat": -35765613
+    },
+    {
+      "date": "2023-10-07",
+      "coinmetrics": 41.1264569,
+      "blockFees": 41.49443835,
+      "differenceSat": 36798145
+    },
+    {
+      "date": "2023-10-23",
+      "coinmetrics": 17.92860465,
+      "blockFees": 17.00277934,
+      "differenceSat": -92582531
+    },
+    {
+      "date": "2023-12-16",
+      "coinmetrics": 568.94621841,
+      "blockFees": 560.36033238,
+      "differenceSat": -858588603
+    },
+    {
+      "date": "2023-12-27",
+      "coinmetrics": 274.99201232,
+      "blockFees": 268.6660723,
+      "differenceSat": -632594002
+    },
+    {
+      "date": "2024-01-10",
+      "coinmetrics": 82.64575047,
+      "blockFees": 84.05762333,
+      "differenceSat": 141187286
+    },
+    {
+      "date": "2024-01-11",
+      "coinmetrics": 102.19403968,
+      "blockFees": 101.2830808,
+      "differenceSat": -91095888
+    },
+    {
+      "date": "2024-02-14",
+      "coinmetrics": 53.34423438,
+      "blockFees": 54.17801676,
+      "differenceSat": 83378238
+    },
+    {
+      "date": "2024-03-14",
+      "coinmetrics": 34.48419108,
+      "blockFees": 33.75232286,
+      "differenceSat": -73186822
+    },
+    {
+      "date": "2024-04-13",
+      "coinmetrics": 107.18489341,
+      "blockFees": 105.49580995,
+      "differenceSat": -168908346
+    },
+    {
+      "date": "2024-04-20",
+      "coinmetrics": 1206.4665844,
+      "blockFees": 1257.71544525,
+      "differenceSat": 5124886085
+    },
+    {
+      "date": "2024-05-20",
+      "coinmetrics": 17.7672926,
+      "blockFees": 17.67120324,
+      "differenceSat": -9608936
+    },
+    {
+      "date": "2024-06-24",
+      "coinmetrics": 19.66337788,
+      "blockFees": 19.66666864,
+      "differenceSat": 329076
+    },
+    {
+      "date": "2024-07-05",
+      "coinmetrics": 14.77085672,
+      "blockFees": 14.72065925,
+      "differenceSat": -5019747
+    },
+    {
+      "date": "2024-08-05",
+      "coinmetrics": 9.5054762,
+      "blockFees": 9.24879723,
+      "differenceSat": -25667897
+    },
+    {
+      "date": "2024-08-16",
+      "coinmetrics": 8.79411815,
+      "blockFees": 8.89082515,
+      "differenceSat": 9670700
+    },
+    {
+      "date": "2024-09-18",
+      "coinmetrics": 7.11434967,
+      "blockFees": 7.01957527,
+      "differenceSat": -9477440
+    },
+    {
+      "date": "2024-11-05",
+      "coinmetrics": 6.32291368,
+      "blockFees": 6.49897362,
+      "differenceSat": 17605994
+    },
+    {
+      "date": "2024-11-10",
+      "coinmetrics": 10.40340315,
+      "blockFees": 10.83393374,
+      "differenceSat": 43053059
+    },
+    {
+      "date": "2024-12-05",
+      "coinmetrics": 14.40977231,
+      "blockFees": 14.28523694,
+      "differenceSat": -12453537
+    },
+    {
+      "date": "2024-12-09",
+      "coinmetrics": 15.76046721,
+      "blockFees": 15.97032013,
+      "differenceSat": 20985292
+    },
+    {
+      "date": "2024-12-19",
+      "coinmetrics": 22.52973589,
+      "blockFees": 22.87270158,
+      "differenceSat": 34296569
+    },
+    {
+      "date": "2025-01-20",
+      "coinmetrics": 12.74676251,
+      "blockFees": 12.37123961,
+      "differenceSat": -37552290
+    },
+    {
+      "date": "2025-01-27",
+      "coinmetrics": 6.17294713,
+      "blockFees": 6.13674654,
+      "differenceSat": -3620059
+    },
+    {
+      "date": "2025-02-03",
+      "coinmetrics": 6.19287225,
+      "blockFees": 6.10799185,
+      "differenceSat": -8488040
+    },
+    {
+      "date": "2025-03-07",
+      "coinmetrics": 5.70866279,
+      "blockFees": 5.67697393,
+      "differenceSat": -3168886
+    },
+    {
+      "date": "2025-04-02",
+      "coinmetrics": 4.52284032,
+      "blockFees": 4.43354893,
+      "differenceSat": -8929139
+    },
+    {
+      "date": "2025-04-07",
+      "coinmetrics": 7.47149574,
+      "blockFees": 6.5929719,
+      "differenceSat": -87852384
+    },
+    {
+      "date": "2025-05-22",
+      "coinmetrics": 8.10750052,
+      "blockFees": 7.93397384,
+      "differenceSat": -17352668
+    },
+    {
+      "date": "2025-06-13",
+      "coinmetrics": 6.54962301,
+      "blockFees": 6.52806429,
+      "differenceSat": -2155872
+    },
+    {
+      "date": "2025-06-22",
+      "coinmetrics": 2.74838076,
+      "blockFees": 2.78059806,
+      "differenceSat": 3221730
+    },
+    {
+      "date": "2025-10-10",
+      "coinmetrics": 4.08933657,
+      "blockFees": 4.02978368,
+      "differenceSat": -5955289
+    },
+    {
+      "date": "2026-01-03",
+      "coinmetrics": 2.53756188,
+      "blockFees": 2.62027149,
+      "differenceSat": 8270961
+    },
+    {
+      "date": "2026-01-14",
+      "coinmetrics": 3.13791446,
+      "blockFees": 3.07288284,
+      "differenceSat": -6503162
+    },
+    {
+      "date": "2026-02-28",
+      "coinmetrics": 2.52109497,
+      "blockFees": 2.52753703,
+      "differenceSat": 644206
+    },
+    {
+      "date": "2026-03-17",
+      "coinmetrics": 2.99977825,
+      "blockFees": 3.07890037,
+      "differenceSat": 7912212
+    },
+    {
+      "date": "2026-04-09",
+      "coinmetrics": 2.44783646,
+      "blockFees": 2.3998083,
+      "differenceSat": -4802816
+    },
+    {
+      "date": "2026-05-09",
+      "coinmetrics": 7.20904316,
+      "blockFees": 7.17283395,
+      "differenceSat": -3620921
+    },
+    {
+      "date": "2026-10-05",
+      "coinmetrics": 2.68886644,
+      "blockFees": 2.72147712,
+      "differenceSat": 3261068
+    },
+    {
+      "date": "2026-10-19",
+      "coinmetrics": 2.5124562,
+      "blockFees": 2.48928929,
+      "differenceSat": -2316691
+    }
+  ]
+}

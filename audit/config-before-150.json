@@ -1,0 +1,1245 @@
+{
+  "_comment": "UTC daily snapshots. Unsupported historical commentary is preserved in audit/original-editorial.json, not presented as measured fact.",
+  "snapshots": [
+    {
+      "id": "genesis",
+      "date": "2009-01-09",
+      "label": "Early mining",
+      "originalLabel": "Genesis Era",
+      "context": "Early mining after the genesis block.",
+      "contextSources": [
+        "https://mempool.space/block/1"
+      ],
+      "contextStatus": "sourced"
+    },
+    {
+      "id": "first-tx",
+      "date": "2009-01-12",
+      "label": "First peer-to-peer transaction",
+      "originalLabel": "First Transaction",
+      "context": "The first recorded Bitcoin transfer between Satoshi Nakamoto and Hal Finney is included in block 170.",
+      "contextSources": [
+        "https://mempool.space/block/170",
+        "https://bitcointalk.org/index.php?topic=155054.0"
+      ],
+      "contextStatus": "sourced"
+    },
+    {
+      "id": "first-exchange-rate",
+      "date": "2009-10-05",
+      "label": "2009-10-05 snapshot",
+      "originalLabel": "First Exchange Rate",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "first-difficulty",
+      "date": "2009-12-30",
+      "label": "2009-12-30 snapshot",
+      "originalLabel": "First Difficulty Jump",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "first-exchange",
+      "date": "2010-02-06",
+      "label": "2010-02-06 snapshot",
+      "originalLabel": "Bitcoin Market Opens",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "pizza",
+      "date": "2010-05-22",
+      "label": "2010-05-22 snapshot",
+      "originalLabel": "Pizza Day",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "slashdot",
+      "date": "2010-07-11",
+      "label": "2010-07-11 snapshot",
+      "originalLabel": "Slashdot Effect",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "overflow-bug",
+      "date": "2010-08-15",
+      "label": "2010-08-15 snapshot",
+      "originalLabel": "Value Overflow Bug",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "million-dollar-network",
+      "date": "2010-11-06",
+      "label": "2010-11-06 snapshot",
+      "originalLabel": "$1M Market Cap",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "dollar-parity",
+      "date": "2011-02-09",
+      "label": "2011-02-09 snapshot",
+      "originalLabel": "Dollar Parity",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "time-magazine",
+      "date": "2011-04-16",
+      "label": "2011-04-16 snapshot",
+      "originalLabel": "TIME Magazine",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "bubble-2011",
+      "date": "2011-06-19",
+      "label": "2011-06-19 snapshot",
+      "originalLabel": "2011 Bubble Burst",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "first-trough",
+      "date": "2011-11-18",
+      "label": "2011-11-18 snapshot",
+      "originalLabel": "First Trough",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "linode-hack",
+      "date": "2012-03-01",
+      "label": "2012-03-01 snapshot",
+      "originalLabel": "Linode Hack",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "baseline-2012",
+      "date": "2012-06-15",
+      "label": "2012-06-15 snapshot",
+      "originalLabel": "2012 Quiet Baseline",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "btc-foundation",
+      "date": "2012-09-27",
+      "label": "2012-09-27 snapshot",
+      "originalLabel": "Bitcoin Foundation",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "halving-2012",
+      "date": "2012-11-28",
+      "label": "First halving",
+      "originalLabel": "First Halving",
+      "context": "The subsidy became 25 BTC at block 210,000.",
+      "contextSources": [
+        "https://mempool.space/block/210000"
+      ],
+      "contextStatus": "sourced"
+    },
+    {
+      "id": "hard-fork-2013",
+      "date": "2013-03-11",
+      "label": "2013-03-11 snapshot",
+      "originalLabel": "Accidental Hard Fork",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "bubble-2013",
+      "date": "2013-04-10",
+      "label": "2013-04-10 snapshot",
+      "originalLabel": "2013 Bubble Pop",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "post-cyprus-floor",
+      "date": "2013-07-04",
+      "label": "2013-07-04 snapshot",
+      "originalLabel": "Post-Cyprus Floor",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "silk-road-seized",
+      "date": "2013-10-02",
+      "label": "2013-10-02 snapshot",
+      "originalLabel": "Silk Road Seized",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "senate-hearing",
+      "date": "2013-11-19",
+      "label": "2013-11-19 snapshot",
+      "originalLabel": "Senate Hearing",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "china-pboc-ban",
+      "date": "2013-12-18",
+      "label": "2013-12-18 snapshot",
+      "originalLabel": "China PBOC Ban",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "mtgox",
+      "date": "2014-02-24",
+      "label": "2014-02-24 snapshot",
+      "originalLabel": "Mt. Gox Collapse",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "irs-property",
+      "date": "2014-03-25",
+      "label": "2014-03-25 snapshot",
+      "originalLabel": "IRS Property Ruling",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "usms-auction",
+      "date": "2014-06-02",
+      "label": "2014-06-02 snapshot",
+      "originalLabel": "First USMS BTC Auction",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "bear-2014",
+      "date": "2014-10-06",
+      "label": "2014-10-06 snapshot",
+      "originalLabel": "2014 Bear Low",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "bear-2015",
+      "date": "2015-01-14",
+      "label": "2015-01-14 snapshot",
+      "originalLabel": "2015 Bear Bottom",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "bip66-fork",
+      "date": "2015-07-04",
+      "label": "2015-07-04 snapshot",
+      "originalLabel": "BIP66 Fork Incident",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "economist-cover",
+      "date": "2015-10-31",
+      "label": "2015-10-31 snapshot",
+      "originalLabel": "Economist Cover",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "hearn-defection",
+      "date": "2016-01-14",
+      "label": "2016-01-14 snapshot",
+      "originalLabel": "Hearn Defection",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "halving-2016",
+      "date": "2016-07-09",
+      "label": "Second halving",
+      "originalLabel": "2016 Halving",
+      "context": "The subsidy became 12.5 BTC at block 420,000.",
+      "contextSources": [
+        "https://mempool.space/block/420000"
+      ],
+      "contextStatus": "sourced"
+    },
+    {
+      "id": "bitfinex-hack",
+      "date": "2016-08-02",
+      "label": "2016-08-02 snapshot",
+      "originalLabel": "Bitfinex Hack",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "thousand-returns",
+      "date": "2016-11-28",
+      "label": "2016-11-28 snapshot",
+      "originalLabel": "$1,000 Returns",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "first-etf-reject",
+      "date": "2017-03-10",
+      "label": "2017-03-10 snapshot",
+      "originalLabel": "First ETF Rejection",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "japan-legal",
+      "date": "2017-04-01",
+      "label": "2017-04-01 snapshot",
+      "originalLabel": "Japan Legalizes Bitcoin",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "segwit-lockin",
+      "date": "2017-07-31",
+      "label": "2017-07-31 snapshot",
+      "originalLabel": "SegWit Lock-in",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "bch-fork",
+      "date": "2017-08-01",
+      "label": "2017-08-01 snapshot",
+      "originalLabel": "Bitcoin Cash Fork",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "china-exchange-ban",
+      "date": "2017-09-04",
+      "label": "2017-09-04 snapshot",
+      "originalLabel": "China Exchange Ban",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "ath-2017",
+      "date": "2017-12-17",
+      "label": "2017-12-17 snapshot",
+      "originalLabel": "2017 ATH $19,783",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "bull-2017",
+      "date": "2017-12-20",
+      "label": "2017-12-20 snapshot",
+      "originalLabel": "2017 Bull Run Peak",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "korea-fud",
+      "date": "2018-01-17",
+      "label": "2018-01-17 snapshot",
+      "originalLabel": "Korea Ban Rumors",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "coinrail-hack",
+      "date": "2018-06-10",
+      "label": "2018-06-10 snapshot",
+      "originalLabel": "Coinrail Hack",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "bear-2018",
+      "date": "2018-12-15",
+      "label": "2018-12-15 snapshot",
+      "originalLabel": "2018 Capitulation",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "crypto-spring",
+      "date": "2019-02-18",
+      "label": "2019-02-18 snapshot",
+      "originalLabel": "Crypto Spring",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "mystery-candle",
+      "date": "2019-04-02",
+      "label": "2019-04-02 snapshot",
+      "originalLabel": "Mystery Candle",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "rally-2019",
+      "date": "2019-06-26",
+      "label": "2019-06-26 snapshot",
+      "originalLabel": "2019 Mini Rally",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "xi-blockchain",
+      "date": "2019-10-24",
+      "label": "2019-10-24 snapshot",
+      "originalLabel": "Xi Endorses Blockchain",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "hashrate-ath-2019",
+      "date": "2019-12-18",
+      "label": "2019-12-18 snapshot",
+      "originalLabel": "2019 Hashrate ATH",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "pre-covid-peak",
+      "date": "2020-02-13",
+      "label": "2020-02-13 snapshot",
+      "originalLabel": "Pre-COVID Peak",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "covid",
+      "date": "2020-03-12",
+      "label": "2020-03-12 snapshot",
+      "originalLabel": "COVID Black Thursday",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "hash-recovery",
+      "date": "2020-04-08",
+      "label": "2020-04-08 snapshot",
+      "originalLabel": "Hash Rate Recovery",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "halving-2020",
+      "date": "2020-05-11",
+      "label": "Third halving",
+      "originalLabel": "2020 Halving",
+      "context": "The subsidy became 6.25 BTC at block 630,000.",
+      "contextSources": [
+        "https://mempool.space/block/630000"
+      ],
+      "contextStatus": "sourced"
+    },
+    {
+      "id": "defi-summer",
+      "date": "2020-07-01",
+      "label": "2020-07-01 snapshot",
+      "originalLabel": "DeFi Summer Baseline",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "microstrategy",
+      "date": "2020-08-11",
+      "label": "2020-08-11 snapshot",
+      "originalLabel": "MicroStrategy Day One",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "square-paypal",
+      "date": "2020-10-08",
+      "label": "2020-10-08 snapshot",
+      "originalLabel": "Square + PayPal",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "first-20k",
+      "date": "2020-12-16",
+      "label": "2020-12-16 snapshot",
+      "originalLabel": "First $20K ATH",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "genesis-30k",
+      "date": "2021-01-03",
+      "label": "2021-01-03 snapshot",
+      "originalLabel": "Genesis Day $30K",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "tesla-1-5b",
+      "date": "2021-02-08",
+      "label": "2021-02-08 snapshot",
+      "originalLabel": "Tesla $1.5B Purchase",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "first-50k",
+      "date": "2021-02-19",
+      "label": "2021-02-19 snapshot",
+      "originalLabel": "First $50K",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "coinbase",
+      "date": "2021-04-14",
+      "label": "2021-04-14 snapshot",
+      "originalLabel": "Coinbase IPO",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "tesla-esg-crash",
+      "date": "2021-05-12",
+      "label": "2021-05-12 snapshot",
+      "originalLabel": "Tesla ESG Crash",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "china-ban",
+      "date": "2021-06-28",
+      "label": "2021-06-28 snapshot",
+      "originalLabel": "China Mining Ban",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "el-salvador-signs",
+      "date": "2021-08-23",
+      "label": "2021-08-23 snapshot",
+      "originalLabel": "El Salvador Signs",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "el-salvador-day1",
+      "date": "2021-09-07",
+      "label": "2021-09-07 snapshot",
+      "originalLabel": "El Salvador Day One",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "ath-2021",
+      "date": "2021-11-10",
+      "label": "2021-11-10 snapshot",
+      "originalLabel": "2021 ATH $69K",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "cme-flash-crash",
+      "date": "2021-12-04",
+      "label": "2021-12-04 snapshot",
+      "originalLabel": "CME Flash Crash",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "ukraine",
+      "date": "2022-02-24",
+      "label": "2022-02-24 snapshot",
+      "originalLabel": "Ukraine War Begins",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "pre-luna-baseline",
+      "date": "2022-04-01",
+      "label": "2022-04-01 snapshot",
+      "originalLabel": "Pre-LUNA Baseline",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "luna-collapse",
+      "date": "2022-05-09",
+      "label": "2022-05-09 snapshot",
+      "originalLabel": "LUNA/UST Collapse",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "celsius-freeze",
+      "date": "2022-06-13",
+      "label": "2022-06-13 snapshot",
+      "originalLabel": "Celsius Freezes Withdrawals",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "bear-2022",
+      "date": "2022-07-13",
+      "label": "2022-07-13 snapshot",
+      "originalLabel": "2022 Cycle Bottom",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "eth-merge",
+      "date": "2022-09-15",
+      "label": "2022-09-15 snapshot",
+      "originalLabel": "Ethereum Merge",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "ftx",
+      "date": "2022-11-11",
+      "label": "2022-11-11 snapshot",
+      "originalLabel": "FTX Collapse",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "bear-year-end-2022",
+      "date": "2022-12-30",
+      "label": "2022-12-30 snapshot",
+      "originalLabel": "2022 Bear Year-End",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "recovery-2023",
+      "date": "2023-01-14",
+      "label": "2023-01-14 snapshot",
+      "originalLabel": "2023 Recovery",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "svb-usdc",
+      "date": "2023-03-10",
+      "label": "2023-03-10 snapshot",
+      "originalLabel": "SVB + USDC De-peg",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "blackrock-etf",
+      "date": "2023-06-15",
+      "label": "2023-06-15 snapshot",
+      "originalLabel": "BlackRock ETF Filing",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "mid-2023-baseline",
+      "date": "2023-09-11",
+      "label": "2023-09-11 snapshot",
+      "originalLabel": "Mid-2023 Baseline",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "etf-trade",
+      "date": "2023-10-23",
+      "label": "2023-10-23 snapshot",
+      "originalLabel": "ETF Trade Heats Up",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "inscriptions",
+      "date": "2023-12-16",
+      "label": "2023-12-16 snapshot",
+      "originalLabel": "Inscription Surge",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "etf-eve",
+      "date": "2023-12-27",
+      "label": "2023-12-27 snapshot",
+      "originalLabel": "ETF Eve",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "etf",
+      "date": "2024-01-11",
+      "label": "US spot Bitcoin ETF trading begins",
+      "originalLabel": "BTC ETF Approved",
+      "context": "Trading began the day after SEC approval.",
+      "contextSources": [
+        "https://www.sec.gov/Archives/edgar/data/1588489/000095017024003719/gbtc_uplist_pr.htm"
+      ],
+      "contextStatus": "sourced"
+    },
+    {
+      "id": "etf-momentum",
+      "date": "2024-02-14",
+      "label": "2024-02-14 snapshot",
+      "originalLabel": "ETF Momentum",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "ath-2024",
+      "date": "2024-03-14",
+      "label": "2024-03-14 snapshot",
+      "originalLabel": "2024 ATH $73K",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "halving-2024",
+      "date": "2024-04-20",
+      "label": "Fourth halving",
+      "originalLabel": "2024 Halving",
+      "context": "The subsidy became 3.125 BTC at block 840,000 (UTC date).",
+      "contextSources": [
+        "https://mempool.space/block/840000"
+      ],
+      "contextStatus": "sourced"
+    },
+    {
+      "id": "eth-etf-surprise",
+      "date": "2024-05-20",
+      "label": "2024-05-20 snapshot",
+      "originalLabel": "Ethereum ETF Surprise",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "germany-btc-sales",
+      "date": "2024-06-24",
+      "label": "2024-06-24 snapshot",
+      "originalLabel": "Germany BTC Sales",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "mtgox-repayments",
+      "date": "2024-07-05",
+      "label": "2024-07-05 snapshot",
+      "originalLabel": "Mt. Gox Repayments",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "yen-carry-crash",
+      "date": "2024-08-05",
+      "label": "2024-08-05 snapshot",
+      "originalLabel": "Yen Carry Unwind",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "fed-cut-50",
+      "date": "2024-09-18",
+      "label": "2024-09-18 snapshot",
+      "originalLabel": "Fed Cuts 50bps",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "election",
+      "date": "2024-11-10",
+      "label": "2024-11-10 snapshot",
+      "originalLabel": "Post-Election Rally",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "first-100k",
+      "date": "2024-12-05",
+      "label": "2024-12-05 snapshot",
+      "originalLabel": "First $100K",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "fed-hawkish-dec",
+      "date": "2024-12-19",
+      "label": "2024-12-19 snapshot",
+      "originalLabel": "Fed December Shock",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "trump",
+      "date": "2025-01-20",
+      "label": "2025-01-20 snapshot",
+      "originalLabel": "Trump Inauguration",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "deepseek-shock",
+      "date": "2025-02-03",
+      "label": "2025-02-03 snapshot",
+      "originalLabel": "DeepSeek Shock",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "white-house-summit",
+      "date": "2025-03-07",
+      "label": "2025-03-07 snapshot",
+      "originalLabel": "White House Crypto Summit",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "liberation-day",
+      "date": "2025-04-07",
+      "label": "2025-04-07 snapshot",
+      "originalLabel": "Liberation Day Crash",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "pizza-15yr",
+      "date": "2025-05-22",
+      "label": "2025-05-22 snapshot",
+      "originalLabel": "Pizza Day 15 Years",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "correction",
+      "date": "2025-10-10",
+      "label": "2025-10-10 snapshot",
+      "originalLabel": "2025 Correction",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "zettahash",
+      "date": "2026-01-03",
+      "label": "Bitcoin\u2019s 17th anniversary",
+      "originalLabel": "First Zettahash",
+      "context": "Seventeenth anniversary of the genesis block.",
+      "contextSources": [
+        "https://mempool.space/block/0"
+      ],
+      "contextStatus": "sourced"
+    },
+    {
+      "id": "etf-peak-2026",
+      "date": "2026-01-14",
+      "label": "2026-01-14 snapshot",
+      "originalLabel": "ETF Peak & Reversal",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "iran-strike",
+      "date": "2026-02-28",
+      "label": "2026-02-28 snapshot",
+      "originalLabel": "U.S.-Iran Strike",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "sec-clarity",
+      "date": "2026-03-17",
+      "label": "2026-03-17 snapshot",
+      "originalLabel": "SEC Regulatory Clarity",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "hormuz-btc-toll",
+      "date": "2026-04-09",
+      "label": "2026-04-09 snapshot",
+      "originalLabel": "Hormuz Bitcoin Toll",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "withheld pending primary-source verification"
+    },
+    {
+      "id": "genesis-block",
+      "date": "2009-01-03",
+      "label": "Genesis block",
+      "context": "Block 0 was mined on this UTC date.",
+      "contextSources": [
+        "https://mempool.space/block/0"
+      ],
+      "contextStatus": "sourced",
+      "selectionReasons": [
+        "Missing protocol or approval anchor; verify against primary source"
+      ]
+    },
+    {
+      "id": "segwit-activation",
+      "date": "2017-08-24",
+      "label": "SegWit activation",
+      "context": "SegWit activated at block 481,824.",
+      "contextSources": [
+        "https://mempool.space/block/481824",
+        "https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki",
+        "https://bitcoincore.org/en/segwit_wallet_dev/"
+      ],
+      "contextStatus": "sourced",
+      "selectionReasons": [
+        "Missing protocol or approval anchor; verify against primary source"
+      ]
+    },
+    {
+      "id": "taproot-activation",
+      "date": "2021-11-14",
+      "label": "Taproot activation",
+      "context": "Taproot activated at block 709,632.",
+      "contextSources": [
+        "https://mempool.space/block/709632",
+        "https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki"
+      ],
+      "contextStatus": "sourced",
+      "selectionReasons": [
+        "Missing protocol or approval anchor; verify against primary source"
+      ]
+    },
+    {
+      "id": "etf-approval",
+      "date": "2024-01-10",
+      "label": "US spot Bitcoin ETF approval",
+      "context": "The SEC approved listing and trading of spot Bitcoin ETP shares.",
+      "contextSources": [
+        "https://www.sec.gov/newsroom/speeches-statements/gensler-statement-spot-bitcoin-011023"
+      ],
+      "contextStatus": "sourced",
+      "selectionReasons": [
+        "Missing protocol or approval anchor; verify against primary source"
+      ]
+    },
+    {
+      "id": "observed-2026-04-15",
+      "date": "2026-04-15",
+      "label": "2026-04-15 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Monthly fixed-calendar baseline"
+      ]
+    },
+    {
+      "id": "observed-2026-05-08",
+      "date": "2026-05-08",
+      "label": "2026-05-08 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Adjacent-day control for FeeTotNtv extremum on 2026-05-09"
+      ]
+    },
+    {
+      "id": "observed-2026-05-09",
+      "date": "2026-05-09",
+      "label": "2026-05-09 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Maximum FeeTotNtv in 2026-04-10\u20262026-10-19"
+      ]
+    },
+    {
+      "id": "observed-2026-05-10",
+      "date": "2026-05-10",
+      "label": "2026-05-10 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Adjacent-day control for FeeTotNtv extremum on 2026-05-09"
+      ]
+    },
+    {
+      "id": "observed-2026-05-15",
+      "date": "2026-05-15",
+      "label": "2026-05-15 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Monthly fixed-calendar baseline"
+      ]
+    },
+    {
+      "id": "observed-2026-06-02",
+      "date": "2026-06-02",
+      "label": "2026-06-02 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Adjacent-day control for BlkCnt extremum on 2026-06-03"
+      ]
+    },
+    {
+      "id": "observed-2026-06-03",
+      "date": "2026-06-03",
+      "label": "2026-06-03 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Minimum BlkCnt in 2026-04-10\u20262026-10-19"
+      ]
+    },
+    {
+      "id": "observed-2026-06-04",
+      "date": "2026-06-04",
+      "label": "2026-06-04 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Adjacent-day control for BlkCnt extremum on 2026-06-03"
+      ]
+    },
+    {
+      "id": "observed-2026-06-15",
+      "date": "2026-06-15",
+      "label": "2026-06-15 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Monthly fixed-calendar baseline"
+      ]
+    },
+    {
+      "id": "observed-2026-07-15",
+      "date": "2026-07-15",
+      "label": "2026-07-15 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Monthly fixed-calendar baseline"
+      ]
+    },
+    {
+      "id": "observed-2026-07-21",
+      "date": "2026-07-21",
+      "label": "2026-07-21 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Adjacent-day control for HashRate extremum on 2026-07-22"
+      ]
+    },
+    {
+      "id": "observed-2026-07-22",
+      "date": "2026-07-22",
+      "label": "2026-07-22 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Minimum HashRate in 2026-04-10\u20262026-10-19"
+      ]
+    },
+    {
+      "id": "observed-2026-07-23",
+      "date": "2026-07-23",
+      "label": "2026-07-23 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Adjacent-day control for HashRate extremum on 2026-07-22"
+      ]
+    },
+    {
+      "id": "observed-2026-08-15",
+      "date": "2026-08-15",
+      "label": "2026-08-15 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Monthly fixed-calendar baseline"
+      ]
+    },
+    {
+      "id": "observed-2026-09-15",
+      "date": "2026-09-15",
+      "label": "2026-09-15 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Monthly fixed-calendar baseline"
+      ]
+    },
+    {
+      "id": "observed-2026-10-04",
+      "date": "2026-10-04",
+      "label": "2026-10-04 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Adjacent-day control for TxCnt extremum on 2026-10-05",
+        "Adjacent-day control for HashRate extremum on 2026-10-05"
+      ]
+    },
+    {
+      "id": "observed-2026-10-05",
+      "date": "2026-10-05",
+      "label": "2026-10-05 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Maximum TxCnt in 2026-04-10\u20262026-10-19",
+        "Maximum HashRate in 2026-04-10\u20262026-10-19"
+      ]
+    },
+    {
+      "id": "observed-2026-10-06",
+      "date": "2026-10-06",
+      "label": "2026-10-06 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Adjacent-day control for TxCnt extremum on 2026-10-05",
+        "Adjacent-day control for HashRate extremum on 2026-10-05"
+      ]
+    },
+    {
+      "id": "observed-2026-10-15",
+      "date": "2026-10-15",
+      "label": "2026-10-15 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Monthly fixed-calendar baseline"
+      ]
+    },
+    {
+      "id": "observed-2026-10-19",
+      "date": "2026-10-19",
+      "label": "2026-10-19 snapshot",
+      "context": null,
+      "contextSources": [],
+      "contextStatus": "measurement-based selection",
+      "selectionReasons": [
+        "Latest requested completed UTC day; publish missing source fields as null"
+      ]
+    }
+  ]
+}

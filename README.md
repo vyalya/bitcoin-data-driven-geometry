@@ -1,134 +1,81 @@
-# The Bitcoin Network as Data Driven Geometry
+# Bitcoin / A network in time
 
-An interactive 3D visualization of the Bitcoin network across **105 historically significant dates** — from Genesis (January 2009) through 2026. Every shape, ring, particle, and block maps to real on-chain data. Nothing is decorative.
+An interactive sculpture of Bitcoin across **150 curated dates and 22,374 blocks**, from genesis through **2026-10-19 UTC**. Atom and Classic show the same seven measurements in two arrangements.
 
-> **Live:** [bitcoin-data-driven-geometry.pages.dev](https://bitcoin-data-driven-geometry.pages.dev/)
+[Audit report](audit/REPORT.md) · [Pipeline](pipeline/README.md) · [Design notes](audit/UI-UX.md) · [Website](https://bitcoin-geometry.com/)
 
-## What you're looking at
+## Run and validate
 
-Each snapshot shows one day of Bitcoin network state as a 3D "gyroscope":
+Use Node.js 22.18 or later.
 
-| Shape | Data |
-|---|---|
-| **Block Crown** (radial spikes at center) | 1 spike per block · length = weight · brightness = tx count |
-| **Fee-tier arcs** (4 horizontal arcs, r=2.2) | 4 fee buckets · thickness = fee pressure · segment share = distribution |
-| **Settlement arc** (horizontal, r=2.8) | arc length = average block interval vs. the 600 s target |
-| **Congestion arc** (horizontal, r=3.3) | thickness + intensity = mempool transaction count |
-| **BTC Volume arc** (horizontal, r=3.8) | arc length = daily BTC transferred vs. the 4.6M BTC peak |
-| **Hashrate ring** (vertical, YZ plane, r=2.5) | arc length = hashrate vs. the ~1,305 EH/s peak |
-| **Difficulty ring** (vertical, XZ plane, r=3.0) | arc length = log₁₀(difficulty), 1 → 150 trillion |
-| **Address particles** (floating cloud) | count = active addresses ÷ 1000 · size = whale activity |
-
-## Data sources
-
-All free, public, no-auth:
-
-| Field | Source |
-|---|---|
-| Hashrate, active addresses, total fees, block count | CoinMetrics community API |
-| Difficulty, mempool count/size, BTC transferred | blockchain.com Charts API |
-| Miner concentration (HHI, 2021 onward) | mempool.space mining pools API |
-| Per-block spine (height, size, weight, tx count) | Google BigQuery `bigquery-public-data.crypto_bitcoin` |
-
-Derived scores (fee pressure, congestion, block stress, network health) are computed from the raw fields above with transparent piecewise formulas in `pipeline/build_db.mjs`.
-
-## Architecture
-
-```
-┌─ Offline (your machine or CI) ───────────────────────────────────┐
-│                                                                   │
-│   CoinMetrics API      ─┐                                         │
-│   blockchain.com API   ─┼─►  Node scripts  ─►  DuckDB (.duckdb)   │
-│   mempool.space API    ─┤                       (staging)         │
-│   BigQuery CSVs        ─┘                          │              │
-│                                                    ▼              │
-│                                          public/data/*.json       │
-│                                          (committed to git)       │
-│                                                                   │
-└───────────────────────────────────────────────────────────────────┘
-                                                     │
-                                                     ▼
-┌─ Deploy ─────────────────────────────────────────────────────────┐
-│   npm run build &&                                                │
-│   npx wrangler pages deploy dist …                                │
-│                                                                   │
-│   Static files → Cloudflare Pages edge network                   │
-└───────────────────────────────────────────────────────────────────┘
-                                                     │
-                                                     ▼
-┌─ Browser runtime (every visitor, isolated) ──────────────────────┐
-│                                                                   │
-│   Page loads → fetch /data/snapshots.json (~25 KB gzipped)       │
-│               → fetch /data/blocks.json    (~80 KB gzipped)       │
-│               → render 3D scene in Three.js                       │
-│                                                                   │
-│   Zero backend. Zero shared state. Unlimited concurrency.        │
-└───────────────────────────────────────────────────────────────────┘
-```
-
-The `.duckdb` file is a local intermediate — never deployed, never served. JSON files are the only data shipped to browsers.
-
-## Tech stack
-
-- **React 19** + **TypeScript 5.9**
-- **React Three Fiber 9** / **drei 10** / **postprocessing** for the 3D scene
-- **Plain JSON** for the snapshots + blocks artefacts at runtime — `fetch()` from the same origin, no runtime database, no WASM
-- **DuckDB (Node)** used offline in the pipeline only — to stage + join the raw API fetches before exporting to JSON
-- **Vite 7** build, **Cloudflare Pages** deploy, `wrangler` CLI for direct pushes
-
-## Run locally
-
-```bash
-npm install
+```sh
+npm ci
 npm run dev
+npm run pipeline:build-only
+npm test
+npm run audit:data
+npm run build
 ```
 
-## Deploy
+The browser uses validated static JSON. No runtime database is needed. Missing or inconsistent files produce an explicit error, never substitute measurements.
 
-```bash
-npm run build && npx wrangler pages deploy dist --project-name=bitcoin-data-driven-geometry --branch=main
+## Seven signals
+
+| Measurement | Geometry | Definition |
+| --- | --- | --- |
+| Blocks | Center tooth count | One tooth for every block on the header-timestamp UTC date; ordered by height. |
+| Transactions | Ring 1 | Sum of transaction counts, excluding one coinbase per block; linear release-wide scale. |
+| Block weight | Each tooth’s length | `0.12 + 1.35 × weight / 4,000,000 WU`; fixed width. The 4 MWU reference is a modern comparison scale, not an early-era consensus claim. |
+| Fees | Ring 2 | Integer block fees summed in satoshis, converted to BTC; linear release-wide scale. |
+| Difficulty | Ring 3 | Arithmetic mean block difficulty; `log10(mean) / log10(release maximum)`. Difficulty 1 has no arc. |
+| Hashrate | Ring 4 | CoinMetrics daily estimate in EH/s; linear release-wide scale. |
+| Active addresses | Dots | Floor(addresses / 1,000) in detail, / 8,000 in grid; caps 1,500 / 180. Addresses are not people. |
+
+Atom arranges the teeth around a spherical nucleus with four crossing orange orbits. Classic keeps the circular gear and crossed outer rings. Layout, color, lighting and animation are presentation choices. No additional quantities are encoded by tooth thickness or brightness. Zero and missing values produce no arc; the numeric panel distinguishes them. Small positive values can be imperceptible. Maxima are shared across this release and may change in later releases.
+
+Hover a tooth for its exact block figures, or tap to pin it; Previous / Next supports inspection without precise pointer targeting. The inspector shows height, size, weight, transactions, fees, difficulty and header time, with a block-explorer link. Additional records load only for the active day. Grid, Play, Orbit, Reset view and Hide panels control navigation. Mobile uses a responsive grid, top timeline strip, pinch zoom and a collapsible bottom inspector.
+
+## Sources and dates
+
+Blocks use miner-supplied header timestamps in `[00:00, next 00:00)` UTC. Blockchain.com and mempool.space hashes/timestamps are matched; gaps and 30 heights outside each endpoint receive additional checks, with Blockstream matching for recovered records. Fees come from mempool.space block records. These are explorer cross-checks, not full-node consensus replay.
+
+CoinMetrics hashrate and active addresses use [normalized Median-Time-Past dates](https://gitbook-docs.coinmetrics.io/network-data/methodologies/normalizing-block-times), a different daily window from the block geometry. Hashrate is an estimate; genesis has no estimate. There are two retained block-count disagreements with CoinMetrics: genesis and January 9, 2009.
+
+The selection retains 103 of the prior 129 dates, adds 47 event dates, and removes 26 routine or superseded choices. Every event has a label, category, context and source link. It is an editorial selection, not an objective ranking or evidence of causation. See [the complete selection](audit/curated-150-events.json) and [selection changes](audit/curation-150.json).
+
+## Reproduce or extend
+
+```sh
+npm run pipeline        # refresh public series and fetch missing block days
+npm run pipeline:blocks # missing configured block days only
+npm run pipeline:plan   # future candidate dates; does not edit config
 ```
 
-Direct deploy, no CI dependency.
+Raw extracts preserve source URLs, response hashes and fetch times. Routine refreshes reuse completed historical block days; use `node pipeline/fetch_blocks.mjs --force` for a deliberate full refetch. Publish all artifacts together.
 
-## Refresh data
+BigQuery has **not** been used in this release. Optional 150-date and 47-date transaction queries are prepared for independent fee/count checks and possible research. Fee histograms, mempool, transfer estimates, output bands and unsupported scores are absent from the core UI. Legacy extracts/fields remain as audit evidence. No paid query is needed to reproduce the seven signals.
 
-```bash
-npm run pipeline     # fetch everything fresh + rebuild parquet
+## Project map
+
+- `src/App.tsx`: scene, timeline, compact guide and block inspector.
+- `src/geometry.ts`, `src/camera.ts`: shared block transforms, hit targets and responsive camera framing.
+- `src/db.ts`: validated static-data loading.
+- `pipeline/config.json`: current 150 dates and sourced event context.
+- `pipeline/raw/`: reproducible source extracts.
+- `public/data/`: schema-2 snapshots, block tuples, per-date block details and provenance.
+- `audit/`: baseline comparisons, current report, curation and validation evidence.
+- `tests/`: data, units, selection, raycasting and camera regressions.
+
+The existing weekly workflow refreshes configured dates and validates tests/build. Historical CHANGELOG entries describe earlier implementations. See the audit report for current deployment and browser-validation limitations.
+
+## Cloudflare deployment
+
+Existing Pages project: `bitcoin-data-driven-geometry`; production branch: `main`; domain: `bitcoin-geometry.com`. This is a direct-upload project, with no Git provider linked. Build with `npm run build`. Verify the active account with `npm exec -- wrangler whoami` before uploading.
+
+```sh
+npm exec -- wrangler pages deploy dist --project-name bitcoin-data-driven-geometry --branch codex/data-integrity-audit --commit-dirty=true
+# After validating the preview:
+npm exec -- wrangler pages deploy dist --project-name bitcoin-data-driven-geometry --branch main --commit-dirty=true
 ```
 
-Runs CoinMetrics → blockchain.com → mempool.space → BigQuery CSV ingest → build → JSON export. BigQuery step reads CSVs from `pipeline/raw/` (export manually via `bq` CLI).
-
-## Design principles
-
-1. **Every shape = real data.** No decoration. If it renders, it traces to a specific metric.
-2. **Honest granularity.** When a source doesn't cover a date (pre-2011 hashrate, pre-2021 HHI), the ring hides and the panel shows "— (no data)" with an explanation. No fake zeros.
-3. **Layered derivation.** Raw fields → derived scores → shape projections. Every layer is documented in the "Sources" tab.
-4. **Bitcoin gold palette only** (`#F7931A` + tints).
-
-## See the full history
-
-For the evolution of the design and architecture decisions, see [CHANGELOG.md](./CHANGELOG.md).
-
-## Project structure
-
-```
-src/
-  App.tsx                  3D scene, HUD panels, narration, search
-  db.ts                    DuckDB-WASM layer; loads parquet at runtime
-  types.ts                 NetworkSnapshot type
-  styles.css               All CSS, mobile breakpoints
-  data/
-    blockData.ts           Per-block fallback tuples
-    staticSnapshots.ts     25-snapshot fallback when parquet isn't present
-pipeline/
-  config.json              105 curated dates + narration
-  fetch_*.mjs              Per-source fetchers
-  ingest_bigquery.mjs      BQ CSV → DuckDB
-  build_db.mjs             Derive metrics + join sources
-  export_json.mjs          DuckDB → JSON artefacts
-public/
-  data/snapshots.json      Full 105-snapshot dataset (committed, ~100 KB)
-  data/blocks.json         Per-block spine indexed by date (committed, ~430 KB)
-  _headers                 Cloudflare Pages security headers
-```
+Use `node pipeline/verify_deployment.mjs https://DEPLOYMENT.bitcoin-data-driven-geometry.pages.dev` to compare served files to the validated local build. The verification script does not render the page. Deployment receipts and the previous production ID are kept in `audit/deployment.json`. Renew expired login with `npm exec -- wrangler login`; use the browser approval flow rather than pasting credentials into chat.

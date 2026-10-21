@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 2,
+  "builtAt": "2026-10-21T02:50:59.284Z",
+  "dateRange": [
+    "2009-01-03",
+    "2026-10-19"
+  ],
+  "snapshotCount": 150,
+  "scales": {
+    "dailyTransactions": 904341,
+    "feesBtc": 1257.71544525,
+    "hashrateEh": 1167.730645367517,
+    "difficulty": 150839487445890.5,
+    "estimatedVolumeBtc": 2393532.26703818,
+    "blockTxCount": 7929,
+    "blockSizeBytes": 4000000,
+    "blockWeight": 4000000,
+    "detailAddressesPerParticle": 1000,
+    "gridAddressesPerParticle": 8000
+  },
+  "coinmetricsRequests": [
+    {
+      "url": "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=AdrActCnt,TxCnt,FeeTotNtv,HashRate,BlkCnt&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000",
+      "fetchedAt": "2026-10-21T02:26:00.259Z",
+      "sha256": "12046550b8a9df66fde4e3ed93e0b66f532a9c209760795d837984a154ed36fd"
+    }
+  ],
+  "charts": {
+    "difficulty": {
+      "url": "https://api.blockchain.info/charts/difficulty?timespan=all&format=json&sampled=false",
+      "fetchedAt": "2026-10-21T01:16:10.061Z",
+      "sha256": "417af2c49e72d8911376a4178b922577a26bb531fb6fbae75b24c94ef1af82f6",
+      "unit": "Difficulty",
+      "period": "day",
+      "lastDate": "2026-10-14"
+    },
+    "mempool-count": {
+      "url": "https://api.blockchain.info/charts/mempool-count?timespan=all&format=json&sampled=false",
+      "fetchedAt": "2026-10-21T01:16:10.061Z",
+      "sha256": "1c6413f640247d42e0f5ad3d55ed0b98de5675b08b1667ec4b7a263eb55104f2",
+      "unit": "Transactions",
+      "period": "minute",
+      "lastDate": "2026-10-16"
+    },
+    "mempool-size": {
+      "url": "https://api.blockchain.info/charts/mempool-size?timespan=all&format=json&sampled=false",
+      "fetchedAt": "2026-10-21T01:16:10.061Z",
+      "sha256": "49a1cbd02d1578096addfe3098f5523c7e9dbef9e387a1de61a99dbbd3f3cb29",
+      "unit": "Bytes",
+      "period": "minute",
+      "lastDate": "2026-10-16"
+    },
+    "estimated-transaction-volume": {
+      "url": "https://api.blockchain.info/charts/estimated-transaction-volume?timespan=all&format=json&sampled=false",
+      "fetchedAt": "2026-10-21T01:16:10.061Z",
+      "sha256": "5bd5f4febe51a9bee1b8a21a0029602aeeb072dc0b6305b5beb9ab1081b63d97",
+      "unit": "BTC",
+      "period": "day",
+      "lastDate": "2026-10-15"
+    }
+  },
+  "blockRequestsFile": "pipeline/raw/block-days.json",
+  "timestampMethodology": "https://gitbook-docs.coinmetrics.io/network-data/methodologies/normalizing-block-times",
+  "disagreements": [
+    {
+      "date": "2009-01-03",
+      "blockCount": 1,
+      "coinmetricsBlockCount": 0
+    },
+    {
+      "date": "2009-01-09",
+      "blockCount": 14,
+      "coinmetricsBlockCount": 19
+    }
+  ],
+  "limitations": [
+    "CoinMetrics normalizes block times using Median-Time-Past; its daily estimates do not share the block geometry’s header-timestamp window.",
+    "Mempool is observed by one provider, not a global ledger quantity.",
+    "No fee tiers or large-output classifications are inferred from aggregate daily fees.",
+    "Daily hashrate is a provider estimate, not a security or decentralization rating.",
+    "Historical commentary without primary-source support is withheld."
+  ]
+}

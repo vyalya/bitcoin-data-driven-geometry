@@ -1,212 +1,77 @@
-#!/usr/bin/env node
-/**
- * Pipeline orchestrator: builds bitcoin.duckdb from all raw sources and
- * populates the derived `snapshots` table.
- *
- * Run order:
- *   1. node pipeline/fetch_coinmetrics.mjs
- *   2. node pipeline/fetch_blockchain.mjs
- *   3. node pipeline/fetch_mempool.mjs
- *   4. node pipeline/ingest_bigquery.mjs   (requires pipeline/raw/bq_*.csv)
- *   5. node pipeline/build_db.mjs          ← this file (derives + merges)
- *   6. node pipeline/export_parquet.mjs
- *
- * Or run everything via: npm run pipeline
- */
-import Database from "duckdb";
-import { readFileSync } from "fs";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
-
-const __dir = dirname(fileURLToPath(import.meta.url));
-const config = JSON.parse(readFileSync(join(__dir, "config.json"), "utf8"));
-
-// ─── Promisified helpers ───────────────────────────────────────────────────────
-const dbExec = (conn, sql) => new Promise((res, rej) =>
-  conn.exec(sql, (err) => err ? rej(err) : res()));
-const dbAll = (conn, sql, ...args) => new Promise((res, rej) =>
-  conn.all(sql, ...args, (err, rows) => err ? rej(err) : res(rows ?? [])));
-
-// ─── Derived metric formulas (mirrors the logic from old patch scripts) ────
-
-// Fee pressure = total daily fees normalized to the historical peak. Using
-// satPerTx looked reasonable in theory but gets dominated by outliers on
-// low-tx days (e.g. Pizza Day: one enormous fee ÷ a few hundred txs pegged
-// the metric at max, which misrepresents network-wide fee demand that day).
-// Total daily BTC in fees is a direct, honest measure: when the fee market
-// is actually competitive, daily totals climb; when it's calm, they don't.
-// Peak: 2024-04-20 (~1206 BTC, halving + Runes launch).
-function feePressureIndex(totalFeesBtc) {
-  if (totalFeesBtc == null || totalFeesBtc <= 0) return 0;
-  const PEAK_DAILY_FEES_BTC = 1300;
-  return Math.min(10, (totalFeesBtc / PEAK_DAILY_FEES_BTC) * 10);
-}
-
-function congestionScore(mempoolTxCount) {
-  if (mempoolTxCount == null || mempoolTxCount === 0) return 0;
-  // 0 → 0, 10K → 2, 50K → 5, 150K → 8, 300K+ → 10
-  if (mempoolTxCount <= 0)      return 0;
-  if (mempoolTxCount <= 10000)  return (mempoolTxCount / 10000) * 2;
-  if (mempoolTxCount <= 50000)  return 2 + ((mempoolTxCount - 10000) / 40000) * 3;
-  if (mempoolTxCount <= 150000) return 5 + ((mempoolTxCount - 50000) / 100000) * 3;
-  if (mempoolTxCount <= 300000) return 8 + ((mempoolTxCount - 150000) / 150000) * 2;
-  return 10;
-}
-
-function stressFromInterval(avgIntervalSecs) {
-  if (avgIntervalSecs == null || avgIntervalSecs <= 0) return 1;
-  const ratio = avgIntervalSecs / 600;
-  if (ratio < 0.5)  return 2.0;
-  if (ratio < 0.8)  return 1.5;
-  if (ratio < 1.2)  return ratio;
-  if (ratio < 1.6)  return 1.2 + (ratio - 1.2) * 0.5;
-  return Math.min(3.0, 1.4 + (ratio - 1.6) * 0.4);
-}
-
-function networkHealthScore(congScore, feeScore, stress) {
-  return Math.max(0, Math.min(10,
-    10
-    - congScore * 0.3
-    - feeScore  * 0.3
-    - Math.max(0, stress - 1) * 1.5
-  ));
-}
-
-function hhiNormalized(hhiRaw) {
-  if (hhiRaw == null) return null;
-  const MIN_HHI = 0.05;
-  const MAX_HHI = 0.35;
-  return Math.max(0, Math.min(10, ((hhiRaw - MIN_HHI) / (MAX_HHI - MIN_HHI)) * 10));
-}
-
-async function main() {
-  const db = new Database.Database(join(__dir, "bitcoin.duckdb"));
-  const conn = db.connect();
-
-  // Ensure schema exists
-  await dbExec(conn, readFileSync(join(__dir, "schema.sql"), "utf8"));
-
-  console.log("Building derived snapshots table…");
-
-  // ── Pre-fetch all raw rows keyed by date ──────────────────────────────────
-  const toDateKey = (v) => {
-    if (v instanceof Date) return v.toISOString().slice(0, 10);
-    return String(v).slice(0, 10);
-  };
-  const toMap = (rows, field = "date") => {
-    const m = {};
-    for (const r of rows) m[toDateKey(r[field] ?? r.date)] = r;
-    return m;
-  };
-
-  const [cmRows, bcRows, mpRows, bqRows] = await Promise.all([
-    dbAll(conn, "SELECT * FROM coinmetrics_raw"),
-    dbAll(conn, "SELECT * FROM blockchain_raw"),
-    dbAll(conn, "SELECT * FROM mempool_raw"),
-    dbAll(conn, "SELECT * FROM bq_daily_agg"),
-  ]);
-
-  const cmMap = toMap(cmRows);
-  const bcMap = toMap(bcRows);
-  const mpMap = toMap(mpRows);
-  const bqMap = toMap(bqRows);
-
-  // ── Build the INSERT statement once ──────────────────────────────────────
-  const insertStmt = conn.prepare(`
-    INSERT OR REPLACE INTO snapshots (
-      date, id, label,
-      block_height, avg_block_interval_secs, network_hashrate_eh,
-      mempool_tx_count, mempool_size_mb,
-      fee_pressure_index, congestion_score, block_production_stress,
-      miner_concentration_score, network_health_score,
-      difficulty, active_addresses,
-      unique_senders, unique_receivers,
-      btc_transferred, total_fees_btc, total_outputs,
-      whale_outputs_1000, whale_outputs_100, mid_outputs_10, retail_outputs,
-      narration, notes, mode
-    ) VALUES (
-      ?, ?, ?,
-      ?, ?, ?,
-      ?, ?,
-      ?, ?, ?,
-      ?, ?,
-      ?, ?,
-      NULL, NULL,
-      ?, ?, NULL,
-      NULL, NULL, NULL, NULL,
-      ?, ?, 'historical'
-    )
-  `);
-
-  for (const snap of config.snapshots) {
-    const { id, date, label, narration, notes } = snap;
-
-    const cm = cmMap[date] ?? {};
-    const bc = bcMap[date] ?? {};
-    const mp = mpMap[date] ?? {};
-    const bq = bqMap[date] ?? {};
-
-    // Block height: BQ
-    const blockHeight = bq.block_height ?? null;
-
-    // Avg interval: derive from block_count (avoids contaminated LAG values
-    // from non-consecutive curated dates where the first block's LAG reaches
-    // back to a previous curated date weeks/months earlier).
-    let avgIntervalSecs = null;
-    if (bq.block_count > 1) {
-      avgIntervalSecs = 86400 / bq.block_count;
-    } else if (cm.blk_count > 0) {
-      avgIntervalSecs = 86400 / cm.blk_count;
-    }
-
-    // Hashrate: CoinMetrics (TH/s ÷ 1e6 = EH/s)
-    const networkHashrateEh = cm.hashrate_th != null ? cm.hashrate_th / 1e6 : null;
-
-    // Mempool: blockchain.com
-    const mempoolTxCount = bc.mempool_tx_count ?? null;
-    const mempoolSizeMb  = bc.mempool_size_mb  ?? null;
-
-    // Fees: CoinMetrics
-    const totalFeesBtc = cm.total_fees_btc ?? null;
-
-    // BTC transferred: blockchain.com
-    const btcTransferred = bc.btc_transferred ?? null;
-
-    // Difficulty: blockchain.com
-    const difficulty = bc.difficulty ?? null;
-
-    // Active addresses: CoinMetrics
-    const activeAddresses = cm.active_addresses ?? null;
-
-    // Miner concentration: mempool.space HHI (NULL before ~2021)
-    const minerConcentrationScore = hhiNormalized(mp.hhi_raw ?? null);
-
-    // ── Derived scores ───────────────────────────────────────────────────
-    const txCount4fee = cm.tx_count ?? bq.tx_count ?? null;
-    const fpi    = feePressureIndex(totalFeesBtc);
-    const cong   = congestionScore(mempoolTxCount);
-    const stress = stressFromInterval(avgIntervalSecs);
-    const health = networkHealthScore(cong, fpi, stress);
-
-    insertStmt.run(
-      date, id, label,
-      blockHeight, avgIntervalSecs, networkHashrateEh,
-      mempoolTxCount, mempoolSizeMb,
-      fpi, cong, stress,
-      minerConcentrationScore, health,
-      difficulty, activeAddresses,
-      btcTransferred, totalFeesBtc,
-      narration, JSON.stringify(notes)
-    );
+// Historical filename retained for npm-script compatibility. Staging is JSON;
+// immutable source extracts make a clean checkout reproducible without DuckDB.
+import { configuration, readJSON, optionalJSON, writeJSON, number, validateBlocks, mean } from './lib/data.mjs';
+import { feeTotalIndex, congestionScore, blockPace, feeBuckets, blockFeeSatoshis } from './lib/metrics.mjs';
+const config = configuration();
+const cmSource = readJSON('pipeline/raw/coinmetrics.json');
+const cm = new Map(cmSource.rows.map(r => [r.time.slice(0,10), r]));
+const blockDays = readJSON('pipeline/raw/block-days.json');
+const charts = Object.fromEntries(['difficulty','mempool-count','mempool-size','estimated-transaction-volume'].map(k=>[k,readJSON(`pipeline/raw/${k}.json`)]));
+const transactionDays = optionalJSON('pipeline/raw/bq-transactions.json', {}).days ?? {};
+const snapshots = [], blocks = {}, disagreements = [];
+for (const entry of config) {
+  const date = entry.date, c = cm.get(date);
+  if (!c) throw new Error(`Missing CoinMetrics row for ${date}`);
+  const blockDay = blockDays[date];
+  if (!blockDay?.complete) throw new Error(`Missing validated full-day block data: ${date}`);
+  const records = blockDay.records;
+  const tuples = records.map(b=>[b.height,b.size,b.weight,b.txCount]);
+  validateBlocks(tuples,date); blocks[date] = tuples;
+  const blockCount = records.length;
+  const cmBlockCount = number(c.BlkCnt);
+  const chart = name => charts[name].days[date]?.value ?? null;
+  const mempoolTxCount = chart('mempool-count');
+  const mempoolBytes = chart('mempool-size');
+  const headerFeesSat = blockFeeSatoshis(records);
+  const totalFeesBtc = headerFeesSat == null ? null : headerFeesSat / 1e8;
+  const coinmetricsFeesBtc = number(c.FeeTotNtv);
+  const coinmetricsTransactionCount = number(c.TxCnt);
+  const tx = transactionDays[date];
+  const nonCoinbaseTxCount = records.reduce((n,b)=>n+b.txCount-1,0);
+  if (tx && tx.transactionCount !== nonCoinbaseTxCount) throw new Error(`Incomplete transaction extract ${date}: ${tx.transactionCount} vs ${nonCoinbaseTxCount}`);
+  if (tx && headerFeesSat !== null && tx.totalFeesSat !== headerFeesSat) throw new Error(`Transaction fees disagree with block fees: ${date}`);
+  const buckets = tx ? feeBuckets(tx.feeBucketCounts) : [];
+  if (tx && tx.feeBucketCounts.reduce((a,b)=>a+b,0) !== tx.transactionCount) throw new Error(`Fee histogram does not cover transactions: ${date}`);
+  const warnings = ['Hashrate and active addresses use CoinMetrics normalized Median-Time-Past dates; block geometry and fee totals use raw block-header UTC dates. These are different time windows.'];
+  if (cmBlockCount !== blockCount) {
+    warnings.push(`CoinMetrics reports ${cmBlockCount} blocks; ${blockCount} matched block headers fall within this UTC day. Block geometry uses header timestamps.`);
+    disagreements.push({date,blockCount,coinmetricsBlockCount:cmBlockCount});
   }
-
-  insertStmt.finalize();
-
-  const [{ n: count }] = await dbAll(conn, "SELECT COUNT(*) AS n FROM snapshots");
-  console.log(`snapshots table has ${count} rows.`);
-
-  conn.close();
-  db.close();
+  if (!tx) warnings.push('Transaction fee-rate histogram and output-size counts have not been queried; these fields are unavailable.');
+  if (mempoolTxCount == null) warnings.push('Historical mempool observations are unavailable or do not cover enough of this UTC day.');
+  const difficulty = mean(records.map(b=>b.difficulty));
+  const networkHashrateEh = number(c.HashRate) == null ? null : number(c.HashRate)/1e6;
+  const provenance = {
+    blockCount:'Block-header timestamps, independently matched between Blockchain.com and mempool.space',
+    difficulty:'Arithmetic mean of difficulty across all blocks with header timestamps on the UTC date',
+    networkHashrateEh:'CoinMetrics HashRate daily estimate, TH/s divided by 1,000,000; provider normalized Median-Time-Past day',
+    activeAddresses:'CoinMetrics AdrActCnt; addresses participating in ledger changes, not people; provider normalized Median-Time-Past day',
+    totalFeesBtc:'Sum of mempool.space block extras.totalFees in integer satoshis / 100,000,000, for the displayed block-header UTC day',
+    coinmetricsFeesBtc:'CoinMetrics FeeTotNtv; normalized daily comparator, not used for the fee geometry',
+    mempoolTxCount:'Blockchain.com observed mempool; arithmetic mean of intraday samples',
+    mempoolSizeMb:'Blockchain.com observed mempool bytes, arithmetic sample mean divided by 1,000,000',
+    btcTransferred:'Blockchain.com estimated transaction value, excluding estimated change; not raw output value',
+  };
+  snapshots.push({
+    schemaVersion:2,id:entry.id,label:entry.label,category:entry.category??"bitcoin",date,context:entry.context??null,contextSources:entry.contextSources??[],
+    blockHeight:records.at(-1)?.height??null,blockCount,coinmetricsBlockCount:cmBlockCount,
+    transactionCount:nonCoinbaseTxCount,meanBlockWeight:blockCount?records.reduce((n,b)=>n+b.weight,0)/blockCount:null,avgBlockIntervalSeconds:blockCount?86400/blockCount:null,
+    blockPace:blockPace(blockCount),networkHashrateEh,mempoolTxCount,mempoolSizeMb:mempoolBytes==null?null:mempoolBytes/1e6,
+    feeTotalIndex:feeTotalIndex(totalFeesBtc),congestionScore:congestionScore(mempoolTxCount),
+    blockProductionStress:null,minerConcentrationScore:null,networkHealthScore:null,
+    difficulty,activeAddresses:number(c.AdrActCnt),uniqueSenders:null,uniqueReceivers:null,
+    btcTransferred:chart('estimated-transaction-volume'),totalFeesBtc,coinmetricsFeesBtc,coinmetricsTransactionCount,
+    totalOutputs:tx?.totalOutputs??null,whaleOutputs1000:tx?.outputsGte1000??null,whaleOutputs100:tx?.outputs100To1000??null,
+    midOutputs10:tx?.outputs10To100??null,retailOutputs:tx?.outputsLt10??null,
+    feeBuckets:buckets,notes:warnings,provenance,
+    coverage:{mempool:charts['mempool-count'].days[date]??null,mempoolSize:charts['mempool-size'].days[date]??null,feeHistogram:tx?'complete':'unavailable'},
+    narration:`${date} UTC: ${blockCount.toLocaleString('en-US')} blocks with ${nonCoinbaseTxCount.toLocaleString('en-US')} non-coinbase transactions. ${totalFeesBtc==null?'Daily fee total unavailable.':`${totalFeesBtc.toLocaleString('en-US',{maximumFractionDigits:8})} BTC in fees across those blocks (mempool.space).`} ${entry.context??''}`.trim(),
+  });
 }
-
-main().catch((e) => { console.error(e); process.exit(1); });
+const max = key => Math.max(1,...snapshots.map(s=>s[key]??0));
+const scales={dailyTransactions:max('transactionCount'),feesBtc:max('totalFeesBtc'),hashrateEh:max('networkHashrateEh'),difficulty:max('difficulty'),estimatedVolumeBtc:max('btcTransferred'),blockTxCount:Math.max(1,...Object.values(blocks).flat().map(b=>b[3])),blockSizeBytes:4000000,blockWeight:4000000,detailAddressesPerParticle:1000,gridAddressesPerParticle:8000};
+for(const s of snapshots)s.scales=scales;
+writeJSON('pipeline/generated/snapshots.json',snapshots);
+writeJSON('pipeline/generated/blocks.json',blocks);
+writeJSON('pipeline/generated/provenance.json',{schemaVersion:2,builtAt:new Date().toISOString(),dateRange:[config[0].date,config.at(-1).date],snapshotCount:snapshots.length,scales,coinmetricsRequests:cmSource.requests,charts:Object.fromEntries(Object.entries(charts).map(([k,v])=>[k,{...v.request,unit:v.unit,period:v.period,lastDate:Object.keys(v.days).at(-1)}])),blockRequestsFile:'pipeline/raw/block-days.json',timestampMethodology:'https://gitbook-docs.coinmetrics.io/network-data/methodologies/normalizing-block-times',disagreements,limitations:['CoinMetrics normalizes block times using Median-Time-Past; its daily estimates do not share the block geometry’s header-timestamp window.', 'Mempool is observed by one provider, not a global ledger quantity.','No fee tiers or large-output classifications are inferred from aggregate daily fees.','Daily hashrate is a provider estimate, not a security or decentralization rating.','Historical commentary without primary-source support is withheld.']});
+console.log(`Built ${snapshots.length} snapshots; ${disagreements.length} provider count disagreements explicitly retained.`);

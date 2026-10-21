@@ -1,0 +1,177 @@
+{
+  "asOf": "2026-10-19",
+  "selection": "Calendar baselines plus observed extrema and adjacent controls; no price or news inference.",
+  "dates": [
+    {
+      "date": "2009-01-03",
+      "reasons": [
+        "Missing protocol or approval anchor; verify against primary source"
+      ],
+      "priority": 1
+    },
+    {
+      "date": "2017-08-24",
+      "reasons": [
+        "Missing protocol or approval anchor; verify against primary source"
+      ],
+      "priority": 1
+    },
+    {
+      "date": "2021-11-14",
+      "reasons": [
+        "Missing protocol or approval anchor; verify against primary source"
+      ],
+      "priority": 1
+    },
+    {
+      "date": "2024-01-10",
+      "reasons": [
+        "Missing protocol or approval anchor; verify against primary source"
+      ],
+      "priority": 1
+    },
+    {
+      "date": "2026-04-15",
+      "reasons": [
+        "Monthly fixed-calendar baseline"
+      ],
+      "priority": 2
+    },
+    {
+      "date": "2026-05-08",
+      "reasons": [
+        "Adjacent-day control for FeeTotNtv extremum on 2026-05-09"
+      ],
+      "priority": 2
+    },
+    {
+      "date": "2026-05-09",
+      "reasons": [
+        "Maximum FeeTotNtv in 2026-04-10…2026-10-19"
+      ],
+      "priority": 1
+    },
+    {
+      "date": "2026-05-10",
+      "reasons": [
+        "Adjacent-day control for FeeTotNtv extremum on 2026-05-09"
+      ],
+      "priority": 2
+    },
+    {
+      "date": "2026-05-15",
+      "reasons": [
+        "Monthly fixed-calendar baseline"
+      ],
+      "priority": 2
+    },
+    {
+      "date": "2026-06-02",
+      "reasons": [
+        "Adjacent-day control for BlkCnt extremum on 2026-06-03"
+      ],
+      "priority": 2
+    },
+    {
+      "date": "2026-06-03",
+      "reasons": [
+        "Minimum BlkCnt in 2026-04-10…2026-10-19"
+      ],
+      "priority": 1
+    },
+    {
+      "date": "2026-06-04",
+      "reasons": [
+        "Adjacent-day control for BlkCnt extremum on 2026-06-03"
+      ],
+      "priority": 2
+    },
+    {
+      "date": "2026-06-15",
+      "reasons": [
+        "Monthly fixed-calendar baseline"
+      ],
+      "priority": 2
+    },
+    {
+      "date": "2026-07-15",
+      "reasons": [
+        "Monthly fixed-calendar baseline"
+      ],
+      "priority": 2
+    },
+    {
+      "date": "2026-07-21",
+      "reasons": [
+        "Adjacent-day control for HashRate extremum on 2026-07-22"
+      ],
+      "priority": 2
+    },
+    {
+      "date": "2026-07-22",
+      "reasons": [
+        "Minimum HashRate in 2026-04-10…2026-10-19"
+      ],
+      "priority": 1
+    },
+    {
+      "date": "2026-07-23",
+      "reasons": [
+        "Adjacent-day control for HashRate extremum on 2026-07-22"
+      ],
+      "priority": 2
+    },
+    {
+      "date": "2026-08-15",
+      "reasons": [
+        "Monthly fixed-calendar baseline"
+      ],
+      "priority": 2
+    },
+    {
+      "date": "2026-09-15",
+      "reasons": [
+        "Monthly fixed-calendar baseline"
+      ],
+      "priority": 2
+    },
+    {
+      "date": "2026-10-04",
+      "reasons": [
+        "Adjacent-day control for TxCnt extremum on 2026-10-05",
+        "Adjacent-day control for HashRate extremum on 2026-10-05"
+      ],
+      "priority": 2
+    },
+    {
+      "date": "2026-10-05",
+      "reasons": [
+        "Maximum TxCnt in 2026-04-10…2026-10-19",
+        "Maximum HashRate in 2026-04-10…2026-10-19"
+      ],
+      "priority": 1
+    },
+    {
+      "date": "2026-10-06",
+      "reasons": [
+        "Adjacent-day control for TxCnt extremum on 2026-10-05",
+        "Adjacent-day control for HashRate extremum on 2026-10-05"
+      ],
+      "priority": 2
+    },
+    {
+      "date": "2026-10-15",
+      "reasons": [
+        "Monthly fixed-calendar baseline"
+      ],
+      "priority": 2
+    },
+    {
+      "date": "2026-10-19",
+      "reasons": [
+        "Latest requested completed UTC day; publish missing source fields as null"
+      ],
+      "priority": 1
+    }
+  ]
+}

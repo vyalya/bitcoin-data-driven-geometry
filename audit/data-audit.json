@@ -1,0 +1,7377 @@
+{
+  "snapshots": 150,
+  "blocks": 22374,
+  "missingMempoolDays": [
+    "2009-01-03",
+    "2009-01-09",
+    "2009-01-12",
+    "2009-03-18",
+    "2009-06-12",
+    "2009-10-05",
+    "2009-12-30",
+    "2010-02-06",
+    "2010-05-06",
+    "2010-05-22",
+    "2010-07-11",
+    "2010-08-15",
+    "2010-12-17",
+    "2011-02-09",
+    "2011-03-11",
+    "2011-04-16",
+    "2011-06-19",
+    "2011-08-05",
+    "2011-09-06",
+    "2011-11-18",
+    "2012-03-01",
+    "2012-07-26",
+    "2012-09-27",
+    "2012-11-06",
+    "2012-11-28",
+    "2013-03-11",
+    "2013-03-25",
+    "2013-04-10",
+    "2013-06-06",
+    "2013-10-02",
+    "2013-11-19",
+    "2013-12-18",
+    "2014-02-24",
+    "2014-03-18",
+    "2014-03-25",
+    "2014-06-27",
+    "2014-08-08",
+    "2014-10-06",
+    "2015-01-14",
+    "2015-01-15",
+    "2015-07-04",
+    "2015-08-24",
+    "2015-10-31",
+    "2015-11-13",
+    "2016-01-14",
+    "2016-03-09",
+    "2026-10-19"
+  ],
+  "missingHistogramDays": [
+    "2009-01-03",
+    "2009-01-09",
+    "2009-01-12",
+    "2009-03-18",
+    "2009-06-12",
+    "2009-10-05",
+    "2009-12-30",
+    "2010-02-06",
+    "2010-05-06",
+    "2010-05-22",
+    "2010-07-11",
+    "2010-08-15",
+    "2010-12-17",
+    "2011-02-09",
+    "2011-03-11",
+    "2011-04-16",
+    "2011-06-19",
+    "2011-08-05",
+    "2011-09-06",
+    "2011-11-18",
+    "2012-03-01",
+    "2012-07-26",
+    "2012-09-27",
+    "2012-11-06",
+    "2012-11-28",
+    "2013-03-11",
+    "2013-03-25",
+    "2013-04-10",
+    "2013-06-06",
+    "2013-10-02",
+    "2013-11-19",
+    "2013-12-18",
+    "2014-02-24",
+    "2014-03-18",
+    "2014-03-25",
+    "2014-06-27",
+    "2014-08-08",
+    "2014-10-06",
+    "2015-01-14",
+    "2015-01-15",
+    "2015-07-04",
+    "2015-08-24",
+    "2015-10-31",
+    "2015-11-13",
+    "2016-01-14",
+    "2016-03-09",
+    "2016-06-17",
+    "2016-06-24",
+    "2016-07-09",
+    "2016-08-02",
+    "2016-11-08",
+    "2017-03-10",
+    "2017-04-01",
+    "2017-05-12",
+    "2017-07-31",
+    "2017-08-01",
+    "2017-08-09",
+    "2017-08-24",
+    "2017-09-04",
+    "2017-12-17",
+    "2017-12-20",
+    "2018-01-17",
+    "2018-06-10",
+    "2018-12-15",
+    "2018-12-19",
+    "2019-02-18",
+    "2019-04-02",
+    "2019-06-26",
+    "2019-10-23",
+    "2019-10-24",
+    "2020-01-30",
+    "2020-02-13",
+    "2020-03-11",
+    "2020-03-12",
+    "2020-03-15",
+    "2020-04-08",
+    "2020-04-20",
+    "2020-05-11",
+    "2020-07-01",
+    "2020-08-11",
+    "2020-10-08",
+    "2020-11-03",
+    "2020-12-16",
+    "2021-01-03",
+    "2021-01-06",
+    "2021-02-08",
+    "2021-02-19",
+    "2021-04-14",
+    "2021-05-12",
+    "2021-06-28",
+    "2021-09-07",
+    "2021-09-20",
+    "2021-09-24",
+    "2021-11-10",
+    "2021-11-14",
+    "2021-12-04",
+    "2022-02-24",
+    "2022-05-09",
+    "2022-06-13",
+    "2022-06-15",
+    "2022-07-13",
+    "2022-09-15",
+    "2022-11-11",
+    "2022-11-30",
+    "2022-12-30",
+    "2023-01-14",
+    "2023-02-06",
+    "2023-03-10",
+    "2023-03-14",
+    "2023-05-25",
+    "2023-06-15",
+    "2023-10-07",
+    "2023-10-23",
+    "2023-12-16",
+    "2023-12-27",
+    "2024-01-10",
+    "2024-01-11",
+    "2024-02-14",
+    "2024-03-14",
+    "2024-04-13",
+    "2024-04-20",
+    "2024-05-20",
+    "2024-06-24",
+    "2024-07-05",
+    "2024-08-05",
+    "2024-08-16",
+    "2024-09-18",
+    "2024-11-05",
+    "2024-11-10",
+    "2024-12-05",
+    "2024-12-09",
+    "2024-12-19",
+    "2025-01-20",
+    "2025-01-27",
+    "2025-02-03",
+    "2025-03-07",
+    "2025-04-02",
+    "2025-04-07",
+    "2025-05-22",
+    "2025-06-13",
+    "2025-06-22",
+    "2025-10-10",
+    "2026-01-03",
+    "2026-01-14",
+    "2026-02-28",
+    "2026-03-17",
+    "2026-04-09",
+    "2026-05-09",
+    "2026-10-05",
+    "2026-10-19"
+  ],
+  "changes": [
+    {
+      "date": "2009-01-03",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2009-01-09",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 3,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7,
+          "after": null
+        },
+        {
+          "field": "btcTransferred",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2009-01-12",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.3659574468085105,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.451063829787234,
+          "after": null
+        },
+        {
+          "field": "btcTransferred",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2009-03-18",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2009-06-12",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2009-10-05",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.8072727272727271,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 8.789090909090909,
+          "after": null
+        },
+        {
+          "field": "btcTransferred",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2009-12-30",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.021276595744681,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.96808510638298,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 1.18289953431284,
+          "after": 1.1245273425108702
+        },
+        {
+          "field": "btcTransferred",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2010-02-06",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.5,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.25,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 1.81864853614541,
+          "after": 1.818648536145414
+        },
+        {
+          "field": "btcTransferred",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2010-05-06",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2010-05-22",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.007615384615384615
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.5,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.247715384615384,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 11.8462281497047,
+          "after": 11.846228149704709
+        },
+        {
+          "field": "btcTransferred",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2010-07-11",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.8044692737430168,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 10,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 23.5012572229032,
+          "after": 23.50125722290317
+        },
+        {
+          "field": "btcTransferred",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2010-08-15",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.5,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.25,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 511.773534256604,
+          "after": 389.94383676965793
+        },
+        {
+          "field": "btcTransferred",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2010-12-17",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2011-02-09",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.0005039790769230768
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.5,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.249848806276923,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 25997.8799288144,
+          "after": 25997.879928814422
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2011-03-11",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2011-04-16",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.028391428923076924
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.8323699421965318,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.991482571323077,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 82345.6441129666,
+          "after": 82345.64411296662
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 3.69088576,
+          "after": 3.66088576
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2011-06-19",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.19493704584615384
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.5,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.191518886246154,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 876954.493513537,
+          "after": 876954.4935135372
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 25.34181596,
+          "after": 25.89261141
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2011-08-05",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2011-09-06",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2011-11-18",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.02476397446153846
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0827067669172932,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.868510657285599,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 1192497.75008948,
+          "after": 1192497.7500894784
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 3.21931668,
+          "after": 3.35692678
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2012-03-01",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.049656758615384614
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9536423841059603,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.985102972415385,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 1376302.26788638,
+          "after": 1376302.2678863804
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 6.45537862,
+          "after": 6.71836722
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2012-07-26",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2012-09-27",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.12197243253846154
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.8944099378881987,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.963408270238462,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 2864140.50781097,
+          "after": 2864140.5078109736
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 15.85641623,
+          "after": 16.11576529
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2012-11-06",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2012-11-28",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.3389501536153846
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.8372093023255813,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.898314953915385,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 3438908.96015914,
+          "after": 3438908.9601591383
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 44.06351997,
+          "after": 43.59397007
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2013-03-11",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.48490707899999996
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.878048780487805,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.8545278763,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 4367876.0008422,
+          "after": 4367876.000842196
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 63.03792027,
+          "after": 49.91899256
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2013-03-25",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2013-04-10",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.49878254861538457
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.5,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.100365235415385,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 7672999.92016414,
+          "after": 7672999.920164138
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 64.84173132,
+          "after": 64.66733147
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2013-06-06",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2013-10-02",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.302717122
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.5,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.1591848634,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 148819199.805093,
+          "after": 148819199.80509263
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 39.35322586,
+          "after": 39.92303312
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2013-11-19",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.22634199607692307
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.8944099378881987,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.932097401176923,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 609482679.888355,
+          "after": 609482679.8883545
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 29.42445949,
+          "after": 31.59785609
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2013-12-18",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.14372636946153847
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.5,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.206882089161539,
+          "after": null
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 18.68442803,
+          "after": 18.64447134
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2014-02-24",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.118507527
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.5,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.2144477419,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 3129573174.52229,
+          "after": 3129573174.5222874
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 15.40597851,
+          "after": 15.21980169
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2014-03-18",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2014-03-25",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.11369310315384616
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9171974522292993,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.965892069053846,
+          "after": null
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 14.78010341,
+          "after": 14.55404643
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2014-06-27",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2014-08-08",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2014-10-06",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.09973861576923077
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.8944099378881987,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.970078415269231,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 34661425923.9769,
+          "after": 34661425923.97694
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 12.96602005,
+          "after": 12.61174465
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2015-01-14",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.1201746136923077
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.993103448275862,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.963947615892307,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 43971662056.0896,
+          "after": 43971662056.08958
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 15.62269978,
+          "after": 15.22479663
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2015-01-15",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2015-07-04",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.1360395766923077
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9473684210526316,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.959188126992307,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 49402014931.2275,
+          "after": 49402014931.22746
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 17.68514497,
+          "after": 17.84510252
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2015-08-24",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2015-10-31",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.22053913484615384
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.979591836734694,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.933838259546153,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 62253982449.7608,
+          "after": 62253982449.76082
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 28.67008753,
+          "after": 28.54469017
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2015-11-13",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2016-01-14",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.24415723038461537
+        },
+        {
+          "field": "congestionScore",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0827067669172932,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.802692680508676,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 113354299801.471,
+          "after": 113354299801.47113
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 31.74043995,
+          "after": 31.82088874
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2016-03-09",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2016-06-17",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2016-06-24",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2016-07-09",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 2980,
+          "after": 3082.75
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 1920614.5,
+          "after": 2.5458390520833336
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.3587241268465501
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.596,
+          "after": 0.61655
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9664429530201343,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.713582761946034,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 213398925331,
+          "after": 213398925331.3239
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 46.6341364900515,
+          "after": 47.40040469
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2016-08-02",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 5457,
+          "after": 4645.416666666667
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 5995735.5,
+          "after": 5.110354848958333
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.6297774968467462
+        },
+        {
+          "field": "congestionScore",
+          "before": 1.0914,
+          "after": 0.9290833333333334
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.935064935064935,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.483646750945976,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 210798472402.845,
+          "after": 210856298776.95554
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 81.871074590077,
+          "after": 81.38920804
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2016-11-08",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2017-03-10",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 41754,
+          "after": 32410.895833333332
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 56159234,
+          "after": 49.70722318229166
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 1.963415964996969
+        },
+        {
+          "field": "congestionScore",
+          "before": 4.38155,
+          "after": 3.6808171874999998
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.923076923076923,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 8.09651021050091,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 460769358090,
+          "after": 460769358090.71423
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 255.244075449606,
+          "after": 257.91797636
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2017-04-01",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 14101,
+          "after": 12512.572916666666
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 10095935.5,
+          "after": 10.91529578125
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 1.4797699293830922
+        },
+        {
+          "field": "congestionScore",
+          "before": 2.307575,
+          "after": 2.18844296875
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0909090909090908,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 8.727432884821436,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 499635929816,
+          "after": 499635929816.66754
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 192.370090819802,
+          "after": 190.64263242
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2017-05-12",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2017-07-31",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 2198,
+          "after": 5600.078125
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 4463871.5,
+          "after": 5.997711005208333
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 1.4565934736919848
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.4396,
+          "after": 1.120015625
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.993103448275862,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.431141957892404,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 860221984436,
+          "after": 860221984436.2223
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 189.357151579958,
+          "after": 194.86886623
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2017-08-01",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 1578,
+          "after": 1483.6927083333333
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 8119854.5,
+          "after": 4.691923828125
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.5694113730768131
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.3156,
+          "after": 0.29673854166666663
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9664429530201343,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.734496588076956,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 860221984436,
+          "after": 860221984436.2223
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 74.0234784999857,
+          "after": 75.94662047
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2017-08-09",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2017-08-24",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2017-09-04",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 6186,
+          "after": 5061.614583333333
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 10946812,
+          "after": 9.693861994791666
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 2.5035163214605154
+        },
+        {
+          "field": "congestionScore",
+          "before": 1.2372,
+          "after": 1.0123229166666665
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.8228571428571428,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 8.877785103561846,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 888171856257,
+          "after": 888171856257.3206
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 325.457121789867,
+          "after": 325.4016802
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2017-12-17",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 99304,
+          "after": 105746.04166666667
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 116050212,
+          "after": 112.98657725
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 4.0951482081528
+        },
+        {
+          "field": "congestionScore",
+          "before": 6.47912,
+          "after": 6.67238125
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.5,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 6.07771953755416,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 1590896927258,
+          "after": 1590896927258.0786
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 532.369267059864,
+          "after": 535.43867532
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2017-12-20",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 124971,
+          "after": 124677.734375
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 107199193,
+          "after": 105.40170978645833
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 7.082959339080109
+        },
+        {
+          "field": "congestionScore",
+          "before": 7.24913,
+          "after": 7.24033203125
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0588235294117647,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 5.61213790415832,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 1873105475221,
+          "after": 1873105475221.611
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 920.784714080414,
+          "after": 911.59174277
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2018-01-17",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 62636,
+          "after": 61590.515625
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 116197028.5,
+          "after": 119.41246622916667
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 5.187371493154807
+        },
+        {
+          "field": "congestionScore",
+          "before": 5.37908,
+          "after": 5.34771546875
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.8622754491017965,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 6.830064552053559,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 2227847638503,
+          "after": 2227847638503.6284
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 674.358294110125,
+          "after": 675.09668652
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2018-06-10",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 947,
+          "after": 2057.3333333333335
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 427681,
+          "after": 1.0872547135416668
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.12783938869230768
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.1894,
+          "after": 0.4114666666666667
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.1338582677165354,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.704040781817504,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 4940704885521,
+          "after": 4940704885521.827
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 16.61912053,
+          "after": 16.7009531
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2018-12-15",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 2344,
+          "after": 2821.4739583333335
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 1087153,
+          "after": 1.4446505572916668
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.1405187733076923
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.4688,
+          "after": 0.5642947916666667
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9664429530201343,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.817204368007692,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 5646403851535,
+          "after": 5646403851534.721
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 18.26744053,
+          "after": 18.37318136
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2018-12-19",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2019-02-18",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 12064,
+          "after": 6525.307291666667
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 5253499.5,
+          "after": 3.3357516927083335
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.23031633476923077
+        },
+        {
+          "field": "congestionScore",
+          "before": 2.1548,
+          "after": 1.3050614583333333
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9290322580645161,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.28446509956923,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 6061518831027,
+          "after": 6061518831027.271
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 29.94112352,
+          "after": 29.40410079
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2019-04-02",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 46226,
+          "after": 47378.677083333336
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 33671212.5,
+          "after": 33.190086390625
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.8880095099230769
+        },
+        {
+          "field": "congestionScore",
+          "before": 4.71695,
+          "after": 4.80340078125
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9171974522292993,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 8.318512147023078,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 6379265451411,
+          "after": 6379265451411.053
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 115.44123629,
+          "after": 114.48978878
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2019-06-26",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 57213,
+          "after": 39687.666666666664
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 35981027.5,
+          "after": 24.049397864583334
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 1.4398977824615387
+        },
+        {
+          "field": "congestionScore",
+          "before": 5.21639,
+          "after": 4.2265749999999995
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.8727272727272727,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 8.003113665261539,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 7409399249090,
+          "after": 7409399249090.253
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 187.18671172,
+          "after": 184.06503874
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2019-10-23",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2019-10-24",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 12758,
+          "after": 10153.182291666666
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 6799099,
+          "after": 4.783506848958333
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.23000486046153845
+        },
+        {
+          "field": "congestionScore",
+          "before": 2.20685,
+          "after": 2.011488671875
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0827067669172932,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.144883391485598,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 13691480038694,
+          "after": 13691480038694.451
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 29.90063186,
+          "after": 28.9599249
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2020-01-30",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2020-02-13",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 6006,
+          "after": 10822.072916666666
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 1765277,
+          "after": 7.083490401041667
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.2664214882307692
+        },
+        {
+          "field": "congestionScore",
+          "before": 1.2012,
+          "after": 2.06165546875
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.021276595744681,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.52779865991375,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 15546745765529,
+          "after": 15546745765529.365
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 34.63479347,
+          "after": 35.47858608
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2020-03-11",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2020-03-12",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 24170,
+          "after": 20974.302083333332
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 14296728,
+          "after": 11.579484151041665
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.4636360446923077
+        },
+        {
+          "field": "congestionScore",
+          "before": 3.0627500000000003,
+          "after": 2.82307265625
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9536423841059603,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 8.942084186592307,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 16552923967337,
+          "after": 16552923967337.232
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 60.27268581,
+          "after": 59.16829292
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2020-03-15",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2020-04-08",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 1407,
+          "after": 5135.723958333333
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 439364,
+          "after": 2.919838296875
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.1727365586923077
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.2814,
+          "after": 1.0271447916666665
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.863759032392307,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 14397482597688.1,
+          "after": 14397482597687.742
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 22.45575263,
+          "after": 22.6627845
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2020-04-20",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2020-05-11",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 28256,
+          "after": 12778.197916666666
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 23799823.5,
+          "after": 13.194830708333335
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.7087542764615384
+        },
+        {
+          "field": "congestionScore",
+          "before": 3.3692,
+          "after": 2.20836484375
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9171974522292993,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 8.776613717061538,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 16104807485529,
+          "after": 16104807485529.383
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 92.13805594,
+          "after": 88.60442418
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2020-07-01",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 4142,
+          "after": 18075.630208333332
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 4643746.5,
+          "after": 11.824513927083334
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.4769741631538461
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.8284,
+          "after": 2.605672265625
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.888888888888889,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.608387751053847,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 15784217546288,
+          "after": 15784217546288.15
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 62.00664121,
+          "after": 62.82571084
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2020-08-11",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 9680,
+          "after": 18703.104166666668
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 12378101,
+          "after": 14.413701869791666
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 1.1650846608461538
+        },
+        {
+          "field": "congestionScore",
+          "before": 1.936,
+          "after": 2.6527328125
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.935064935064935,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.069674601746154,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 16947802333947,
+          "after": 16947802333946.61
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 151.46100591,
+          "after": 151.68404592
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2020-10-08",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 26827,
+          "after": 15073.583333333334
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 14358846,
+          "after": 8.517651057291665
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.7953364763846155
+        },
+        {
+          "field": "congestionScore",
+          "before": 3.262025,
+          "after": 2.3805187500000002
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.888888888888889,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 8.782791557084614,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 19298087186263,
+          "after": 19298087186262.61
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 103.39374193,
+          "after": 103.13964018
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2020-11-03",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2020-12-16",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 75167,
+          "after": 30750.75
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 46158399,
+          "after": 20.011963458333334
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.6391398137692307
+        },
+        {
+          "field": "congestionScore",
+          "before": 5.75501,
+          "after": 3.55630625
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0069930069930069,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 8.07126554537972,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 18670168558400,
+          "after": 18670168558399.586
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 83.08817579,
+          "after": 79.9044725
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2021-01-03",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 12737,
+          "after": 19666.796875
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 14130568,
+          "after": 17.663175765625
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.653886936846154
+        },
+        {
+          "field": "congestionScore",
+          "before": 2.205275,
+          "after": 2.725009765625
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9113924050632911,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.142251418946154,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 18599593048299,
+          "after": 18599593048299.492
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 85.00530179,
+          "after": 86.41999352
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2021-01-06",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2021-02-08",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 73679,
+          "after": 41297.916666666664
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 81522360.5,
+          "after": 75.11212414583333
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 1.0688914572307693
+        },
+        {
+          "field": "congestionScore",
+          "before": 5.71037,
+          "after": 4.34734375
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.888888888888889,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.9662215628307695,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 21434395961349,
+          "after": 21434395961348.918
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 138.95588944,
+          "after": 134.17229408
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2021-02-19",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 88537,
+          "after": 75429.82291666667
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 75751664.5,
+          "after": 76.27524305729168
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 1.2376155788461538
+        },
+        {
+          "field": "congestionScore",
+          "before": 6.15611,
+          "after": 5.7628946875
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9411764705882354,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.781882326346154,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 21455226865438.4,
+          "after": 21455226865438.344
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 160.89002525,
+          "after": 160.8057528
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2021-04-14",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 74593,
+          "after": 72707.94791666667
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 75303755.5,
+          "after": 81.55842752604167
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 1.0466435224615385
+        },
+        {
+          "field": "congestionScore",
+          "before": 5.73779,
+          "after": 5.6812384375
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0666666666666667,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.864669943261538,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 23137439666472,
+          "after": 23137439666472.05
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 136.06365792,
+          "after": 136.184935
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2021-05-12",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 8530,
+          "after": 11529.296875
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 39267441.5,
+          "after": 26.233642015625
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.5939144984615385
+        },
+        {
+          "field": "congestionScore",
+          "before": 1.706,
+          "after": 2.114697265625
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.8372093023255813,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.31002565046154,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 20608845737768,
+          "after": 20608845737768.164
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 77.2088848,
+          "after": 76.98423673
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2021-06-28",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 43912,
+          "after": 47603.380208333336
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 34922434,
+          "after": 32.924643140625
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.3992770485384616
+        },
+        {
+          "field": "congestionScore",
+          "before": 4.5434,
+          "after": 4.820253515625
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.4145454545454546,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.8953787036202785,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 19932791027263,
+          "after": 19932791027262.742
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 51.90601631,
+          "after": 53.65438019
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2021-09-07",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 3877,
+          "after": 5784.510416666667
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 2820988,
+          "after": 3.58437528125
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.14500570338461538
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.7754,
+          "after": 1.1569020833333334
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9411764705882354,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.723878288984615,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 17615033039279,
+          "after": 17615033039278.88
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 18.85074144,
+          "after": 18.45604694
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2021-09-20",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2021-09-24",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2021-11-10",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 12553,
+          "after": 8290.744791666666
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 9306174,
+          "after": 6.366564385416667
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.14163449869230768
+        },
+        {
+          "field": "congestionScore",
+          "before": 2.191475,
+          "after": 1.6581489583333333
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9664429530201343,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.300067150392307,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 21659344833265,
+          "after": 21659344833264.848
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 18.41248483,
+          "after": 18.41489098
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2021-11-14",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2021-12-04",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 10049,
+          "after": 3204.859375
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 5003915.5,
+          "after": 1.5177341770833332
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.1374365896153846
+        },
+        {
+          "field": "congestionScore",
+          "before": 2.003675,
+          "after": 0.640971875
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9290322580645161,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.357666523115386,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 22335659268936,
+          "after": 22335659268936.39
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 17.86675665,
+          "after": 17.45400848
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2022-02-24",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 3151,
+          "after": 4704.692708333333
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 1836224,
+          "after": 3.004869234375
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.08015634592307691
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.6302,
+          "after": 0.9409385416666666
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0909090909090908,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.65052945985944,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 27967152532434,
+          "after": 27967152532434.23
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 10.42032497,
+          "after": 10.24872082
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2022-05-09",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 1404,
+          "after": 7169.817708333333
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 1142322.5,
+          "after": 4.765156458333333
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.15846537346153847
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.2808,
+          "after": 1.4339635416666665
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9290322580645161,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.86822038796154,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 29794407589312,
+          "after": 29794407589312.08
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 20.60049855,
+          "after": 19.78760376
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2022-06-13",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 22530,
+          "after": 18066.520833333332
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 27165348.5,
+          "after": 21.428301578125
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.22254889953846155
+        },
+        {
+          "field": "congestionScore",
+          "before": 2.93975,
+          "after": 2.6049890624999996
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0827067669172932,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 8.927250179762522,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 30283293547737,
+          "after": 30283293547736.676
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 28.93135694,
+          "after": 28.14786917
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2022-06-15",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2022-07-13",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 24965,
+          "after": 16063.125
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 20969040.5,
+          "after": 10.227195317708334
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.18318572569230768
+        },
+        {
+          "field": "congestionScore",
+          "before": 3.122375,
+          "after": 2.454734375
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.2545454545454544,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 8.626513600474127,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 29152798808272,
+          "after": 29152798808271.883
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 23.81414434,
+          "after": 23.02288103
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2022-09-15",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 2284,
+          "after": 4344.760416666667
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 1380962,
+          "after": 2.515939234375
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.13325419461538462
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.4568,
+          "after": 0.8689520833333334
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.979591836734694,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.822983741615383,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 32045359565303,
+          "after": 32045359565303.145
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 17.3230453,
+          "after": 17.30599694
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2022-11-11",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 750,
+          "after": 4207.932291666667
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 251053.5,
+          "after": 2.2847770104166667
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.164000564
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.15,
+          "after": 0.8415864583333333
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0746268656716418,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.793859532292537,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 36762198818467,
+          "after": 36762198818467.21
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 21.32007332,
+          "after": 21.93111017
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2022-11-30",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2022-12-30",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 1127,
+          "after": 3239.9322916666665
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 398068.5,
+          "after": 3.4802319322916664
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.16694558607692309
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.2254,
+          "after": 0.6479864583333333
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9113924050632911,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.882296324176924,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 35364065900457,
+          "after": 35364065900457.12
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 21.70292619,
+          "after": 21.7942512
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2023-01-14",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 602,
+          "after": 2157.75
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 181393.5,
+          "after": 1.0410729947916666
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.10447835461538461
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.1204,
+          "after": 0.43155
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.8421052631578947,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.932536493615384,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 34093570325204,
+          "after": 34093570325203.844
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 13.5821861,
+          "after": 14.0260069
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2023-02-06",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2023-03-10",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 39602,
+          "after": 41357.526041666664
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 64580508,
+          "after": 62.35743970833334
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.3326804806923077
+        },
+        {
+          "field": "congestionScore",
+          "before": 4.22015,
+          "after": 4.351814453125
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0588235294117647,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 8.545915561674661,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 43127061549760.65,
+          "after": 43127061549761.086
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 43.24846249,
+          "after": 43.94455143
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2023-03-14",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2023-05-25",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2023-06-15",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 198131,
+          "after": 174638.09895833334
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 159254898,
+          "after": 154.228342421875
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.3182996266153847
+        },
+        {
+          "field": "congestionScore",
+          "before": 8.641746666666666,
+          "after": 8.328507986111111
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9729729729729729,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.3119861120153855,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 52350439455487,
+          "after": 52350439455487.47
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 41.37895146,
+          "after": 41.02129533
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2023-10-07",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2023-10-23",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 19040,
+          "after": 16235.020833333334
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 98037337,
+          "after": 95.42409213541667
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.13791234346153847
+        },
+        {
+          "field": "congestionScore",
+          "before": 2.678,
+          "after": 2.4676265625
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9171974522292993,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.155226296961539,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 61030681983176,
+          "after": 61030681983175.59
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 17.92860465,
+          "after": 17.00277934
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2023-12-16",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 166552,
+          "after": 182426.953125
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 95189791,
+          "after": 127.66307953645833
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 4.376509372384615
+        },
+        {
+          "field": "congestionScore",
+          "before": 8.220693333333333,
+          "after": 8.432359375
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9473684210526316,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 6.220839188284615,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 67305906902031.1,
+          "after": 67305906902031.39
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 568.94621841,
+          "after": 560.36033238
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2023-12-27",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 36526,
+          "after": 150924.22916666666
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 26190621,
+          "after": 165.08299377604166
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 2.115323171692308
+        },
+        {
+          "field": "congestionScore",
+          "before": 3.98945,
+          "after": 8.012323055555555
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.1162790697674418,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.9941494438411445,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 72006146478567,
+          "after": 72006146478567.1
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 274.99201232,
+          "after": 268.6660723
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2024-01-10",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2024-01-11",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 92520,
+          "after": 85707.046875
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 323078786.5,
+          "after": 322.2786188229167
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.7861079975384616
+        },
+        {
+          "field": "congestionScore",
+          "before": 6.2756,
+          "after": 6.07121140625
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.8323699421965318,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.881487600738461,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 73197634206448,
+          "after": 73197634206448.34
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 102.19403968,
+          "after": 101.2830808
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2024-02-14",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 136128,
+          "after": 135766.21354166666
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 207023390,
+          "after": 199.12422725520835
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.4103402644615385
+        },
+        {
+          "field": "congestionScore",
+          "before": 7.58384,
+          "after": 7.572986406249999
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0359712230215827,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.547789086129164,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 75502165623894,
+          "after": 75502165623893.72
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 53.34423438,
+          "after": 54.17801676
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2024-03-14",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 85939,
+          "after": 79060.94270833333
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 122519853,
+          "after": 117.88648031770833
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.26526300830769234
+        },
+        {
+          "field": "congestionScore",
+          "before": 6.07817,
+          "after": 5.87182828125
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.021276595744681,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 8.06505520389067,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 82709090260024.77,
+          "after": 82709090260024.36
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 34.48419108,
+          "after": 33.75232286
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2024-04-13",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2024-04-20",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 135225,
+          "after": 168561.03977272726
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 142206781,
+          "after": 156.442930375
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 9.280512187692308
+        },
+        {
+          "field": "congestionScore",
+          "before": 7.55675,
+          "after": 8.24748053030303
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.1076923076923078,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 4.787282882153845,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 86388558925171.2,
+          "after": 86388558925171.02
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 1206.4665844,
+          "after": 1257.71544525
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2024-05-20",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 165232,
+          "after": 157091.96354166666
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 169963238,
+          "after": 168.40290488020835
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.13667148153846154
+        },
+        {
+          "field": "congestionScore",
+          "before": 8.203093333333333,
+          "after": 8.094559513888889
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.923076923076923,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.498070555538462,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 83148355189240,
+          "after": 83148355189239.77
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 17.7672926,
+          "after": 17.67120324
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2024-06-24",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 145894,
+          "after": 151970.86842105264
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 141813041,
+          "after": 141.77992144736842
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.15125675292307691
+        },
+        {
+          "field": "congestionScore",
+          "before": 7.87682,
+          "after": 8.026278245614035
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9473684210526316,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.591576974123076,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 83675262295060,
+          "after": 83675262295059.9
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 19.66337788,
+          "after": 19.66666864
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2024-07-05",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 137236,
+          "after": 139317.78645833334
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 110308406.5,
+          "after": 110.02128184895832
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.11362197476923076
+        },
+        {
+          "field": "congestionScore",
+          "before": 7.61708,
+          "after": 7.67953359375
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.1900826446280992,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.395665440627082,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 80082477459597.12,
+          "after": 80082477459597.45
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 14.77085672,
+          "after": 14.72065925
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2024-08-05",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 192510,
+          "after": 181108.50520833334
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 78178357,
+          "after": 63.72131730729166
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.07311904769230769
+        },
+        {
+          "field": "congestionScore",
+          "before": 8.5668,
+          "after": 8.414780069444445
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.923076923076923,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.408024285692307,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 90666502495566,
+          "after": 90666502495565.78
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 9.5054762,
+          "after": 9.24879723
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2024-08-16",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2024-09-18",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 155721,
+          "after": 158888.10416666666
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 98198361,
+          "after": 100.63754243229167
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.05472576669230769
+        },
+        {
+          "field": "congestionScore",
+          "before": 8.07628,
+          "after": 8.118508055555555
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0434782608695652,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.49548087868796,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 92671576265160.72,
+          "after": 92671576265161.06
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 7.11434967,
+          "after": 7.01957527
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2024-11-05",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2024-11-10",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 137410,
+          "after": 136166.85416666666
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 73729142.5,
+          "after": 75.239198515625
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.08002617807692308
+        },
+        {
+          "field": "congestionScore",
+          "before": 7.6223,
+          "after": 7.585005625
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9729729729729729,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.689302146576923,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 101646843652784.6,
+          "after": 101646843652785.2
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 10.40340315,
+          "after": 10.83393374
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2024-12-05",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 136082,
+          "after": 135661.14583333334
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 65394611,
+          "after": 59.149203125
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.11084440238461538
+        },
+        {
+          "field": "congestionScore",
+          "before": 7.58246,
+          "after": 7.569834375
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9290322580645161,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.692008679284616,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 103919634711492,
+          "after": 103919634711492.2
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 14.40977231,
+          "after": 14.28523694
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2024-12-09",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2024-12-19",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 147287,
+          "after": 138650.55729166666
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 80886431,
+          "after": 78.46200209375
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.17330566069230768
+        },
+        {
+          "field": "congestionScore",
+          "before": 7.91861,
+          "after": 7.65951671875
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.993103448275862,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.5724253017923076,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 108522647629298,
+          "after": 108522647629298.2
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 22.52973589,
+          "after": 22.87270158
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2025-01-20",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 121446,
+          "after": 113787.08333333333
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 74303948,
+          "after": 59.5683781875
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.0980520193076923
+        },
+        {
+          "field": "congestionScore",
+          "before": 7.1433800000000005,
+          "after": 6.913612499999999
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9473684210526316,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 7.827570394207692,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 110451907374650,
+          "after": 110451907374649.5
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 12.74676251,
+          "after": 12.37123961
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2025-01-27",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2025-02-03",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 3565,
+          "after": 6134.489583333333
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 11263147,
+          "after": 21.24003452604167
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.04763747884615384
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.713,
+          "after": 1.2268979166666667
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9411764705882354,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.771808756346154,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 108105433845147.45,
+          "after": 108105433845147.2
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 6.19287225,
+          "after": 6.10799185
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2025-03-07",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 8746,
+          "after": 10801.984375
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 24749745,
+          "after": 20.900713682291666
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.04391279069230769
+        },
+        {
+          "field": "congestionScore",
+          "before": 1.7492,
+          "after": 2.060148828125
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0140845070422535,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.440939402228928,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 110568428300952.6,
+          "after": 110568428300952.7
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 5.70866279,
+          "after": 5.67697393
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2025-04-02",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2025-04-07",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 2782,
+          "after": 4125.109375
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 997706.5,
+          "after": 2.46102571875
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.05747304415384616
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.5564,
+          "after": 0.825021875
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.993103448275862,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.815838086753846,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 121507793131898,
+          "after": 121507793131898.1
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 7.47149574,
+          "after": 6.5929719
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2025-05-22",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 6334,
+          "after": 9543.588541666666
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 10227759.5,
+          "after": 10.345137458333333
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.06236538861538462
+        },
+        {
+          "field": "congestionScore",
+          "before": 1.2668,
+          "after": 1.9087177083333333
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.96,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.601250383415385,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 121658450774824.5,
+          "after": 121658450774825
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 8.10750052,
+          "after": 7.93397384
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2025-06-13",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2025-06-22",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2025-10-10",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 9259,
+          "after": 5207.697916666667
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 4562943.5,
+          "after": 1.737255921875
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.031456435153846156
+        },
+        {
+          "field": "congestionScore",
+          "before": 1.8518,
+          "after": 1.0415395833333334
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0909090909090908,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.29865943309021,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 150839487445891.53,
+          "after": 150839487445890.5
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 4.08933657,
+          "after": 4.02978368
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2026-01-03",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 857,
+          "after": 2477.1979166666665
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 209255.5,
+          "after": 0.811655875
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.01951970676923077
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.1714,
+          "after": 0.4954395833333333
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 0.9290322580645161,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.94272408796923,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 148258433855480.38,
+          "after": 148258433855481.3
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 2.53756188,
+          "after": 2.62027149
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2026-01-14",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 9263,
+          "after": 3278.7604166666665
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 3577476,
+          "after": 1.1791421197916667
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.024137803538461542
+        },
+        {
+          "field": "congestionScore",
+          "before": 1.8526,
+          "after": 0.6557520833333333
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.161290322580645,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.195043175067493,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 146472570619931.47,
+          "after": 146472570619930.8
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 3.13791446,
+          "after": 3.07288284
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2026-02-28",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 1791,
+          "after": 2025.7916666666667
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 702130,
+          "after": 0.7040231041666666
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.01939303823076923
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.3582,
+          "after": 0.40515833333333334
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.0069930069930069,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.87623257804126,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 144398401518100.44,
+          "after": 144398401518100.9
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 2.52109497,
+          "after": 2.52753703
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2026-03-17",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 642,
+          "after": 3623.5625
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 189919.5,
+          "after": 1.316715640625
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.023075217307692304
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.1284,
+          "after": 0.7247125
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1.1338582677165354,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.753770033232888,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 145042165424852.5,
+          "after": 145042165424853.3
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 2.99977825,
+          "after": 3.07890037
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2026-04-09",
+      "added": false,
+      "changes": [
+        {
+          "field": "mempoolTxCount",
+          "before": 764,
+          "after": 2438.7135416666665
+        },
+        {
+          "field": "mempoolSizeMb",
+          "before": 252529.5,
+          "after": 0.7507658489583334
+        },
+        {
+          "field": "feePressureIndex",
+          "before": 0.01882951123076923
+        },
+        {
+          "field": "congestionScore",
+          "before": 0.1528,
+          "after": 0.48774270833333333
+        },
+        {
+          "field": "blockProductionStress",
+          "before": 1,
+          "after": null
+        },
+        {
+          "field": "minerConcentrationScore",
+          "before": 3.997361150469777,
+          "after": null
+        },
+        {
+          "field": "networkHealthScore",
+          "before": 9.94851114663077,
+          "after": null
+        },
+        {
+          "field": "difficulty",
+          "before": 138966872071212.44,
+          "after": 138966872071213.2
+        },
+        {
+          "field": "totalFeesBtc",
+          "before": 2.44783646,
+          "after": 2.3998083
+        },
+        {
+          "field": "totalOutputs",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs1000",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "whaleOutputs100",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "midOutputs10",
+          "before": 0,
+          "after": null
+        },
+        {
+          "field": "retailOutputs",
+          "before": 0,
+          "after": null
+        }
+      ]
+    },
+    {
+      "date": "2026-05-09",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2026-10-05",
+      "added": true,
+      "changes": []
+    },
+    {
+      "date": "2026-10-19",
+      "added": true,
+      "changes": []
+    }
+  ]
+}

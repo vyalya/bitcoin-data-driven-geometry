@@ -12,3 +12,7 @@ pipeline/raw/*.csv
 # Remove these two lines once you want to commit the parquet files
 # public/data/snapshots.parquet
 # public/data/blocks.parquet
+
+pipeline/generated/
+audit/source-responses/
+*.tmp

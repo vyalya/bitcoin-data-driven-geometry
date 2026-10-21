@@ -14,16 +14,10 @@
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   # No Flash / Silverlight cross-domain policy
   X-Permitted-Cross-Domain-Policies: none
-  # CSP intentionally omitted. Every combination we tried silently broke
-  # DuckDB-WASM's blob-Worker + importScripts(jsDelivr) loading chain in
-  # ways that didn't surface as CSP violations — just a silent WASM
-  # "function signature mismatch" because partially-loaded worker code
-  # couldn't construct the right imports. The headers above still harden
-  # the site (clickjacking blocked, no powerful features, HTTPS enforced,
-  # referrer minimized, no MIME sniffing, no Flash cross-domain). The
-  # app also never touches user input, cookies, or storage, so the XSS
-  # surface CSP would cover is effectively nil here.
 
-# Parquet files are static — cache hard
-/data/*.parquet
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+# Revalidate JSON so clients receive the current data release.
+/data/*.json
+  Cache-Control: no-cache
+
+/data/block-details/*.json
+  Cache-Control: no-cache

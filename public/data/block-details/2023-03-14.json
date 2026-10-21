@@ -1,0 +1,1462 @@
+[
+  {
+    "height": 780695,
+    "hash": "0000000000000000000253a6715201823fae55b27fd30280a2d5fcf2ef67ec3a",
+    "timestamp": 1678752369,
+    "size": 1356259,
+    "weight": 3992806,
+    "txCount": 2334,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 26796510
+  },
+  {
+    "height": 780696,
+    "hash": "0000000000000000000162cb3f0f9cf465516c14b24ccc508c081328834896c9",
+    "timestamp": 1678753521,
+    "size": 1345066,
+    "weight": 3993046,
+    "txCount": 2263,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 30182303
+  },
+  {
+    "height": 780697,
+    "hash": "0000000000000000000532dbbb6dbd2b7b5ab32227a9d3a09d6c567cf6a41d7e",
+    "timestamp": 1678753566,
+    "size": 1457819,
+    "weight": 3993110,
+    "txCount": 1471,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 15779002
+  },
+  {
+    "height": 780698,
+    "hash": "000000000000000000045cdecebee2a7fb0b219ba0260b0d8d87bccc4d42469e",
+    "timestamp": 1678753626,
+    "size": 1824368,
+    "weight": 3993344,
+    "txCount": 1990,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 9238772
+  },
+  {
+    "height": 780699,
+    "hash": "0000000000000000000488725ed0658ee0a89186e47836ac63cb2e005255e716",
+    "timestamp": 1678755492,
+    "size": 1498233,
+    "weight": 3992922,
+    "txCount": 3038,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 28824325
+  },
+  {
+    "height": 780700,
+    "hash": "00000000000000000005444faa646addf8cb1cd2c0a9ebd89ee461c82df45232",
+    "timestamp": 1678756138,
+    "size": 1667360,
+    "weight": 3993050,
+    "txCount": 2596,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 22722989
+  },
+  {
+    "height": 780701,
+    "hash": "00000000000000000001a35fc5299295d90abaf3324547836ef0b30a29fdcf85",
+    "timestamp": 1678756895,
+    "size": 1778174,
+    "weight": 3992957,
+    "txCount": 2622,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 18993960
+  },
+  {
+    "height": 780702,
+    "hash": "000000000000000000057623c4b4872d31f092b079200d5b431ea7647d76077b",
+    "timestamp": 1678756950,
+    "size": 2779813,
+    "weight": 3992905,
+    "txCount": 1108,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 6059315
+  },
+  {
+    "height": 780703,
+    "hash": "00000000000000000003d9453500ac42d83db191ed676d29553ae159c5d3fd77",
+    "timestamp": 1678757664,
+    "size": 2161597,
+    "weight": 3993160,
+    "txCount": 2154,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 15747520
+  },
+  {
+    "height": 780704,
+    "hash": "000000000000000000041015663666597a9237bf5d8154757146fe84bd797063",
+    "timestamp": 1678758204,
+    "size": 2094089,
+    "weight": 3993074,
+    "txCount": 2349,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 13805801
+  },
+  {
+    "height": 780705,
+    "hash": "0000000000000000000252f30c8aa5485871570417d1899c86b16abd9defaa17",
+    "timestamp": 1678758261,
+    "size": 2076016,
+    "weight": 3992875,
+    "txCount": 1397,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 5084458
+  },
+  {
+    "height": 780706,
+    "hash": "00000000000000000003f5c7ae34659be5e2ed8e69127b96df2be76cec17b822",
+    "timestamp": 1678758494,
+    "size": 3338081,
+    "weight": 3993230,
+    "txCount": 1019,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 7252395
+  },
+  {
+    "height": 780707,
+    "hash": "0000000000000000000412921015c683dc5480076a2d91e60a4513bd9fe7a55e",
+    "timestamp": 1678759412,
+    "size": 1405894,
+    "weight": 3993382,
+    "txCount": 1967,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 23320449
+  },
+  {
+    "height": 780708,
+    "hash": "00000000000000000003c9ea73559d46fc1d878b7c3a43ccd89df0c653fd0369",
+    "timestamp": 1678760702,
+    "size": 1386000,
+    "weight": 3992763,
+    "txCount": 2532,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 27108544
+  },
+  {
+    "height": 780709,
+    "hash": "00000000000000000002dd0b9cfcdfe8d16c7067704559cfbec02e14d43e2537",
+    "timestamp": 1678760889,
+    "size": 1645943,
+    "weight": 3998282,
+    "txCount": 1633,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 12047377
+  },
+  {
+    "height": 780710,
+    "hash": "00000000000000000005c46b3acceeafa30c169d40247e216c87e73bb2614f98",
+    "timestamp": 1678762005,
+    "size": 1533933,
+    "weight": 3998268,
+    "txCount": 2851,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 19730031
+  },
+  {
+    "height": 780711,
+    "hash": "00000000000000000000bb1ccf9057d7852fe506a1f47ab95ef1dc2d33d85fd8",
+    "timestamp": 1678763264,
+    "size": 1582086,
+    "weight": 3993192,
+    "txCount": 3031,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 21316524
+  },
+  {
+    "height": 780712,
+    "hash": "0000000000000000000086035c8b285a268274179db6a2c4a27da06b813d5af8",
+    "timestamp": 1678763277,
+    "size": 2804417,
+    "weight": 3992897,
+    "txCount": 932,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 4072900
+  },
+  {
+    "height": 780713,
+    "hash": "00000000000000000000b25cf4c270d132ff1a4994510fb0558e3d6dc3150f5b",
+    "timestamp": 1678764658,
+    "size": 1609573,
+    "weight": 3993007,
+    "txCount": 3188,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 23436740
+  },
+  {
+    "height": 780714,
+    "hash": "000000000000000000013b8015dc38a5281d348d66962089915d1285882609e7",
+    "timestamp": 1678764777,
+    "size": 2198502,
+    "weight": 3993150,
+    "txCount": 1587,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 5867457
+  },
+  {
+    "height": 780715,
+    "hash": "0000000000000000000315a92da855ea2ba099c58c7a68c846ab349255f2d9a1",
+    "timestamp": 1678764785,
+    "size": 3193975,
+    "weight": 3993223,
+    "txCount": 670,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 3114825
+  },
+  {
+    "height": 780716,
+    "hash": "000000000000000000066b385d82f29511dbc001268ba7f951d7c091e08ff0e6",
+    "timestamp": 1678765063,
+    "size": 2147500,
+    "weight": 3992923,
+    "txCount": 1937,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 7777285
+  },
+  {
+    "height": 780717,
+    "hash": "00000000000000000005f85b5355d9bf436d5d8bdb3e8fa0a3d85ebbaafa8b17",
+    "timestamp": 1678765286,
+    "size": 3153395,
+    "weight": 3993212,
+    "txCount": 816,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 6637133
+  },
+  {
+    "height": 780718,
+    "hash": "00000000000000000001bab466029a1c41d5e9d87091ad240a784a08aeeab398",
+    "timestamp": 1678766388,
+    "size": 1450333,
+    "weight": 3993424,
+    "txCount": 2463,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 22171910
+  },
+  {
+    "height": 780719,
+    "hash": "00000000000000000006373dd437a473619dd109e56f59cf990e36eaaa161883",
+    "timestamp": 1678767087,
+    "size": 1243910,
+    "weight": 3998312,
+    "txCount": 1271,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 24725935
+  },
+  {
+    "height": 780720,
+    "hash": "0000000000000000000095b5d9d8f1e2d0c2fc66acc835227f4197be1e9ea01f",
+    "timestamp": 1678767178,
+    "size": 2604530,
+    "weight": 3998006,
+    "txCount": 729,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 6865642
+  },
+  {
+    "height": 780721,
+    "hash": "00000000000000000002aa253d8e5fa87654e56190a1e1da4fa12500e70a73a4",
+    "timestamp": 1678767223,
+    "size": 3790881,
+    "weight": 3998409,
+    "txCount": 268,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 2831868
+  },
+  {
+    "height": 780722,
+    "hash": "00000000000000000001636c4c198c26bbbb8ee0b6dcec9a4eb87ed6a45716b3",
+    "timestamp": 1678767245,
+    "size": 3868269,
+    "weight": 3993066,
+    "txCount": 158,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 2357106
+  },
+  {
+    "height": 780723,
+    "hash": "00000000000000000004a0cf7aba3b95f9670544ac19d7934a1641c8823572d0",
+    "timestamp": 1678767294,
+    "size": 3600137,
+    "weight": 3993041,
+    "txCount": 233,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 4187078
+  },
+  {
+    "height": 780724,
+    "hash": "0000000000000000000145fe1867113935af5e601c470e20cbbeceacea99a5c0",
+    "timestamp": 1678767479,
+    "size": 3413032,
+    "weight": 3992737,
+    "txCount": 565,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 6881938
+  },
+  {
+    "height": 780725,
+    "hash": "0000000000000000000347fdffe78db579c0e4ddbda07c4b3345bd928fd9df17",
+    "timestamp": 1678767654,
+    "size": 3496811,
+    "weight": 3993446,
+    "txCount": 513,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 6161650
+  },
+  {
+    "height": 780726,
+    "hash": "0000000000000000000362fae33e907abc63a055dd1481c0b95388723bdaa31f",
+    "timestamp": 1678769009,
+    "size": 1478040,
+    "weight": 3993129,
+    "txCount": 2397,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 28226721
+  },
+  {
+    "height": 780727,
+    "hash": "000000000000000000028b05cd5b4b1c2943154f0d5f05fe8585bcb695e5e82f",
+    "timestamp": 1678769024,
+    "size": 3143215,
+    "weight": 3992743,
+    "txCount": 927,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 4576063
+  },
+  {
+    "height": 780728,
+    "hash": "000000000000000000050bb38d00dc0225edc655746e10761b044c9f92b950e2",
+    "timestamp": 1678771105,
+    "size": 1560757,
+    "weight": 3993022,
+    "txCount": 2652,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 40781763
+  },
+  {
+    "height": 780729,
+    "hash": "00000000000000000004f9b6ce5f00a35623580278500bc7115d483d61006f04",
+    "timestamp": 1678772896,
+    "size": 1408515,
+    "weight": 3992997,
+    "txCount": 2619,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 33349081
+  },
+  {
+    "height": 780730,
+    "hash": "00000000000000000000ac0c30d1bc5d2e3691c389f8ebe24476397237dc6673",
+    "timestamp": 1678773227,
+    "size": 1596281,
+    "weight": 3998192,
+    "txCount": 2205,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 21632994
+  },
+  {
+    "height": 780731,
+    "hash": "000000000000000000061d30138f4170b1f749c077919606b0ad94cd79582664",
+    "timestamp": 1678774152,
+    "size": 1311880,
+    "weight": 3993409,
+    "txCount": 1839,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 25722615
+  },
+  {
+    "height": 780732,
+    "hash": "000000000000000000017b24ee5c5e682c8cdf7e01369e40bbedfb8272027048",
+    "timestamp": 1678774611,
+    "size": 1368905,
+    "weight": 3992786,
+    "txCount": 2755,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 21772678
+  },
+  {
+    "height": 780733,
+    "hash": "0000000000000000000481de61fa5cd99fb8a275e61a660dfca358d10a406e17",
+    "timestamp": 1678775589,
+    "size": 1520464,
+    "weight": 3992719,
+    "txCount": 2446,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 29119481
+  },
+  {
+    "height": 780734,
+    "hash": "00000000000000000000a8bc04b720ea78be9680fc5f9e63a5a8c5ed66f0409c",
+    "timestamp": 1678775875,
+    "size": 1492595,
+    "weight": 3993062,
+    "txCount": 1273,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 16808351
+  },
+  {
+    "height": 780735,
+    "hash": "00000000000000000001e0ee735359fa9f44d105ae191dac40710f0725b69179",
+    "timestamp": 1678776177,
+    "size": 1792088,
+    "weight": 3993053,
+    "txCount": 1906,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 13170870
+  },
+  {
+    "height": 780736,
+    "hash": "00000000000000000003ff5557150efc574023c9cc7cd8ea7800e941e0ec3cef",
+    "timestamp": 1678776620,
+    "size": 1944510,
+    "weight": 3993207,
+    "txCount": 2290,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 14763825
+  },
+  {
+    "height": 780737,
+    "hash": "000000000000000000029dc8a6da5dff52181be7ade6eb5f112d873ff6498284",
+    "timestamp": 1678777539,
+    "size": 1391160,
+    "weight": 3993321,
+    "txCount": 2308,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 25128104
+  },
+  {
+    "height": 780738,
+    "hash": "00000000000000000004b9d082082056ac91d180edaceabb61260abfa2592c39",
+    "timestamp": 1678777661,
+    "size": 2494960,
+    "weight": 3992998,
+    "txCount": 1506,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 8314586
+  },
+  {
+    "height": 780739,
+    "hash": "000000000000000000045824065b2efa1fe3e5bd210d4f52ff3f1d6204c56545",
+    "timestamp": 1678777748,
+    "size": 1578952,
+    "weight": 3993451,
+    "txCount": 927,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 4973517
+  },
+  {
+    "height": 780740,
+    "hash": "00000000000000000001a696a10e1b2cf4243a7363f78d6f9bbc1ee4728e4cd1",
+    "timestamp": 1678778054,
+    "size": 2379975,
+    "weight": 3993069,
+    "txCount": 1431,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 10617571
+  },
+  {
+    "height": 780741,
+    "hash": "0000000000000000000262899c94788b47d9e4d3127d862556fd73d613b9918a",
+    "timestamp": 1678778549,
+    "size": 2201973,
+    "weight": 3993366,
+    "txCount": 1576,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 17772937
+  },
+  {
+    "height": 780742,
+    "hash": "0000000000000000000324f6abde8b2a00f1bbbd9d834e2ec8714c3a3eb1115a",
+    "timestamp": 1678778726,
+    "size": 3297833,
+    "weight": 3998291,
+    "txCount": 701,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 7984129
+  },
+  {
+    "height": 780743,
+    "hash": "00000000000000000005dfd8afc25ea6d7af2ffd534a664938e87cea06e323d1",
+    "timestamp": 1678778896,
+    "size": 3310039,
+    "weight": 3993310,
+    "txCount": 677,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 6414547
+  },
+  {
+    "height": 780744,
+    "hash": "000000000000000000010ba7f6fe84603c34675efec570e15408af4d151934a2",
+    "timestamp": 1678778983,
+    "size": 3384373,
+    "weight": 3992875,
+    "txCount": 411,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 6672594
+  },
+  {
+    "height": 780745,
+    "hash": "00000000000000000001cfa681bcd44e378e0614161130e32e94131aab82572d",
+    "timestamp": 1678779025,
+    "size": 3798899,
+    "weight": 3992810,
+    "txCount": 234,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 2800752
+  },
+  {
+    "height": 780746,
+    "hash": "00000000000000000004809948e11729ca25f71ddb4f6bf61528c565d3a525dd",
+    "timestamp": 1678779192,
+    "size": 3160982,
+    "weight": 3993161,
+    "txCount": 666,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 6825428
+  },
+  {
+    "height": 780747,
+    "hash": "00000000000000000001dd471547bdf804acbd45a3504a10c519807166f50f0b",
+    "timestamp": 1678779309,
+    "size": 3197881,
+    "weight": 3993175,
+    "txCount": 589,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 9000961
+  },
+  {
+    "height": 780748,
+    "hash": "000000000000000000059dbfe50ecd4286c99919955a3ff52c37f523cf66ef14",
+    "timestamp": 1678780508,
+    "size": 1432955,
+    "weight": 3993083,
+    "txCount": 2281,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 34623102
+  },
+  {
+    "height": 780749,
+    "hash": "000000000000000000031727959af490f1cb011cb74f5e9f7b003421fcc3379d",
+    "timestamp": 1678781234,
+    "size": 1271152,
+    "weight": 3992848,
+    "txCount": 1776,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 28780958
+  },
+  {
+    "height": 780750,
+    "hash": "0000000000000000000537eb893783f5fc292cc9e6ddfd564635a65c561ff2ae",
+    "timestamp": 1678781308,
+    "size": 1790689,
+    "weight": 3997999,
+    "txCount": 1829,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 12656359
+  },
+  {
+    "height": 780751,
+    "hash": "00000000000000000000da10599e875acfdbb29f42ce2328e1d0d181746f4f4e",
+    "timestamp": 1678781450,
+    "size": 2573523,
+    "weight": 3998079,
+    "txCount": 1387,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 10680871
+  },
+  {
+    "height": 780752,
+    "hash": "00000000000000000003c3f33adb64f57b63095119dcb48e64d5ece915288188",
+    "timestamp": 1678782057,
+    "size": 2005442,
+    "weight": 3998240,
+    "txCount": 2162,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 21347816
+  },
+  {
+    "height": 780753,
+    "hash": "00000000000000000000219122af1759e2136f7be99b4871ef75eda622d7b7df",
+    "timestamp": 1678782770,
+    "size": 1775731,
+    "weight": 3993379,
+    "txCount": 2316,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 31983423
+  },
+  {
+    "height": 780754,
+    "hash": "00000000000000000002cc19856e080cb6cd6d64bf28ee6055f1230af90a4a34",
+    "timestamp": 1678783698,
+    "size": 1498427,
+    "weight": 3993284,
+    "txCount": 2611,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 41504487
+  },
+  {
+    "height": 780755,
+    "hash": "00000000000000000002b89c8126bb8c7f02ccc7489e4bc707b83766d8039dfc",
+    "timestamp": 1678783891,
+    "size": 2547784,
+    "weight": 3998326,
+    "txCount": 1508,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 11146688
+  },
+  {
+    "height": 780756,
+    "hash": "000000000000000000002bc46de6dfc42e2729a46fd0ca3f13516cb9eac41958",
+    "timestamp": 1678783910,
+    "size": 2340911,
+    "weight": 3992801,
+    "txCount": 117,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 3409616
+  },
+  {
+    "height": 780757,
+    "hash": "000000000000000000065ecbcbbc674a8f5269becb59f68939accafea0ceb4d7",
+    "timestamp": 1678785044,
+    "size": 1456216,
+    "weight": 3993286,
+    "txCount": 2580,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 48849747
+  },
+  {
+    "height": 780758,
+    "hash": "000000000000000000005b899a0c034bd8c1cffc9db8f8fbb9fa3dabe9091922",
+    "timestamp": 1678785198,
+    "size": 2263258,
+    "weight": 3993250,
+    "txCount": 2023,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 13555202
+  },
+  {
+    "height": 780759,
+    "hash": "000000000000000000066540842f6c8abd190912dafa915f6c4641ab73689a73",
+    "timestamp": 1678785240,
+    "size": 2341968,
+    "weight": 3993261,
+    "txCount": 382,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 6329051
+  },
+  {
+    "height": 780760,
+    "hash": "00000000000000000003aaff217c8ec5ca52f59e647bfb0a8619c836086bafac",
+    "timestamp": 1678787869,
+    "size": 1173472,
+    "weight": 3992899,
+    "txCount": 1319,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 88682142
+  },
+  {
+    "height": 780761,
+    "hash": "00000000000000000005e908fa00afb9480f74a66f5d432b82f3e321951e2648",
+    "timestamp": 1678789488,
+    "size": 1289440,
+    "weight": 3993346,
+    "txCount": 1955,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 79973756
+  },
+  {
+    "height": 780762,
+    "hash": "00000000000000000001f31925bd6f0cfee1f3cd4901e00108d7ee2894617e9a",
+    "timestamp": 1678789861,
+    "size": 1625479,
+    "weight": 3992689,
+    "txCount": 3187,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 34552759
+  },
+  {
+    "height": 780763,
+    "hash": "00000000000000000004971f5ee4c200926f9fd49cf895f1e5617a2b4e3ef216",
+    "timestamp": 1678790465,
+    "size": 1753526,
+    "weight": 3993059,
+    "txCount": 2434,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 31169180
+  },
+  {
+    "height": 780764,
+    "hash": "000000000000000000060c95020d1f375c3f58df36c208190a604d49c70eed41",
+    "timestamp": 1678790797,
+    "size": 1411948,
+    "weight": 3992737,
+    "txCount": 2755,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 24956631
+  },
+  {
+    "height": 780765,
+    "hash": "00000000000000000005bd7aff50ce7f0e5d4c283e44f9431257dd5229e95d25",
+    "timestamp": 1678791310,
+    "size": 1499669,
+    "weight": 3993020,
+    "txCount": 3950,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 29545122
+  },
+  {
+    "height": 780766,
+    "hash": "00000000000000000000fe2557bf207fd6447e59641626c933361df40d8d9dc1",
+    "timestamp": 1678793011,
+    "size": 1538237,
+    "weight": 3993443,
+    "txCount": 3845,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 42238231
+  },
+  {
+    "height": 780767,
+    "hash": "000000000000000000005cdf6d623e9c864383d11e53db0101a9f702940b71e5",
+    "timestamp": 1678793104,
+    "size": 1641183,
+    "weight": 3993252,
+    "txCount": 2756,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 20294926
+  },
+  {
+    "height": 780768,
+    "hash": "00000000000000000001b27f7e3072819a58c32995dc2a10cd901c3128dd5f67",
+    "timestamp": 1678795176,
+    "size": 1588343,
+    "weight": 3992867,
+    "txCount": 3370,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 42943657
+  },
+  {
+    "height": 780769,
+    "hash": "000000000000000000043659780ca85d4ab09cdba078e321220a53b133fbd34c",
+    "timestamp": 1678795207,
+    "size": 2173595,
+    "weight": 3992852,
+    "txCount": 782,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 27148791
+  },
+  {
+    "height": 780770,
+    "hash": "0000000000000000000572563c0d3ef76b75cf695d4b16e7cec4ef13cf00e1bb",
+    "timestamp": 1678795300,
+    "size": 1453514,
+    "weight": 3993419,
+    "txCount": 3071,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 22743771
+  },
+  {
+    "height": 780771,
+    "hash": "000000000000000000026c54df496cee8e9856e8dae8de7ceea712f97ba225da",
+    "timestamp": 1678795666,
+    "size": 1369233,
+    "weight": 3993309,
+    "txCount": 2347,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 26793941
+  },
+  {
+    "height": 780772,
+    "hash": "00000000000000000000afee25a420f9bd7cdbc814cb854420fbad5739d93c7c",
+    "timestamp": 1678796641,
+    "size": 1478337,
+    "weight": 3998391,
+    "txCount": 3729,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 31875602
+  },
+  {
+    "height": 780773,
+    "hash": "000000000000000000017d2a13d2edde73abacfb4f601d9e9ff34faa9b1d5c40",
+    "timestamp": 1678798504,
+    "size": 1481839,
+    "weight": 3993175,
+    "txCount": 3774,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 42082445
+  },
+  {
+    "height": 780774,
+    "hash": "00000000000000000001335362eab9965b7b2a6bf5aa8ea8d275d27905d8a86c",
+    "timestamp": 1678798479,
+    "size": 1358461,
+    "weight": 3993130,
+    "txCount": 2432,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 22681278
+  },
+  {
+    "height": 780775,
+    "hash": "0000000000000000000028bcb46c1706522f96710ee3c59ab2044eaf123c02c6",
+    "timestamp": 1678798638,
+    "size": 1682318,
+    "weight": 3992801,
+    "txCount": 3230,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 19946995
+  },
+  {
+    "height": 780776,
+    "hash": "0000000000000000000089bf6eb74aad5d8849922df27ff60a382f557100d88f",
+    "timestamp": 1678798666,
+    "size": 1402706,
+    "weight": 3992981,
+    "txCount": 1806,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 14545380
+  },
+  {
+    "height": 780777,
+    "hash": "0000000000000000000328190f3a58de2716dba7e7a973fe4bf89b13abec3bcd",
+    "timestamp": 1678800097,
+    "size": 1578909,
+    "weight": 3993363,
+    "txCount": 3195,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 47222355
+  },
+  {
+    "height": 780778,
+    "hash": "000000000000000000035d1a4374c92d1a61a5aa889ea8ef4055635fa78ed1c8",
+    "timestamp": 1678800444,
+    "size": 1611376,
+    "weight": 3993070,
+    "txCount": 3973,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 31905610
+  },
+  {
+    "height": 780779,
+    "hash": "00000000000000000001fe9d320d83231d749c0dae01f49ddab4b7d7d639f4ad",
+    "timestamp": 1678800760,
+    "size": 1504362,
+    "weight": 3993189,
+    "txCount": 2990,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 28129547
+  },
+  {
+    "height": 780780,
+    "hash": "00000000000000000001f65d31fd29c44b50dca0ed2bc97a6bfdacd7f1380a9e",
+    "timestamp": 1678801671,
+    "size": 1557025,
+    "weight": 3998272,
+    "txCount": 3328,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 44254387
+  },
+  {
+    "height": 780781,
+    "hash": "0000000000000000000182ae9affd425bbc51cafbc1518e2b4210be5d99b1ed3",
+    "timestamp": 1678802342,
+    "size": 1480575,
+    "weight": 3992886,
+    "txCount": 3349,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 34143197
+  },
+  {
+    "height": 780782,
+    "hash": "000000000000000000025da55877c5d3c6e64babaf6047d6ebdfc4557fb58bd0",
+    "timestamp": 1678803341,
+    "size": 1334046,
+    "weight": 3993366,
+    "txCount": 1925,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 35338538
+  },
+  {
+    "height": 780783,
+    "hash": "0000000000000000000347921592423c03ba6fb7c4d193d60a0b4c1b212fedd1",
+    "timestamp": 1678804270,
+    "size": 1260226,
+    "weight": 3993295,
+    "txCount": 2053,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 42058062
+  },
+  {
+    "height": 780784,
+    "hash": "00000000000000000000a04da1699e64767d8594c68fd17751d6da95ac76d9fc",
+    "timestamp": 1678804327,
+    "size": 1464007,
+    "weight": 3993052,
+    "txCount": 2736,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 30815304
+  },
+  {
+    "height": 780785,
+    "hash": "00000000000000000004c06aa263cd1b0ed9b398e2c6e5e13914c59ef221f03e",
+    "timestamp": 1678804383,
+    "size": 1977205,
+    "weight": 3992974,
+    "txCount": 1351,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 27960485
+  },
+  {
+    "height": 780786,
+    "hash": "00000000000000000006091f3660c152dab8c4a459ca0dfb9443b2c8512618ef",
+    "timestamp": 1678805541,
+    "size": 1513683,
+    "weight": 3993018,
+    "txCount": 3462,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 44205549
+  },
+  {
+    "height": 780787,
+    "hash": "00000000000000000001df7d54362e30729c7a6deaba6a0c376f3bc3a323f585",
+    "timestamp": 1678805706,
+    "size": 1526416,
+    "weight": 3992836,
+    "txCount": 2889,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 30017151
+  },
+  {
+    "height": 780788,
+    "hash": "00000000000000000002d18dcfe758def5af60266fa30108dc0fe959ad2036b2",
+    "timestamp": 1678805719,
+    "size": 1649963,
+    "weight": 3993392,
+    "txCount": 2770,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 21778088
+  },
+  {
+    "height": 780789,
+    "hash": "00000000000000000003c26534c765c9f2b9a8691d607d6fcdc19b9277a8946d",
+    "timestamp": 1678805746,
+    "size": 1516925,
+    "weight": 3993317,
+    "txCount": 1650,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 19848844
+  },
+  {
+    "height": 780790,
+    "hash": "000000000000000000012c49408280f1a7c7be8fdec57304c2e7a647e8176ed3",
+    "timestamp": 1678806229,
+    "size": 1451936,
+    "weight": 3993158,
+    "txCount": 2789,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 33256805
+  },
+  {
+    "height": 780791,
+    "hash": "0000000000000000000625706fa392bf3de5dfa4ff5dd587dff70373121bc372",
+    "timestamp": 1678806474,
+    "size": 1532754,
+    "weight": 3993147,
+    "txCount": 2150,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 24204866
+  },
+  {
+    "height": 780792,
+    "hash": "00000000000000000003a396847c2c7acb2234dc1cb506db60a4f55c0fc05a9c",
+    "timestamp": 1678806667,
+    "size": 1588714,
+    "weight": 3993052,
+    "txCount": 2037,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 25968306
+  },
+  {
+    "height": 780793,
+    "hash": "0000000000000000000110ba4415ca6def660b4f7825b52af541368581017930",
+    "timestamp": 1678807137,
+    "size": 1551840,
+    "weight": 3993168,
+    "txCount": 3705,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 27627736
+  },
+  {
+    "height": 780794,
+    "hash": "000000000000000000064a7a2bd1abba8ce92c2cb6d4d303ef5a4a89f2118c01",
+    "timestamp": 1678807195,
+    "size": 1221987,
+    "weight": 3993021,
+    "txCount": 881,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 15328820
+  },
+  {
+    "height": 780795,
+    "hash": "00000000000000000002c5f4e096f93b56ab05a37fa511ccde028cbd1c72444d",
+    "timestamp": 1678807485,
+    "size": 1270591,
+    "weight": 3993337,
+    "txCount": 1739,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 21044169
+  },
+  {
+    "height": 780796,
+    "hash": "0000000000000000000456f6846a9242613928cd17e001f14c42f44ee9f1f965",
+    "timestamp": 1678807707,
+    "size": 1620070,
+    "weight": 3993043,
+    "txCount": 2311,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 20270376
+  },
+  {
+    "height": 780797,
+    "hash": "0000000000000000000111dd1a5a87d3195ecd0ff0cdb97b199cb42b6d3dc662",
+    "timestamp": 1678808919,
+    "size": 1515009,
+    "weight": 3993411,
+    "txCount": 3034,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 43916005
+  },
+  {
+    "height": 780798,
+    "hash": "0000000000000000000594e9390698c9f2f7c73a61424c450b516ca1fe3f55d9",
+    "timestamp": 1678809625,
+    "size": 1512929,
+    "weight": 3998156,
+    "txCount": 3505,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 36491174
+  },
+  {
+    "height": 780799,
+    "hash": "00000000000000000004fa7ac12dc91fa87c76b7374d7aa0435a7d190a84efce",
+    "timestamp": 1678810156,
+    "size": 1301265,
+    "weight": 3992967,
+    "txCount": 1834,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 37482848
+  },
+  {
+    "height": 780800,
+    "hash": "00000000000000000005c15ef47b4e46e88251d38e265541ea6d1601e8ddb307",
+    "timestamp": 1678811390,
+    "size": 1358040,
+    "weight": 3992949,
+    "txCount": 2144,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 45233947
+  },
+  {
+    "height": 780801,
+    "hash": "000000000000000000057d233cd08d204146bc08dadd77c6e73dc8fac88e8452",
+    "timestamp": 1678811440,
+    "size": 1526598,
+    "weight": 3993156,
+    "txCount": 3662,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 30149056
+  },
+  {
+    "height": 780802,
+    "hash": "000000000000000000046e4c2df40dc7f02f8dca6f60c98e448d43c7fa2b5be9",
+    "timestamp": 1678811483,
+    "size": 1638039,
+    "weight": 3993015,
+    "txCount": 2756,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 23826530
+  },
+  {
+    "height": 780803,
+    "hash": "00000000000000000005f0d9f4b492dc24315da6997d5b0909dfbb3e4fcd2694",
+    "timestamp": 1678811624,
+    "size": 1742654,
+    "weight": 3992942,
+    "txCount": 2409,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 20146708
+  },
+  {
+    "height": 780804,
+    "hash": "00000000000000000000e32c33d5ddec4aa667ac41bc9ca10fe148c845907b1b",
+    "timestamp": 1678812483,
+    "size": 1485118,
+    "weight": 3998275,
+    "txCount": 3640,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 38254666
+  },
+  {
+    "height": 780805,
+    "hash": "000000000000000000047e8e8fb6ab3534c3a58100d334feec8c9404af39bac5",
+    "timestamp": 1678813503,
+    "size": 1511074,
+    "weight": 3993223,
+    "txCount": 3616,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 40176732
+  },
+  {
+    "height": 780806,
+    "hash": "000000000000000000065d3cd7473afd1bacb8de91403774f7cd535b5e990e6c",
+    "timestamp": 1678814926,
+    "size": 1480553,
+    "weight": 3993251,
+    "txCount": 3618,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 43252591
+  },
+  {
+    "height": 780807,
+    "hash": "00000000000000000003214555632349cbab068a7a90841e548f7298ca468c3c",
+    "timestamp": 1678815115,
+    "size": 1554788,
+    "weight": 3993485,
+    "txCount": 3839,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 29333012
+  },
+  {
+    "height": 780808,
+    "hash": "00000000000000000002c55e0d6313f449a87eeb2b6434039810541f74775132",
+    "timestamp": 1678816419,
+    "size": 1574303,
+    "weight": 3998276,
+    "txCount": 3727,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 42158942
+  },
+  {
+    "height": 780809,
+    "hash": "00000000000000000005f4337ea50745c91b2c8d77a38494f5c099b7e1ec3661",
+    "timestamp": 1678817641,
+    "size": 1261796,
+    "weight": 3992951,
+    "txCount": 1936,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 44713254
+  },
+  {
+    "height": 780810,
+    "hash": "0000000000000000000612c7c9abce4cae729cb700d017f9af83504c3bb9fe17",
+    "timestamp": 1678817770,
+    "size": 1552684,
+    "weight": 3993223,
+    "txCount": 2913,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 33794886
+  },
+  {
+    "height": 780811,
+    "hash": "00000000000000000005c97d7166ccf8c316624079646d96c6a3dc152df6b22b",
+    "timestamp": 1678818964,
+    "size": 1511650,
+    "weight": 3993403,
+    "txCount": 3523,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 41578061
+  },
+  {
+    "height": 780812,
+    "hash": "00000000000000000001cbab6a3189fcdb8bc960d0ee92b4f7d5c6dff58abebe",
+    "timestamp": 1678819838,
+    "size": 1532820,
+    "weight": 3992712,
+    "txCount": 3318,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 38779535
+  },
+  {
+    "height": 780813,
+    "hash": "00000000000000000003361e0908bc5739cae2db98e24e447020e87e947a605d",
+    "timestamp": 1678820625,
+    "size": 1520627,
+    "weight": 3993386,
+    "txCount": 3575,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 37735754
+  },
+  {
+    "height": 780814,
+    "hash": "000000000000000000065f5e012360a32c89bda6f5e22b2931c68089dc33387b",
+    "timestamp": 1678820736,
+    "size": 1722209,
+    "weight": 3992678,
+    "txCount": 3627,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 27316061
+  },
+  {
+    "height": 780815,
+    "hash": "00000000000000000000e26a88690a9f69fce625722ad032a2006437a91f10ba",
+    "timestamp": 1678821014,
+    "size": 1571248,
+    "weight": 3993379,
+    "txCount": 3326,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 27857364
+  },
+  {
+    "height": 780816,
+    "hash": "00000000000000000004d2ada5c75791c940a7b04e09224eed451d8894effcab",
+    "timestamp": 1678821085,
+    "size": 1967136,
+    "weight": 3993015,
+    "txCount": 1333,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 22351998
+  },
+  {
+    "height": 780817,
+    "hash": "00000000000000000005d65450893ff27e0baee742a58c6bcb7cbb70ede49302",
+    "timestamp": 1678821304,
+    "size": 1505130,
+    "weight": 3993405,
+    "txCount": 2423,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 23159020
+  },
+  {
+    "height": 780818,
+    "hash": "00000000000000000003f0fee6a844a2dd54dfdbd51e5eebe5298af84e19d086",
+    "timestamp": 1678822793,
+    "size": 1547641,
+    "weight": 3993205,
+    "txCount": 3750,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 44699637
+  },
+  {
+    "height": 780819,
+    "hash": "00000000000000000001e013ac3ddfdade6450e44234135c789622ac51053402",
+    "timestamp": 1678823399,
+    "size": 1542959,
+    "weight": 3992837,
+    "txCount": 3397,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 36977542
+  },
+  {
+    "height": 780820,
+    "hash": "000000000000000000032d6b1b7a1c2bfc92844612956e7120230af62fd78d58",
+    "timestamp": 1678823427,
+    "size": 1942700,
+    "weight": 3993404,
+    "txCount": 1867,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 22432428
+  },
+  {
+    "height": 780821,
+    "hash": "00000000000000000005ae4ea609ce828febf7b254f6721a6156ecb4877bbe3e",
+    "timestamp": 1678824235,
+    "size": 1489993,
+    "weight": 3993430,
+    "txCount": 2634,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 40906028
+  },
+  {
+    "height": 780822,
+    "hash": "00000000000000000001c352c3e98ff154a6f65dc8bc92a4fe89f9b19ee8d772",
+    "timestamp": 1678824311,
+    "size": 1335363,
+    "weight": 3992763,
+    "txCount": 1741,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 22330489
+  },
+  {
+    "height": 780823,
+    "hash": "000000000000000000046b692330899dd3e448986f827cac41358397af21a7b6",
+    "timestamp": 1678824740,
+    "size": 1383790,
+    "weight": 3993172,
+    "txCount": 2436,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 28953669
+  },
+  {
+    "height": 780824,
+    "hash": "00000000000000000003dfaed14df00c7e4faa8a468de8383a0972e8523fccd5",
+    "timestamp": 1678824898,
+    "size": 1557310,
+    "weight": 3993232,
+    "txCount": 1170,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 16319403
+  },
+  {
+    "height": 780825,
+    "hash": "00000000000000000003ed7bf2f6c6cf8b2d4a2899139248807c03c065ec5464",
+    "timestamp": 1678825019,
+    "size": 1281944,
+    "weight": 3992894,
+    "txCount": 1024,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 21415311
+  },
+  {
+    "height": 780826,
+    "hash": "000000000000000000024c550dcc48f322f1d875ae30e6116c3a7528a1e39e35",
+    "timestamp": 1678825424,
+    "size": 1262401,
+    "weight": 3993283,
+    "txCount": 1889,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 21595110
+  },
+  {
+    "height": 780827,
+    "hash": "00000000000000000006374d3d775e4909d727e86da4ead7f05a0ff8bcc33195",
+    "timestamp": 1678827168,
+    "size": 1500504,
+    "weight": 3992790,
+    "txCount": 3597,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 44616320
+  },
+  {
+    "height": 780828,
+    "hash": "00000000000000000001fc45142a97b0a08dc1aa7468fa3cbeeae3022cfbb7df",
+    "timestamp": 1678827783,
+    "size": 1541603,
+    "weight": 3993236,
+    "txCount": 3606,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 36401871
+  },
+  {
+    "height": 780829,
+    "hash": "000000000000000000038f1b778b9c4d205f6ffde5abbb1b1900d0f62cdc9d0c",
+    "timestamp": 1678828175,
+    "size": 1500700,
+    "weight": 3992959,
+    "txCount": 2342,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 28822014
+  },
+  {
+    "height": 780830,
+    "hash": "00000000000000000003c443ece022a996492edb9f177ed0e07f26869b31d52b",
+    "timestamp": 1678828844,
+    "size": 1777871,
+    "weight": 3993008,
+    "txCount": 2273,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 31654593
+  },
+  {
+    "height": 780831,
+    "hash": "000000000000000000038e1d03caaace7018f30a715741b55c6f0fd1be25490f",
+    "timestamp": 1678832019,
+    "size": 1452411,
+    "weight": 3993435,
+    "txCount": 3108,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 53760786
+  },
+  {
+    "height": 780832,
+    "hash": "00000000000000000000080b7829a5088dc0d0ab568d42577d7530117fe0330e",
+    "timestamp": 1678832283,
+    "size": 1357463,
+    "weight": 3998345,
+    "txCount": 2810,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 37859793
+  },
+  {
+    "height": 780833,
+    "hash": "000000000000000000020a1b612378514348198b44a77ef99f54c1938e90e3ca",
+    "timestamp": 1678833058,
+    "size": 1507357,
+    "weight": 3992662,
+    "txCount": 3181,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 38255916
+  },
+  {
+    "height": 780834,
+    "hash": "00000000000000000004216e6c9b13bb986635182782f5980b5fb5f96177bd55",
+    "timestamp": 1678834498,
+    "size": 1449932,
+    "weight": 3993017,
+    "txCount": 3057,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 42337838
+  },
+  {
+    "height": 780835,
+    "hash": "000000000000000000047d600abed9155f5aeca9b257d93622ac70420acb6a62",
+    "timestamp": 1678835274,
+    "size": 1522666,
+    "weight": 3992614,
+    "txCount": 2478,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 36923709
+  },
+  {
+    "height": 780836,
+    "hash": "00000000000000000003d9f8956a29a92446d269ad932ff2ea8d60d1abf60c35",
+    "timestamp": 1678835697,
+    "size": 1577635,
+    "weight": 3993445,
+    "txCount": 3352,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 32096742
+  },
+  {
+    "height": 780837,
+    "hash": "000000000000000000007ec888f8e79b93488256518068f219814058021b3972",
+    "timestamp": 1678836349,
+    "size": 1662522,
+    "weight": 3993390,
+    "txCount": 2939,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 29763390
+  },
+  {
+    "height": 780838,
+    "hash": "00000000000000000005a93cb41bcdc4b93f710ff60ecbb1f2bbaa726e776b3a",
+    "timestamp": 1678836580,
+    "size": 1691444,
+    "weight": 3993134,
+    "txCount": 2396,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 24141031
+  },
+  {
+    "height": 780839,
+    "hash": "000000000000000000044f8b45c134c9e752f71811af7e14127662ef979ebadf",
+    "timestamp": 1678836933,
+    "size": 1285167,
+    "weight": 3993153,
+    "txCount": 2352,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 22112795
+  },
+  {
+    "height": 780840,
+    "hash": "00000000000000000005203a9662921b9c992544fad5a490d917d1d5bffb7385",
+    "timestamp": 1678836942,
+    "size": 1439347,
+    "weight": 3993382,
+    "txCount": 1718,
+    "difficulty": 43551722213590.37,
+    "totalFeesSat": 14857215
+  }
+]

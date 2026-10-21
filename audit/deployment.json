@@ -1,0 +1,21 @@
+{
+  "project": "bitcoin-data-driven-geometry",
+  "accountId": "fdf8b9d8872e484aa9931c36113c7842",
+  "productionBranch": "main",
+  "domain": "https://bitcoin-geometry.com",
+  "previousProductionId": "eb2ff5cf-a6ff-49da-9186-fd9e142b69ec",
+  "previousProductionUrl": "https://eb2ff5cf.bitcoin-data-driven-geometry.pages.dev",
+  "previewUrl": "https://a1ef1571.bitcoin-data-driven-geometry.pages.dev",
+  "previewAlias": "https://codex-data-integrity-audit.bitcoin-data-driven-geometry.pages.dev",
+  "snapshotSha256": "7d8d8b400d61659f80ca1d701a5ce4e1a5cb253cfc17d718f2e9767531b05a23",
+  "status": "Published to production; all 162 served files match the user-tested preview build.",
+  "tests": 23,
+  "snapshots": 150,
+  "blocks": 22374,
+  "productionUrl": "https://81ff2cc5.bitcoin-data-driven-geometry.pages.dev",
+  "productionDeploymentShortId": "81ff2cc5",
+  "verifiedAt": "2026-10-21T03:21:24.516Z",
+  "productionFilesVerified": 162,
+  "userPreviewValidation": "User tested the preview and explicitly approved publication.",
+  "assistantBrowserValidation": "Saved browser permission denial prevented rendered checks; remote file hashes were verified."
+}

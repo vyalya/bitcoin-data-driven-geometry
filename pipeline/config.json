@@ -1,740 +1,1789 @@
 {
-  "_comment": "Single source of truth for all curated snapshot dates. Edit this file to add/change dates. Run pipeline/build_db.mjs to regenerate public/data/snapshots.parquet.",
+  "_comment": "UTC daily snapshots. Unsupported historical commentary is preserved in audit/original-editorial.json, not presented as measured fact.",
   "snapshots": [
     {
-      "id": "genesis",
+      "id": "day-2009-01-03",
+      "date": "2009-01-03",
+      "label": "Genesis block",
+      "context": "Block 0 was mined on this UTC date.",
+      "contextSources": [
+        "https://mempool.space/block/0"
+      ],
+      "contextStatus": "sourced",
+      "selectionReasons": [
+        "Missing protocol or approval anchor; verify against primary source"
+      ],
+      "category": "bitcoin"
+    },
+    {
+      "id": "day-2009-01-09",
       "date": "2009-01-09",
-      "label": "Genesis Era",
-      "narration": "January 9, 2009 — six days after the genesis block. Only 14 blocks mined. Each is 215 bytes with a single transaction. Satoshi is mining alone on a CPU. The entire Bitcoin network is one node, one miner, zero real transactions. The spine is sparse and tiny — this is the quietest day in Bitcoin history.",
-      "notes": ["6 days after genesis block. Satoshi mining alone on a CPU.", "14 blocks mined. One node, one miner, zero real transactions."]
+      "label": "Early mining",
+      "originalLabel": "Genesis Era",
+      "context": "Early mining after the genesis block.",
+      "contextSources": [
+        "https://mempool.space/block/1"
+      ],
+      "contextStatus": "sourced",
+      "category": "bitcoin"
     },
     {
-      "id": "first-tx",
+      "id": "day-2009-01-12",
       "date": "2009-01-12",
-      "label": "First Transaction",
-      "narration": "January 12, 2009 — Block 170. Satoshi sends 10 BTC to Hal Finney, the first human to receive Bitcoin. The chain is three days old. Peer-to-peer electronic cash is no longer theoretical. This transaction is still unspent today, a permanent monument in the ledger.",
-      "notes": ["Block 170: Satoshi sends 10 BTC to Hal Finney.", "First peer-to-peer Bitcoin transaction. Still visible in the UTXO set."]
+      "label": "First peer-to-peer transaction",
+      "originalLabel": "First Transaction",
+      "context": "The first recorded Bitcoin transfer between Satoshi Nakamoto and Hal Finney is included in block 170.",
+      "contextSources": [
+        "https://mempool.space/block/170",
+        "https://bitcointalk.org/index.php?topic=155054.0"
+      ],
+      "contextStatus": "sourced",
+      "category": "bitcoin"
     },
     {
-      "id": "first-exchange-rate",
+      "id": "day-2009-03-18",
+      "date": "2009-03-18",
+      "label": "Fed expands quantitative easing",
+      "category": "economy",
+      "context": "The Federal Reserve expands asset purchases and announces purchases of longer-term Treasury securities.",
+      "contextSources": [
+        "https://www.federalreserve.gov/newsevents/pressreleases/monetary20090318a.htm"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2009-06-12",
+      "date": "2009-06-12",
+      "label": "Iran presidential election",
+      "category": "politics",
+      "context": "Iran holds its disputed presidential election; large protests follow.",
+      "contextSources": [
+        "https://en.wikipedia.org/wiki/2009_Iranian_presidential_election"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2009-10-05",
       "date": "2009-10-05",
-      "label": "First Exchange Rate",
-      "narration": "October 5, 2009 — New Liberty Standard publishes the first Bitcoin exchange rate: $1 buys 1,309.03 BTC. The price is derived from electricity cost to mine. Bitcoin has a market price for the first time. The geometry is nearly flat — a few dozen blocks a day, fractions of pennies per coin.",
-      "notes": ["New Liberty Standard: $1 = 1,309.03 BTC.", "Price derived from electricity cost. First published exchange rate."]
+      "label": "New Liberty Standard exchange rate",
+      "originalLabel": "First Exchange Rate",
+      "context": "An early published Bitcoin-to-dollar exchange-rate quotation.",
+      "contextSources": [
+        "https://price.anyone.eu.org/home/linear.html"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "first-difficulty",
+      "id": "day-2009-12-30",
       "date": "2009-12-30",
-      "label": "First Difficulty Jump",
-      "narration": "December 30, 2009 — difficulty rises above 1 for the first time as mining gradually spreads beyond Satoshi's single machine. The adjustment algorithm confirms that multiple nodes are now competing. The network is no longer a solo operation.",
-      "notes": ["First difficulty adjustment beyond 1 as more CPUs join.", "Mining is no longer a one-person operation."]
+      "label": "First difficulty increase",
+      "originalLabel": "First Difficulty Jump",
+      "context": "Block 32,256 begins the first difficulty period above difficulty 1.",
+      "contextSources": [
+        "https://mempool.space/block/32256"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "first-exchange",
+      "id": "day-2010-02-06",
       "date": "2010-02-06",
-      "label": "Bitcoin Market Opens",
-      "narration": "February 6, 2010 — Bitcoin Market, the first real BTC/USD exchange, opens with a bid/ask spread. Order books exist for the first time. Price discovery moves from calculated electricity ratios to actual buyers and sellers. The spine stays sparse — almost no transactions beyond exchange operations.",
-      "notes": ["Bitcoin Market exchange opens — first real BTC/USD order book.", "Price discovery begins through actual market participants."]
+      "label": "Bitcoin Market development",
+      "originalLabel": "Bitcoin Market Opens",
+      "context": "An early development checkpoint for Bitcoin Market; trading opened later, in March.",
+      "contextSources": [
+        "https://bitcointalk.org/index.php?topic=20.0"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "pizza",
+      "id": "day-2010-05-06",
+      "date": "2010-05-06",
+      "label": "US Flash Crash",
+      "category": "markets",
+      "context": "US markets experience the Flash Crash.",
+      "contextSources": [
+        "https://www.sec.gov/newsroom/press-releases/2010-81-sec-cftc-release-preliminary-findings-review-may-6-market-events"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2010-05-22",
       "date": "2010-05-22",
-      "label": "Pizza Day",
-      "narration": "May 22, 2010 — Laszlo Hanyecz pays 10,000 BTC for two pizzas, the first real-world Bitcoin purchase. Block heights around 57K. Most blocks still carry just 1 transaction. Those 10,000 BTC would be worth over $700 million in 2024.",
-      "notes": ["10,000 BTC for two pizzas — first real-world Bitcoin purchase.", "Block ~57K. Worth ~$40 at the time. Worth ~$700M in 2024."]
+      "label": "Bitcoin Pizza Day",
+      "originalLabel": "Pizza Day",
+      "context": "Laszlo Hanyecz reports completing a pizza purchase for 10,000 BTC.",
+      "contextSources": [
+        "https://bitcointalk.org/index.php?topic=137.0"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "slashdot",
+      "id": "day-2010-07-11",
       "date": "2010-07-11",
-      "label": "Slashdot Effect",
-      "narration": "July 11, 2010 — a Slashdot post titled 'Bitcoin P2P Currency' sends 200,000+ tech readers to investigate. Price spikes from $0.008 to $0.08 in five days — a 10× move. Block sizes begin growing as new users arrive and transact. The network's first viral moment.",
-      "notes": ["Slashdot article sends 200K+ tech readers to Bitcoin.", "Price 10×s in 5 days. First viral discovery moment."]
+      "label": "Bitcoin reaches Slashdot",
+      "originalLabel": "Slashdot Effect",
+      "context": "Slashdot publishes its Bitcoin version 0.3 story.",
+      "contextSources": [
+        "https://news.slashdot.org/story/10/07/11/1747245/bitcoin-releases-version-03"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "overflow-bug",
+      "id": "day-2010-08-15",
       "date": "2010-08-15",
-      "label": "Value Overflow Bug",
-      "narration": "August 15, 2010 — an integer overflow in the transaction validation code allows 184 billion BTC to be created in a single transaction in block 74638. Satoshi and developers coordinate the fastest emergency patch in Bitcoin history — patched and rolled back within five hours. The fork is resolved in under 19 blocks.",
-      "notes": ["Integer overflow bug: 184 billion BTC created in block 74638.", "Emergency patch deployed and chain rolled back in under 5 hours."]
+      "label": "Value-overflow incident",
+      "originalLabel": "Value Overflow Bug",
+      "context": "Developers respond to the value-overflow bug. This geometry shows the surviving canonical chain, not the invalid branch.",
+      "contextSources": [
+        "https://bitcointalk.org/index.php?topic=823.0"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "million-dollar-network",
-      "date": "2010-11-06",
-      "label": "$1M Market Cap",
-      "narration": "November 6, 2010 — Bitcoin's total market cap crosses $1 million for the first time. Price is around $0.50. The network is still tiny by any measure, but a threshold has been crossed. The spine shows a few hundred transactions per day — small by 2024 standards, enormous relative to where it started.",
-      "notes": ["Bitcoin market cap crosses $1 million for the first time.", "Price ~$0.50. A financial threshold is crossed."]
+      "id": "day-2010-12-17",
+      "date": "2010-12-17",
+      "label": "Tunisian uprising begins",
+      "category": "world",
+      "context": "Protests beginning in Tunisia become a starting point of the Arab Spring.",
+      "contextSources": [
+        "https://digitallibrary.un.org/record/755593/files/A_HRC_23_46_Add.1-AR.pdf"
+      ],
+      "contextStatus": "sourced historical context"
     },
     {
-      "id": "dollar-parity",
+      "id": "day-2011-02-09",
       "date": "2011-02-09",
-      "label": "Dollar Parity",
-      "narration": "February 9, 2011 — Bitcoin reaches $1 USD parity for the first time. One coin, one dollar. A psychological milestone that makes headlines in early tech media. Block times are orderly, hashrate is growing. The geometry is clean and rhythmic — the network runs beautifully as price discovery begins in earnest.",
-      "notes": ["BTC reaches $1 USD parity for the first time.", "Psychological milestone covered by tech media."]
+      "label": "Dollar parity",
+      "originalLabel": "Dollar Parity",
+      "context": "Bitcoin reaches dollar parity in the daily reference-price series.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "time-magazine",
+      "id": "day-2011-03-11",
+      "date": "2011-03-11",
+      "label": "Tohoku earthquake and Fukushima",
+      "category": "world",
+      "context": "An earthquake and tsunami strike Japan, triggering the Fukushima Daiichi nuclear accident.",
+      "contextSources": [
+        "https://www-pub.iaea.org/mtcd/publications/pdf/pub1710-reportbythedg-web.pdf"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2011-04-16",
       "date": "2011-04-16",
-      "label": "TIME Magazine",
-      "narration": "April 16, 2011 — TIME Magazine publishes 'Online Cash Bitcoin Could Challenge Governments, Banks.' Price runs from $1 to $8 in days. The first wave of mainstream media drives speculative interest. Block sizes begin expanding as new users transact, but the network handles it smoothly.",
-      "notes": ["TIME Magazine covers Bitcoin — price runs from $1 to $8.", "First mainstream media wave drives speculative interest."]
+      "label": "TIME covers Bitcoin",
+      "originalLabel": "TIME Magazine",
+      "context": "TIME\u2019s Techland article brings Bitcoin to a broader audience.",
+      "contextSources": [
+        "https://techland.time.com/2011/04/16/online-cash-bitcoin-could-challenge-governments/"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "bubble-2011",
+      "id": "day-2011-06-19",
       "date": "2011-06-19",
-      "label": "2011 Bubble Burst",
-      "narration": "June 19, 2011 — Bitcoin's first major bubble just burst. BTC hit $31, then crashed to $2. Mt. Gox has been hacked for the first time. Blocks are small, transactions few. Early chaos, but the network keeps producing blocks every ~10 minutes.",
-      "notes": ["First major bubble — BTC hit $31 then crashed to $2.", "Mt. Gox hacked for the first time. Early chaos."]
+      "label": "Mt. Gox security breach",
+      "originalLabel": "2011 Bubble Burst",
+      "context": "A security incident disrupts trading at the early Bitcoin exchange.",
+      "contextSources": [
+        "https://github.com/MagicalTux/mtgox-2011-analysis/blob/master/REPORT.md"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "first-trough",
+      "id": "day-2011-08-05",
+      "date": "2011-08-05",
+      "label": "US credit rating downgrade",
+      "category": "economy",
+      "context": "Standard & Poor\u2019s lowers the United States\u2019 long-term sovereign rating from AAA to AA+.",
+      "contextSources": [
+        "https://www.prnewswire.com/news-releases/united-states-of-america-long-term-rating-lowered-to-aa-due-to-political-risks-rising-debt-burden-outlook-negative-126870828.html"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2011-09-06",
+      "date": "2011-09-06",
+      "label": "Gold's 2011 record",
+      "category": "gold",
+      "context": "Gold reaches its 2011 London PM fixing record during the sovereign-debt crisis.",
+      "contextSources": [
+        "https://www.gold.org/news-and-events/press-releases/record-investment-demand-boosts-global-gold-demand-all-time-high"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2011-11-18",
       "date": "2011-11-18",
-      "label": "First Trough",
-      "narration": "November 18, 2011 — Bitcoin touches ~$2 after its first major crash. The press calls it dead for the first time. But the spine tells a different story: blocks arrive every 10 minutes, difficulty adjusts normally, the protocol is indifferent to price. This is the first of many 'Bitcoin obituaries' that will be written.",
-      "notes": ["Post-mania bottom: price ~$2. First 'Bitcoin is dead' headlines.", "The protocol keeps producing blocks. Unphased by market collapse."]
+      "label": "2011 bear-market trough",
+      "originalLabel": "First Trough",
+      "context": "A low-price checkpoint near the end of Bitcoin\u2019s first major market cycle.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "linode-hack",
+      "id": "day-2012-03-01",
       "date": "2012-03-01",
-      "label": "Linode Hack",
-      "narration": "March 1, 2012 — attackers compromise Linode's hosting infrastructure and steal 46,703 BTC from several Bitcoin services, including Bitcoinica. It is the first major infrastructure-level security failure — not a protocol bug, but a custodial failure. The lesson about self-custody is being written in real losses.",
-      "notes": ["46,703 BTC stolen from Linode-hosted Bitcoin services.", "First major infrastructure/custodial security failure."]
+      "label": "Linode security breach",
+      "originalLabel": "Linode Hack",
+      "context": "A hosting-account compromise affects several Bitcoin services.",
+      "contextSources": [
+        "https://bitcointalk.org/index.php?topic=66979.0"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "baseline-2012",
-      "date": "2012-06-15",
-      "label": "2012 Quiet Baseline",
-      "narration": "June 15, 2012 — mid-year quiet. Bitcoin is trading around $7. Mempool is nearly empty, fees are fractions of a cent, blocks arrive like clockwork at roughly one every 10 minutes. Pre-halving calm. This is what a healthy, uncontested Bitcoin network looks like.",
-      "notes": ["Mid-2012 baseline: ~$7 price, near-zero fees, textbook block cadence.", "Pre-halving quiet. Network operating normally with minimal stress."]
+      "id": "day-2012-07-26",
+      "date": "2012-07-26",
+      "label": "Draghi: whatever it takes",
+      "category": "economy",
+      "context": "ECB President Mario Draghi pledges to do what is necessary within the bank\u2019s mandate to preserve the euro.",
+      "contextSources": [
+        "https://www.ecb.europa.eu/press/key/date/2012/html/sp120726.mt.html"
+      ],
+      "contextStatus": "sourced historical context"
     },
     {
-      "id": "btc-foundation",
+      "id": "day-2012-09-27",
       "date": "2012-09-27",
-      "label": "Bitcoin Foundation",
-      "narration": "September 27, 2012 — the Bitcoin Foundation is chartered as the first formal industry governance body. Gavin Andresen, Jon Matonis, and others aim to bring structure to protocol development and legal advocacy. The network infrastructure beneath remains unchanged — the geometry is calm.",
-      "notes": ["Bitcoin Foundation chartered — first formal industry governance.", "First attempt at structured protocol stewardship and legal advocacy."]
+      "label": "Bitcoin Foundation launches",
+      "originalLabel": "Bitcoin Foundation",
+      "context": "Gavin Andresen announces the Bitcoin Foundation.",
+      "contextSources": [
+        "https://bitcointalk.org/index.php?topic=113400.0"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "halving-2012",
+      "id": "day-2012-11-06",
+      "date": "2012-11-06",
+      "label": "Obama reelected",
+      "category": "politics",
+      "context": "US presidential election day. Barack Obama wins reelection; vote counting extends beyond this UTC snapshot.",
+      "contextSources": [
+        "https://www.archives.gov/electoral-college/2012"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2012-11-28",
       "date": "2012-11-28",
-      "label": "First Halving",
-      "narration": "November 28, 2012 — the first halving reduces the block reward from 50 to 25 BTC. Block 210,000. Hashrate barely flinches. The supply shock is mathematical and pre-scheduled — the protocol knows no other way. Price is around $12. The first empirical test of the halving thesis.",
-      "notes": ["First halving: block reward 50 → 25 BTC at block 210,000.", "Price ~$12. First test of the halving supply shock thesis."]
+      "label": "First halving",
+      "originalLabel": "First Halving",
+      "context": "The subsidy became 25 BTC at block 210,000.",
+      "contextSources": [
+        "https://mempool.space/block/210000"
+      ],
+      "contextStatus": "sourced",
+      "category": "bitcoin"
     },
     {
-      "id": "hard-fork-2013",
+      "id": "day-2013-03-11",
       "date": "2013-03-11",
-      "label": "Accidental Hard Fork",
-      "narration": "March 11, 2013 — a software incompatibility between Bitcoin 0.8 and 0.7 clients causes an accidental chain split lasting six hours. Two versions of the blockchain exist simultaneously. Gavin Andresen coordinates miners to roll back to the shorter chain. The closest Bitcoin has come to a consensus failure under real economic conditions.",
-      "notes": ["v0.8 vs v0.7 incompatibility causes 6-hour chain split.", "Emergency coordination rolls back to shorter chain. First consensus failure under load."]
+      "label": "Accidental Bitcoin chain split",
+      "originalLabel": "Accidental Hard Fork",
+      "context": "A block-processing incompatibility splits the network. The displayed blocks belong to the surviving canonical chain.",
+      "contextSources": [
+        "https://github.com/bitcoin/bips/blob/master/bip-0050.mediawiki"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "bubble-2013",
+      "id": "day-2013-03-25",
+      "date": "2013-03-25",
+      "label": "Cyprus bank bailout agreement",
+      "category": "economy",
+      "context": "The Eurogroup announces an agreement concerning Cyprus\u2019s bank restructuring and bailout.",
+      "contextSources": [
+        "https://www.consilium.europa.eu/en/press/press-releases/2013/03/25/statement-by-the-eurogroup-president-on-cyprus-25-march-2013/"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2013-04-10",
       "date": "2013-04-10",
-      "label": "2013 Bubble Pop",
-      "narration": "April 10, 2013 — BTC crashed from $266 to $50 in hours. Fast blocks at 452s signal ASICs arriving and hashrate surging. Block sizes vary wildly — some nearly empty, others packed. The network is growing up.",
-      "notes": ["BTC fell from $266 to $50 in hours.", "Fast blocks (452s) — ASICs arriving, hashrate surging."]
+      "label": "April 2013 market reversal",
+      "originalLabel": "2013 Bubble Pop",
+      "context": "The April 2013 speculative rally reaches its reversal period.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "post-cyprus-floor",
-      "date": "2013-07-04",
-      "label": "Post-Cyprus Floor",
-      "narration": "July 4, 2013 — after the Cyprus-driven frenzy and subsequent crash, Bitcoin settles near $88. Accumulation quietly begins. Hashrate continues climbing as ASICs proliferate globally. The geometry is calmer than April — the panic has passed, the protocol hasn't noticed.",
-      "notes": ["Post-Cyprus bottom: BTC settles at ~$88. Quiet accumulation.", "Hashrate climbing as ASICs proliferate despite the price crash."]
+      "id": "day-2013-06-06",
+      "date": "2013-06-06",
+      "label": "Snowden surveillance disclosures",
+      "category": "technology",
+      "context": "NSA surveillance disclosures bring digital privacy into worldwide debate.",
+      "contextSources": [
+        "https://www.theguardian.com/world/2013/jun/06/nsa-phone-records-verizon-court-order"
+      ],
+      "contextStatus": "sourced historical context"
     },
     {
-      "id": "silk-road-seized",
+      "id": "day-2013-10-02",
       "date": "2013-10-02",
-      "label": "Silk Road Seized",
-      "narration": "October 2, 2013 — the FBI seizes Silk Road, arresting Ross Ulbricht and taking possession of over 26,000 BTC. The darknet marketplace had been the largest real-world Bitcoin commerce venue since 2011. Price briefly dips then recovers. The network produces blocks through the arrest without interruption.",
-      "notes": ["FBI seizes Silk Road, arrests Ulbricht, takes 26,000+ BTC.", "Price dips then recovers. Blocks keep coming. Protocol is neutral."]
+      "label": "Silk Road shutdown",
+      "originalLabel": "Silk Road Seized",
+      "context": "US authorities shut down the Silk Road marketplace.",
+      "contextSources": [
+        "https://www.justice.gov/archive/usao/nys/pressreleases/October13/SilkRoadSeizurePR.php"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "senate-hearing",
+      "id": "day-2013-11-19",
       "date": "2013-11-19",
-      "label": "Senate Hearing",
-      "narration": "November 19, 2013 — the U.S. Senate holds the first Bitcoin hearings, and regulators express surprisingly open-minded views. Price hits $900 and briefly surpasses the spot price of an ounce of gold. The first time government legitimized rather than threatened the asset. The network is absorbing the surge in transaction interest.",
-      "notes": ["U.S. Senate hearings express open-minded view of Bitcoin.", "Price hits $900, briefly surpasses gold spot price. First legitimization."]
+      "label": "Senate virtual-currency hearing",
+      "originalLabel": "Senate Hearing",
+      "context": "US Senate subcommittees examine the present and future impact of virtual currency.",
+      "contextSources": [
+        "https://www.banking.senate.gov/hearings/the-present-and-future-impact-of-virtual-currency"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "china-pboc-ban",
+      "id": "day-2013-12-18",
       "date": "2013-12-18",
-      "label": "China PBOC Ban",
-      "narration": "December 18, 2013 — the PBOC prohibits Chinese financial institutions from transacting in Bitcoin. It is the first major sovereign prohibition. Price falls 50% in days from the November ATH. But the blockchain doesn't stop. Miners in China keep producing blocks, indifferent to the regulatory decree.",
-      "notes": ["PBOC bans Chinese financial institutions from Bitcoin transactions.", "First major sovereign prohibition. Price -50% but blocks keep coming."]
+      "label": "China payment restrictions: aftermath",
+      "originalLabel": "China PBOC Ban",
+      "context": "A December market checkpoint after China\u2019s initial Bitcoin restrictions, announced earlier that month.",
+      "contextSources": [
+        "https://wwws.loc.gov/law/help/cryptoassets/china.php"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "mtgox",
+      "id": "day-2014-02-24",
       "date": "2014-02-24",
-      "label": "Mt. Gox Collapse",
-      "narration": "February 24, 2014 — Mt. Gox declared bankruptcy. 850,000 BTC lost. Hashrate barely 0.026 EH/s. A dark day for Bitcoin trust, but the blocks keep coming. Block sizes range from tiny coinbase-only to full 1MB. The protocol is indifferent to market panic.",
-      "notes": ["Mt. Gox declared bankruptcy. 850,000 BTC lost.", "Hashrate barely 0.026 EH/s. Dark day for Bitcoin trust."]
+      "label": "Mt. Gox crisis",
+      "originalLabel": "Mt. Gox Collapse",
+      "context": "A checkpoint during the exchange\u2019s closure crisis; its Japanese bankruptcy filing followed on February 28.",
+      "contextSources": [
+        "https://www.mtgox.com/"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "irs-property",
+      "id": "day-2014-03-18",
+      "date": "2014-03-18",
+      "label": "Russia annexes Crimea",
+      "category": "war",
+      "context": "Russia announces the annexation of Crimea, which is internationally contested.",
+      "contextSources": [
+        "https://www.un.org/sg/en/content/highlight/2014-03-18.html"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2014-03-25",
       "date": "2014-03-25",
-      "label": "IRS Property Ruling",
-      "narration": "March 25, 2014 — the IRS issues Notice 2014-21 declaring Bitcoin to be property for tax purposes, not currency. Every sale is now a taxable event. The ruling crystallizes the compliance landscape permanently and drives some early adopters into tax headaches for years of undeclared gains. The network continues unconcerned.",
-      "notes": ["IRS Notice 2014-21: Bitcoin is property, not currency.", "Every sale becomes a taxable event. Compliance landscape crystallizes."]
+      "label": "IRS Bitcoin tax guidance",
+      "originalLabel": "IRS Property Ruling",
+      "context": "The IRS announces its treatment of virtual currency as property for US federal tax purposes.",
+      "contextSources": [
+        "https://content.govdelivery.com/accounts/USIRS/bulletins/ad0dfb"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "usms-auction",
-      "date": "2014-06-02",
-      "label": "First USMS BTC Auction",
-      "narration": "June 2, 2014 — the U.S. Marshals Service auctions 29,657 BTC seized from Silk Road. Tim Draper wins the entire lot. It is the first time a major institutional player acquires Bitcoin through government-run channels, legitimizing the asset for funds that required legal provenance. This is the institutional narrative in its earliest form.",
-      "notes": ["US Marshals auction 29,657 Silk Road BTC. Tim Draper wins all.", "First institutional acquisition via government-run channels."]
+      "id": "day-2014-06-27",
+      "date": "2014-06-27",
+      "label": "First US Marshals Bitcoin auction",
+      "category": "bitcoin",
+      "context": "The US Marshals Service holds its first auction of seized Silk Road bitcoins.",
+      "contextSources": [
+        "https://www.sec.gov/Archives/edgar/data/1436229/000141588914001925/ex99-1.htm"
+      ],
+      "contextStatus": "sourced historical context"
     },
     {
-      "id": "bear-2014",
+      "id": "day-2014-08-08",
+      "date": "2014-08-08",
+      "label": "Ebola international emergency",
+      "category": "world",
+      "context": "WHO declares the West African Ebola outbreak a public-health emergency of international concern.",
+      "contextSources": [
+        "https://www.who.int/news/item/08-08-2014-statement-on-the-1st-meeting-of-the-ihr-emergency-committee-on-the-2014-ebola-outbreak-in-west-africa"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2014-10-06",
       "date": "2014-10-06",
-      "label": "2014 Bear Low",
-      "narration": "October 6, 2014 — Bitcoin approaches ~$275, the low of a prolonged bear market following the Mt. Gox collapse. Eighteen months of pain. But the blockchain has grown dramatically: hashrate has climbed even through the price fall, driven by ASIC manufacturers who sell machines regardless of market conditions. Proof of work doesn't stop because price drops.",
-      "notes": ["~$275 bear market low, 18 months post-Mt. Gox collapse.", "Hashrate climbed through the entire bear. ASICs don't care about price."]
+      "label": "2014 autumn selloff",
+      "originalLabel": "2014 Bear Low",
+      "context": "An autumn checkpoint in the prolonged 2014 Bitcoin drawdown.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "bear-2015",
+      "id": "day-2015-01-14",
       "date": "2015-01-14",
-      "label": "2015 Bear Bottom",
-      "narration": "January 14, 2015 — the deepest bear market despair. BTC is around $200. But the network is quietly building: 0.36 EH/s, steady 596s block intervals. Blocks show growing variety in size — real economic activity underneath the price collapse.",
-      "notes": ["BTC ~$200. Deepest bear market despair.", "Network quietly building — 0.36 EH/s, steady blocks."]
+      "label": "2015 bear-market trough",
+      "originalLabel": "2015 Bear Bottom",
+      "context": "A January checkpoint near the low of the 2014\u201315 drawdown.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "bip66-fork",
+      "id": "day-2015-01-15",
+      "date": "2015-01-15",
+      "label": "Swiss franc currency shock",
+      "category": "economy",
+      "context": "The Swiss National Bank removes its minimum exchange rate against the euro.",
+      "contextSources": [
+        "https://www.snb.ch/en/publications/communication/press-releases/2015/pre_20150115"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2015-07-04",
       "date": "2015-07-04",
-      "label": "BIP66 Fork Incident",
-      "narration": "July 4, 2015 — a bug in how major miners handle BIP66 (strict DER signature encoding) leads to six consecutive orphaned blocks and a temporary chain split. Miners were validating block headers without fully validating transactions — SPV mining at scale fails for the first time. A hard lesson in the gap between spec and implementation.",
-      "notes": ["BIP66 deployment bug causes 6 consecutive empty orphan blocks.", "SPV mining failure exposes gap between spec and implementation."]
+      "label": "BIP66 invalid-block alert",
+      "originalLabel": "BIP66 Fork Incident",
+      "context": "Bitcoin.org warns about invalid blocks during the BIP66 upgrade. This dataset contains canonical blocks.",
+      "contextSources": [
+        "https://bitcoin.org/en/alert/2015-07-04-spv-mining"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "economist-cover",
+      "id": "day-2015-08-24",
+      "date": "2015-08-24",
+      "label": "China's Black Monday",
+      "category": "markets",
+      "context": "Chinese equities fall sharply during a global market selloff.",
+      "contextSources": [
+        "https://www.euronews.com/2015/08/24/china-s-black-monday-a-symptom-of-wider-malaise-in-the-world-s-second-largest"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2015-10-31",
       "date": "2015-10-31",
-      "label": "Economist Cover",
-      "narration": "October 31, 2015 — The Economist publishes 'The Trust Machine,' arguing that Bitcoin's underlying blockchain technology deserves serious institutional attention. It is the first serious treatment by a major financial publication, separating 'Bitcoin the blockchain' from 'Bitcoin the speculative asset.' The enterprise blockchain era begins here.",
-      "notes": ["The Economist 'The Trust Machine' cover story.", "First serious institutional framing — separates blockchain from speculation."]
+      "label": "The Economist: The trust machine",
+      "originalLabel": "Economist Cover",
+      "context": "The Economist features blockchain in its October 31 issue.",
+      "contextSources": [
+        "https://www.economist.com/leaders/2015/10/31/the-trust-machine"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "hearn-defection",
+      "id": "day-2015-11-13",
+      "date": "2015-11-13",
+      "label": "Paris attacks",
+      "category": "world",
+      "context": "Coordinated terrorist attacks take place in Paris.",
+      "contextSources": [
+        "https://press.un.org/en/2015/sgsm17325.doc.htm"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2016-01-14",
       "date": "2016-01-14",
-      "label": "Hearn Defection",
-      "narration": "January 14, 2016 — Bitcoin core developer Mike Hearn publishes 'The resolution of the Bitcoin experiment,' declaring Bitcoin a failed project. Price drops 10% same day. The scaling debate reaches its most acrimonious point. But the blockchain keeps producing blocks at 10-minute intervals, indifferent to the drama of its developers.",
-      "notes": ["Mike Hearn: 'Bitcoin has failed' — dev exodus fear. Price -10%.", "Scaling war at its peak. Protocol keeps producing blocks regardless."]
+      "label": "Mike Hearn\u2019s Bitcoin departure",
+      "originalLabel": "Hearn Defection",
+      "context": "Mike Hearn publishes his account of leaving the Bitcoin project.",
+      "contextSources": [
+        "https://medium.com/mike-hearn/the-resolution-of-the-bitcoin-experiment-dabb30201f7"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "halving-2016",
+      "id": "day-2016-03-09",
+      "date": "2016-03-09",
+      "label": "AlphaGo wins first Lee Sedol game",
+      "category": "ai",
+      "context": "AlphaGo plays and wins its first match game against Lee Sedol.",
+      "contextSources": [
+        "https://blog.google/innovation-and-ai/products/alphagos-ultimate-challenge/"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2016-06-17",
+      "date": "2016-06-17",
+      "label": "The DAO attack",
+      "category": "technology",
+      "context": "An exploit drains funds from The DAO on Ethereum; this snapshot measures Bitcoin on that date.",
+      "contextSources": [
+        "https://blog.ethereum.org/2016/06/17/critical-update-re-dao-vulnerability"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2016-06-24",
+      "date": "2016-06-24",
+      "label": "Brexit result",
+      "category": "politics",
+      "context": "The UK referendum result confirms a vote to leave the European Union.",
+      "contextSources": [
+        "https://www.bankofengland.co.uk/news/2016/june/statement-from-the-governor-of-the-boe-following-the-eu-referendum-result"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2016-07-09",
       "date": "2016-07-09",
-      "label": "2016 Halving",
-      "narration": "July 9, 2016 — the 2nd halving. Block subsidy drops from 25 to 12.5 BTC. Hashrate at 1.6 EH/s. The network is calm, mempool clear. This is the quiet before the 2017 storm. Notice how blocks near the halving boundary are packed — miners racing.",
-      "notes": ["2nd halving — subsidy 25 → 12.5 BTC per block.", "1.6 EH/s. Calm before the 2017 storm. Block 420,000 mined this day."]
+      "label": "Second halving",
+      "originalLabel": "2016 Halving",
+      "context": "The subsidy became 12.5 BTC at block 420,000.",
+      "contextSources": [
+        "https://mempool.space/block/420000"
+      ],
+      "contextStatus": "sourced",
+      "category": "bitcoin"
     },
     {
-      "id": "bitfinex-hack",
+      "id": "day-2016-08-02",
       "date": "2016-08-02",
-      "label": "Bitfinex Hack",
-      "narration": "August 2, 2016 — Bitfinex is hacked for 119,756 BTC. The exchange's novel response: socialize losses across all accounts, issuing BFX tokens representing the shortfall. Price falls 20% in hours. The loss is eventually repaid in full — but not before months of uncertainty and one of the largest exchange thefts since Mt. Gox.",
-      "notes": ["119,756 BTC stolen from Bitfinex multi-sig wallets.", "Exchange socializes 36% losses across all accounts. Price -20%."]
+      "label": "Bitfinex security breach",
+      "originalLabel": "Bitfinex Hack",
+      "context": "Bitfinex halts trading after discovering a Bitcoin-wallet security breach.",
+      "contextSources": [
+        "https://blog.bitfinex.com/announcements/security-breach/"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "thousand-returns",
-      "date": "2016-11-28",
-      "label": "$1,000 Returns",
-      "narration": "November 28, 2016 — Bitcoin crosses $1,000 for the first time since the 2013 bubble, after nearly three years below that level. The halving thesis is beginning to play out. Transaction volumes are rising. The spine shows denser, heavier blocks than the last time Bitcoin was at this price.",
-      "notes": ["BTC crosses $1,000 after ~3 years below it.", "The halving thesis begins to play out. Blocks are denser than in 2013."]
+      "id": "day-2016-11-08",
+      "date": "2016-11-08",
+      "label": "US election: Trump wins",
+      "category": "politics",
+      "context": "US presidential election day. Donald Trump wins; the result becomes clear on November 9 UTC.",
+      "contextSources": [
+        "https://www.archives.gov/electoral-college/2016"
+      ],
+      "contextStatus": "sourced historical context"
     },
     {
-      "id": "first-etf-reject",
+      "id": "day-2017-03-10",
       "date": "2017-03-10",
-      "label": "First ETF Rejection",
-      "narration": "March 10, 2017 — the SEC rejects the Winklevoss Bitcoin ETF application, citing concerns about market manipulation and lack of regulated surveillance-sharing agreements. Price drops briefly then recovers. The first chapter of a seven-year ETF saga opens. The question of institutional access becomes the defining regulatory narrative for the decade.",
-      "notes": ["SEC rejects Winklevoss spot BTC ETF — first ETF chapter opens.", "Price dips then recovers. Seven-year ETF saga begins."]
+      "label": "Winklevoss ETF proposal rejected",
+      "originalLabel": "First ETF Rejection",
+      "context": "The SEC disapproves the proposed listing of the Winklevoss Bitcoin Trust.",
+      "contextSources": [
+        "https://www.sec.gov/files/rules/sro/batsbzx/2017/34-80206.pdf"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "japan-legal",
+      "id": "day-2017-04-01",
       "date": "2017-04-01",
-      "label": "Japan Legalizes Bitcoin",
-      "narration": "April 1, 2017 — Japan's Payment Services Act amendments officially recognize Bitcoin as a legal payment method. Major retailers and exchanges begin offering Bitcoin payments. Japan becomes the first G7 nation to legally integrate Bitcoin into its payment infrastructure. Yen-denominated volume spikes. The spine grows busier.",
-      "notes": ["Japan recognizes Bitcoin as legal payment — first G7 acceptance.", "Yen-denominated volume spikes. Major retailers begin integration."]
+      "label": "Japan\u2019s exchange rules take effect",
+      "originalLabel": "Japan Legalizes Bitcoin",
+      "context": "Japan\u2019s amended Payment Services Act introduces registration for cryptocurrency exchanges.",
+      "contextSources": [
+        "https://www.fsa.go.jp/policy/virtual_currency/index.html"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "segwit-lockin",
+      "id": "day-2017-05-12",
+      "date": "2017-05-12",
+      "label": "WannaCry ransomware outbreak",
+      "category": "technology",
+      "context": "The WannaCry ransomware outbreak spreads internationally.",
+      "contextSources": [
+        "https://www.cisa.gov/sites/default/files/Annual_Reports/NCCIC_Year_in_Review_2017_Final.pdf"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2017-07-31",
       "date": "2017-07-31",
-      "label": "SegWit Lock-in",
-      "narration": "July 31, 2017 — UASF (BIP148) pressure and miner signaling combine to lock in SegWit activation after a year-long scaling civil war. It is the most contentious technical governance episode in Bitcoin's history to that point. The fix for transaction malleability and the foundation for the Lightning Network has finally won.",
-      "notes": ["UASF forces SegWit lock-in after a year-long scaling civil war.", "Foundation for Lightning Network secured. Malleability fix activated."]
+      "label": "UASF eve",
+      "originalLabel": "SegWit Lock-in",
+      "context": "The day before BIP148\u2019s August 1 activation date; SegWit lock-in followed on August 9.",
+      "contextSources": [
+        "https://github.com/bitcoin/bips/blob/master/bip-0148.mediawiki"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "bch-fork",
+      "id": "day-2017-08-01",
       "date": "2017-08-01",
-      "label": "Bitcoin Cash Fork",
-      "narration": "August 1, 2017 — Bitcoin Cash splits from Bitcoin at block 478,558. It is the first major contentious hard fork — every BTC holder receives an equivalent BCH balance. The chain split is clean and final. Two protocols, two communities, one shared history. The geometry shows Bitcoin handling the split without disruption.",
-      "notes": ["First major contentious chain split — Bitcoin Cash born at block 478,558.", "Every BTC holder credited BCH. Two protocols, one shared history."]
+      "label": "Bitcoin Cash chain split",
+      "originalLabel": "Bitcoin Cash Fork",
+      "context": "Bitcoin Cash separates from Bitcoin. This visualization continues to follow Bitcoin\u2019s chain.",
+      "contextSources": [
+        "https://www.bitcoincash.org/"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "china-exchange-ban",
+      "id": "day-2017-08-09",
+      "date": "2017-08-09",
+      "label": "SegWit locks in",
+      "category": "bitcoin",
+      "context": "Block 479,808 begins SegWit\u2019s locked-in period, before activation on August 24.",
+      "contextSources": [
+        "https://mempool.space/block/479808"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2017-08-24",
+      "date": "2017-08-24",
+      "label": "SegWit activation",
+      "context": "SegWit activated at block 481,824.",
+      "contextSources": [
+        "https://mempool.space/block/481824",
+        "https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki",
+        "https://bitcoincore.org/en/segwit_wallet_dev/"
+      ],
+      "contextStatus": "sourced",
+      "selectionReasons": [
+        "Missing protocol or approval anchor; verify against primary source"
+      ],
+      "category": "bitcoin"
+    },
+    {
+      "id": "day-2017-09-04",
       "date": "2017-09-04",
-      "label": "China Exchange Ban",
-      "narration": "September 4, 2017 — China bans ICOs and announces the closure of all domestic cryptocurrency exchanges. BTC falls 25% in days. But Chinese miners keep hashing, Chinese nodes keep validating — only the exchanges go dark. The network routes around the ban within weeks as trading migrates to OTC and offshore venues.",
-      "notes": ["PBOC bans ICOs and closes all Chinese crypto exchanges.", "BTC -25%. But miners and nodes keep running. Exchange activity migrates OTC."]
+      "label": "China bans ICO fundraising",
+      "originalLabel": "China Exchange Ban",
+      "context": "Chinese authorities announce restrictions on initial coin offerings.",
+      "contextSources": [
+        "https://www.cac.gov.cn/2017-09/04/c_1121603512.htm"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "ath-2017",
+      "id": "day-2017-12-17",
       "date": "2017-12-17",
-      "label": "2017 ATH $19,783",
-      "narration": "December 17, 2017 — Bitcoin reaches $19,783 on Coinbase, the all-time high of the 2017 bull cycle. CME futures launched three days earlier. The retail frenzy is at its peak — Google searches for 'buy bitcoin' are at all-time highs. The mempool is already overflowing. The 2018 crash will begin in weeks.",
-      "notes": ["$19,783 ATH on Coinbase — peak of 2017 retail mania.", "CME futures launched 3 days prior. Mempool already overwhelmed."]
+      "label": "2017 bull-market peak",
+      "originalLabel": "2017 ATH $19,783",
+      "context": "A checkpoint at the crest of the December 2017 rally.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "bull-2017",
+      "id": "day-2017-12-20",
       "date": "2017-12-20",
-      "label": "2017 Bull Run Peak",
-      "narration": "December 20, 2017 — BTC near $20K. The spine glows hot: every block packed near 4 MWU with 2,000-3,500 transactions. 343K pending transactions in the mempool. Congestion score 4.7/10. Fee pressure at 2.9/10. The settlement ring stays full — blocks still arriving on schedule despite the chaos.",
-      "notes": ["BTC near $20K. 343K mempool transactions.", "13 EH/s hashrate. Congestion score 4.7 — network stressed. Block 500K."]
+      "label": "December 2017 fee surge",
+      "originalLabel": "2017 Bull Run Peak",
+      "context": "A high-fee day during the December 2017 activity surge.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=HashRate,TxCnt,FeeTotNtv&frequency=1d&start_time=2017-12-20&end_time=2017-12-20"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "network"
     },
     {
-      "id": "korea-fud",
+      "id": "day-2018-01-17",
       "date": "2018-01-17",
-      "label": "Korea Ban Rumors",
-      "narration": "January 17, 2018 — South Korean government officials discuss a possible cryptocurrency ban. The rumor alone erases 25% of Bitcoin's value in days. By February the ban doesn't materialize, but the damage is done. This is the beginning of the 2018 crypto winter. The geometry reflects the selloff: mempool clearing as panic sellers send coins to exchanges.",
-      "notes": ["South Korean ban rumors: BTC -25% in days at peak of crypto winter.", "Ban doesn't materialize but triggers the 2018 bear market collapse."]
+      "label": "January 2018 selloff",
+      "originalLabel": "Korea Ban Rumors",
+      "context": "The January selloff follows the late-2017 speculative peak.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "coinrail-hack",
+      "id": "day-2018-06-10",
       "date": "2018-06-10",
-      "label": "Coinrail Hack",
-      "narration": "June 10, 2018 — South Korean exchange Coinrail is hacked for tokens worth approximately $40 million. The crypto market, already weakened, drops another 10%. The cumulative weight of bear market conditions — regulation fears, exchange hacks, ICO collapse — presses down on sentiment. The geometry is quiet: few transactions, healthy blocks, unconcerned infrastructure.",
-      "notes": ["South Korean exchange Coinrail hacked. Crypto market -10%.", "Infrastructure calm amid market fear. Blocks unaffected."]
+      "label": "Coinrail security breach",
+      "originalLabel": "Coinrail Hack",
+      "context": "Coinrail reports a security breach.",
+      "contextSources": [
+        "https://techcrunch.com/2018/06/10/korean-crypto-exchange-coinrail-loses-over-40m-in-tokens-following-a-hack/"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "bear-2018",
+      "id": "day-2018-12-15",
       "date": "2018-12-15",
-      "label": "2018 Capitulation",
-      "narration": "December 15, 2018 — BTC bottomed near $3,200. Blood in the streets. But look at the network: 41 EH/s, empty mempool, perfect health score 8.6/10. Block intervals are textbook 600s. The network doesn't care about price.",
-      "notes": ["BTC bottomed near $3,200. Blood in the streets.", "Network: 41 EH/s, empty mempool, perfectly healthy."]
+      "label": "2018 bear-market trough",
+      "originalLabel": "2018 Capitulation",
+      "context": "A December checkpoint near the low of the 2018 drawdown.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "crypto-spring",
+      "id": "day-2018-12-19",
+      "date": "2018-12-19",
+      "label": "Fed raises rates amid selloff",
+      "category": "economy",
+      "context": "The Federal Reserve raises its target range to 2.25\u20132.50 percent.",
+      "contextSources": [
+        "https://www.federalreserve.gov/newsevents/pressreleases/monetary20181219a.htm"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2019-02-18",
       "date": "2019-02-18",
-      "label": "Crypto Spring",
-      "narration": "February 18, 2019 — Bitcoin breaks $4,000 for the first time since the bear market began. The fifteen-month winter is thawing. Transaction volumes are recovering, addresses are accumulating. The spine begins filling again — economic activity returning before price makes headlines. The geometry signals recovery before the charts do.",
-      "notes": ["BTC breaks $4K after 15-month bear market. Recovery confirmed.", "Transaction volumes recovering. Accumulation visible in the spine."]
+      "label": "2019 market recovery",
+      "originalLabel": "Crypto Spring",
+      "context": "Bitcoin\u2019s early-2019 recovery following the previous year\u2019s drawdown.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "mystery-candle",
+      "id": "day-2019-04-02",
       "date": "2019-04-02",
-      "label": "Mystery Candle",
-      "narration": "April 2, 2019 — a mysterious $1,000 price spike fires in a single hour, the largest single-hour candle of the bear era. Suspected triggers include a coordinated buy order, Tether issuance, or a market maker testing liquidity. The spine briefly spikes as traders scramble. No definitive explanation is ever established.",
-      "notes": ["$1,000 spike in one hour — largest single-hour candle of the bear era.", "No confirmed cause. Tether issuance and coordinated buys suspected."]
+      "label": "April 2019 breakout",
+      "originalLabel": "Mystery Candle",
+      "context": "A sharp upward move in the daily Bitcoin reference-price series.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "rally-2019",
+      "id": "day-2019-06-26",
       "date": "2019-06-26",
-      "label": "2019 Mini Rally",
-      "narration": "June 26, 2019 — BTC briefly hit $13K. 76K mempool transactions building. Fast blocks at 524s as hashrate surges to 65 EH/s. The congestion ring is just starting to glow. A preview of things to come.",
-      "notes": ["BTC briefly hit $13K. 76K mempool building.", "Fast blocks (524s) — hashrate surging to 65 EH/s."]
+      "label": "2019 rally crest",
+      "originalLabel": "2019 Mini Rally",
+      "context": "A late-June checkpoint near the crest of the 2019 rally.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "xi-blockchain",
+      "id": "day-2019-10-23",
+      "date": "2019-10-23",
+      "label": "Google's quantum supremacy paper",
+      "category": "quantum",
+      "context": "Google publishes a quantum-sampling benchmark result. It is not a demonstration of breaking Bitcoin\u2019s cryptography.",
+      "contextSources": [
+        "https://www.nature.com/articles/s41586-019-1666-5"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2019-10-24",
       "date": "2019-10-24",
-      "label": "Xi Endorses Blockchain",
-      "narration": "October 24, 2019 — President Xi Jinping publicly endorses blockchain technology as a national priority in a Politburo speech. Bitcoin surges 40% in a single day on the news — the single largest daily move of the year. The geometry flares: mempool fills, fee rates spike, blocks arrive fast. A reminder that sovereign commentary can move markets by billions in hours.",
-      "notes": ["Xi Jinping endorses blockchain in Politburo speech. BTC +40% in one day.", "Largest daily move of 2019. Mempool fills as traders rush in."]
+      "label": "Xi\u2019s blockchain study session",
+      "originalLabel": "Xi Endorses Blockchain",
+      "context": "China\u2019s leadership discusses blockchain on October 24; the public report follows on October 25.",
+      "contextSources": [
+        "https://www.cac.gov.cn/2019-10/25/c_1573535013319838.htm"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "technology"
     },
     {
-      "id": "hashrate-ath-2019",
-      "date": "2019-12-18",
-      "label": "2019 Hashrate ATH",
-      "narration": "December 18, 2019 — year-end. Bitcoin trades at around $7,000, modest by bull market standards. But the hashrate has climbed to a new all-time high, surpassing 100 EH/s for the first time. Security is growing even as price flatlines. The geometry is healthy and calm — a quiet accumulation period before the halving.",
-      "notes": ["Year-end: hashrate crosses 100 EH/s ATH despite modest $7K price.", "Network security growing independent of price. Pre-halving calm."]
+      "id": "day-2020-01-30",
+      "date": "2020-01-30",
+      "label": "WHO declares coronavirus emergency",
+      "category": "covid",
+      "context": "WHO declares the novel-coronavirus outbreak a public-health emergency of international concern.",
+      "contextSources": [
+        "https://www.who.int/europe/health-topics/coronavirus"
+      ],
+      "contextStatus": "sourced historical context"
     },
     {
-      "id": "pre-covid-peak",
+      "id": "day-2020-02-13",
       "date": "2020-02-13",
-      "label": "Pre-COVID Peak",
-      "narration": "February 13, 2020 — Bitcoin crosses $10,000 again, the highest since 2019. It seems like the halving narrative is driving a bull run. Thirty days later, COVID will crash everything by 50%. For now the geometry is healthy, blocks arriving normally, mempool modest. A brief window of optimism before the storm.",
-      "notes": ["BTC crosses $10K — last bull signal before COVID crash.", "Blocks healthy, mempool modest. 30 days before Black Thursday."]
+      "label": "Before the COVID market crash",
+      "originalLabel": "Pre-COVID Peak",
+      "context": "A February market checkpoint before the March pandemic selloff.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "covid",
+      "id": "day-2020-03-11",
+      "date": "2020-03-11",
+      "label": "WHO characterizes COVID-19 pandemic",
+      "category": "covid",
+      "context": "WHO characterizes COVID-19 as a pandemic.",
+      "contextSources": [
+        "https://www.who.int/docs/default-source/coronaviruse/situation-REPORTS/20200311-SITREP-51-COVID-19.PDF"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2020-03-12",
       "date": "2020-03-12",
-      "label": "COVID Black Thursday",
-      "narration": "March 12, 2020 — COVID Black Thursday. BTC dropped 50% in 24 hours. Global pandemic panic. But blocks keep coming at 572s intervals. 27K mempool transactions — a spike, but manageable. The settlement ring stays nearly complete. Bitcoin doesn't have a circuit breaker.",
-      "notes": ["Global pandemic panic. BTC dropped 50% in 24 hours.", "Mempool spiked to 27K. Blocks fast at 572s."]
+      "label": "COVID market crash",
+      "originalLabel": "COVID Black Thursday",
+      "context": "Bitcoin falls sharply during the global pandemic market crisis.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "hash-recovery",
+      "id": "day-2020-03-15",
+      "date": "2020-03-15",
+      "label": "Fed emergency rate cut and QE",
+      "category": "economy",
+      "context": "The Federal Reserve cuts its target rate to near zero and announces further asset purchases.",
+      "contextSources": [
+        "https://www.federalreserve.gov/newsevents/pressreleases/monetary20200315a.htm"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2020-04-08",
       "date": "2020-04-08",
-      "label": "Hash Rate Recovery",
-      "narration": "April 8, 2020 — exactly 27 days after Black Thursday, the Bitcoin hashrate has fully recovered to pre-crash levels. Miners who sold and shut off machines have been replaced by opportunistic operators who bought cheap. The network's resilience to external shocks — even a global pandemic — is now empirically demonstrated. Blocks flow normally.",
-      "notes": ["Hashrate fully recovers 27 days after COVID crash.", "Empirical proof of network resilience. Miners rotate, protocol continues."]
+      "label": "Post-crash mining checkpoint",
+      "originalLabel": "Hash Rate Recovery",
+      "context": "A mining-activity comparison day after the March 2020 market crash.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=HashRate,TxCnt,FeeTotNtv&frequency=1d&start_time=2020-04-08&end_time=2020-04-08"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "network"
     },
     {
-      "id": "halving-2020",
+      "id": "day-2020-04-20",
+      "date": "2020-04-20",
+      "label": "WTI oil futures turn negative",
+      "category": "markets",
+      "context": "The expiring front-month WTI oil futures contract trades below zero.",
+      "contextSources": [
+        "https://www.eia.gov/todayinenergy/detail.php?id=43495"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2020-05-11",
       "date": "2020-05-11",
-      "label": "2020 Halving",
-      "narration": "May 11, 2020 — the 3rd halving. Subsidy drops from 12.5 to 6.25 BTC. 109 EH/s hashrate, near-empty mempool. The spine shows blocks near block 629,867. Recovery is underway. In 12 months, BTC will be at $64K.",
-      "notes": ["3rd halving — subsidy 12.5 → 6.25 BTC.", "109 EH/s, clear mempool. Block 630,000 mined this day."]
+      "label": "Third halving",
+      "originalLabel": "2020 Halving",
+      "context": "The subsidy became 6.25 BTC at block 630,000.",
+      "contextSources": [
+        "https://mempool.space/block/630000"
+      ],
+      "contextStatus": "sourced",
+      "category": "bitcoin"
     },
     {
-      "id": "defi-summer",
+      "id": "day-2020-07-01",
       "date": "2020-07-01",
-      "label": "DeFi Summer Baseline",
-      "narration": "July 1, 2020 — DeFi Summer is igniting on Ethereum while Bitcoin quietly consolidates near $9,000. Mempool is calm, blocks arrive normally. This is a useful baseline: the network at healthy equilibrium, no stress, no crisis. The institutional accumulation that will define the next 18 months is beginning, quietly, off-chain.",
-      "notes": ["DeFi Summer starts on ETH while BTC consolidates at $9K.", "Calm mempool, healthy blocks. Institutional accumulation beginning off-chain."]
+      "label": "DeFi summer: Bitcoin checkpoint",
+      "originalLabel": "DeFi Summer Baseline",
+      "context": "A mid-2020 Bitcoin comparison day during the broader cryptocurrency expansion.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "microstrategy",
+      "id": "day-2020-08-11",
       "date": "2020-08-11",
-      "label": "MicroStrategy Day One",
-      "narration": "August 11, 2020 — MicroStrategy announces a $250 million Bitcoin purchase as its primary treasury reserve asset. CEO Michael Saylor calls it 'the apex property of human civilization.' It is the first time a NASDAQ-listed company has adopted Bitcoin as its primary treasury reserve. The corporate treasury playbook is born. Price crosses $12,000.",
-      "notes": ["MicroStrategy announces first $250M BTC corporate treasury purchase.", "First NASDAQ company to adopt BTC as primary reserve. Price crosses $12K."]
+      "label": "MicroStrategy adopts Bitcoin reserves",
+      "originalLabel": "MicroStrategy Day One",
+      "context": "MicroStrategy announces Bitcoin as its primary treasury reserve asset.",
+      "contextSources": [
+        "https://www.strategy.com/media"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "square-paypal",
+      "id": "day-2020-10-08",
       "date": "2020-10-08",
-      "label": "Square + PayPal",
-      "narration": "October 8, 2020 — Square announces a $50 million BTC purchase, and PayPal announces it will allow 346 million users to buy, hold, and sell cryptocurrency. In a single day, institutional accumulation and mainstream payment infrastructure converge. The two-day legitimacy wave drives price above $11,000. The geometry reflects the increased network activity.",
-      "notes": ["Square $50M BTC; PayPal opens to 346M users — same day.", "Institutional + mainstream convergence. Price above $11K."]
+      "label": "Square buys Bitcoin",
+      "originalLabel": "Square + PayPal",
+      "context": "Square announces its Bitcoin treasury investment. PayPal\u2019s separate announcement came later in October.",
+      "contextSources": [
+        "https://squareup.com/us/en/press/2020-bitcoin-investment"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "first-20k",
+      "id": "day-2020-11-03",
+      "date": "2020-11-03",
+      "label": "US election: Biden wins",
+      "category": "politics",
+      "context": "US presidential election day. Joe Biden ultimately wins; the race is called several days later.",
+      "contextSources": [
+        "https://www.archives.gov/electoral-college/2020"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2020-12-16",
       "date": "2020-12-16",
-      "label": "First $20K ATH",
-      "narration": "December 16, 2020 — Bitcoin breaks $20,000 for the first time, surpassing the 2017 all-time high after three years. Unlike 2017, this time institutional buyers are holding — not panic-selling retail. The supply shock from the halving, combined with institutional demand, has produced a structurally different market. The geometry is dense and healthy.",
-      "notes": ["BTC breaks $20K for first time — 3-year-old record shattered.", "Institutional holders this time. Structurally different from 2017."]
+      "label": "Bitcoin breaks $20,000",
+      "originalLabel": "First $20K ATH",
+      "context": "The daily Bitcoin reference price crosses $20,000.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "genesis-30k",
+      "id": "day-2021-01-03",
       "date": "2021-01-03",
-      "label": "Genesis Day $30K",
-      "narration": "January 3, 2021 — Bitcoin crosses $30,000 on the 12th anniversary of the genesis block. The parabolic phase of the 2021 bull run is underway. Price has doubled in the last two weeks. The geometry is beginning to show the signature of a bull market: dense blocks, elevated fees, growing mempool. Coinbase is preparing for its NASDAQ listing.",
-      "notes": ["BTC crosses $30K on Bitcoin's 12th anniversary. Parabolic phase begins.", "Price doubled in 2 weeks. Coinbase NASDAQ listing on the horizon."]
+      "label": "Bitcoin\u2019s 12th anniversary",
+      "originalLabel": "Genesis Day $30K",
+      "context": "Twelve years since the genesis block.",
+      "contextSources": [
+        "https://mempool.space/block/0"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "tesla-1-5b",
+      "id": "day-2021-01-06",
+      "date": "2021-01-06",
+      "label": "US Capitol attack",
+      "category": "politics",
+      "context": "The US Capitol is attacked during certification of the presidential election.",
+      "contextSources": [
+        "https://www.justice.gov/archives/opa/speech/attorney-general-merrick-b-garland-delivers-remarks-first-anniversary-attack-capitol"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2021-02-08",
       "date": "2021-02-08",
-      "label": "Tesla $1.5B Purchase",
-      "narration": "February 8, 2021 — Tesla discloses a $1.5 billion Bitcoin purchase in an SEC filing, and announces plans to accept BTC for vehicle purchases. BTC crosses $44,000. It is the largest corporate Bitcoin purchase to date and signals that the largest companies in the world are beginning to view Bitcoin as a legitimate treasury asset. The geometry flares with activity.",
-      "notes": ["Tesla discloses $1.5B BTC purchase. Plans to accept BTC for vehicles.", "BTC crosses $44K. Largest corporate purchase to date."]
+      "label": "Tesla discloses Bitcoin purchase",
+      "originalLabel": "Tesla $1.5B Purchase",
+      "context": "Tesla discloses a $1.5 billion Bitcoin investment.",
+      "contextSources": [
+        "https://techcrunch.com/2021/02/08/tesla-buys-1-5b-in-bitcoin-may-accept-the-cryptocurrency-as-payment-in-the-future/"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "first-50k",
+      "id": "day-2021-02-19",
       "date": "2021-02-19",
-      "label": "First $50K",
-      "narration": "February 19, 2021 — Bitcoin crosses $50,000 for the first time. The five-figure milestone seemed impossible a year ago; now it arrives with institutional backing behind it. The mempool is elevated, blocks are full, fees are rising. The 2021 ATH is still months away — this is just the approach.",
-      "notes": ["BTC crosses $50K for the first time.", "Institutional backing makes this different from 2017. ATH still months away."]
+      "label": "Trillion-dollar valuation",
+      "originalLabel": "First $50K",
+      "context": "Bitcoin\u2019s daily reference market capitalization crosses one trillion US dollars.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "coinbase",
+      "id": "day-2021-04-14",
       "date": "2021-04-14",
-      "label": "Coinbase IPO",
-      "narration": "April 14, 2021 — Coinbase goes public on NASDAQ. BTC at $64K. 257K mempool transactions — heavy institutional-driven congestion. Congestion ring expanding. Fee tiers show pressure across all brackets. The network is handling the biggest influx of new users in its history.",
-      "notes": ["Coinbase went public on NASDAQ. BTC at $64K.", "257K mempool — heavy institutional-driven congestion."]
+      "label": "Coinbase direct listing",
+      "originalLabel": "Coinbase IPO",
+      "context": "Coinbase shares begin trading on Nasdaq through a direct listing.",
+      "contextSources": [
+        "https://www.nasdaqtrader.com/TraderNews.aspx?id=ETA2021-28"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "tesla-esg-crash",
+      "id": "day-2021-05-12",
       "date": "2021-05-12",
-      "label": "Tesla ESG Crash",
-      "narration": "May 12, 2021 — Elon Musk tweets that Tesla is suspending Bitcoin vehicle payments due to environmental concerns about proof-of-work energy use. BTC falls 17% in hours. The ESG attack vector against Bitcoin is activated at scale. Within days China will announce mining bans. The geometry is turbulent — mempool spikes, then clears as panic selling subsides.",
-      "notes": ["Elon Musk suspends Tesla BTC payments over ESG concerns. Price -17%.", "ESG attack vector activated. China mining ban follows within days."]
+      "label": "Tesla suspends Bitcoin payments",
+      "originalLabel": "Tesla ESG Crash",
+      "context": "Tesla announces it will stop accepting Bitcoin for vehicle purchases.",
+      "contextSources": [
+        "https://techcrunch.com/2021/05/12/elon-musk-technoking-of-tesla-orders-a-halt-to-bitcoin-car-payments/"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "china-ban",
+      "id": "day-2021-06-28",
       "date": "2021-06-28",
-      "label": "China Mining Ban",
-      "narration": "June 28, 2021 — China banned mining. Hashrate crashed from 180 to 109 EH/s overnight. Paradoxically healthy: low fees, clear mempool, perfect block production. The congestion ring is barely visible. Bitcoin routed around the largest mining ban in history in weeks.",
-      "notes": ["China banned mining. Hashrate crashed from 180→109 EH/s.", "Paradoxically healthy — low fees, clear mempool."]
+      "label": "China mining crackdown: aftermath",
+      "originalLabel": "China Mining Ban",
+      "context": "A late-June checkpoint after China\u2019s May crackdown announcement and June provincial restrictions.",
+      "contextSources": [
+        "https://www.loc.gov/item/global-legal-monitor/2022-02-08/china-national-development-and-reform-commission-issues-notice-restricting-cryptocurrency-mining/"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "el-salvador-signs",
-      "date": "2021-08-23",
-      "label": "El Salvador Signs",
-      "narration": "August 23, 2021 — El Salvador's president Nayib Bukele signs the Bitcoin Law into effect, making Bitcoin legal tender alongside the U.S. dollar. It is the first time a sovereign nation has adopted Bitcoin as legal tender. The Chivo wallet is being prepared. Global reaction ranges from celebration to condemnation. The geometry is calm — the protocol didn't need to change.",
-      "notes": ["El Salvador signs Bitcoin legal tender law — first sovereign adoption.", "Chivo wallet being built. Global reaction sharply divided."]
-    },
-    {
-      "id": "el-salvador-day1",
+      "id": "day-2021-09-07",
       "date": "2021-09-07",
-      "label": "El Salvador Day One",
-      "narration": "September 7, 2021 — El Salvador's Chivo wallet launches. Within hours Bitcoin crashes 19% globally in what becomes known as 'Crypto Tuesday.' Technical issues with the wallet, Bukele's decision to buy the dip on national television, and leveraged long liquidations combine for chaos. The blockchain keeps processing every transaction without interruption.",
-      "notes": ["Chivo wallet launches in El Salvador. BTC -19% on 'Crypto Tuesday'.", "Wallet crashes, Bukele buys the dip on TV. Blockchain is uninterrupted."]
+      "label": "El Salvador adopts Bitcoin",
+      "originalLabel": "El Salvador Day One",
+      "context": "El Salvador\u2019s Bitcoin legal-tender framework takes effect.",
+      "contextSources": [
+        "https://www.imf.org/en/news/articles/2021/11/22/mcs-el-salvador-staff-concluding-statement-of-the-2021-article-iv-mission"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "ath-2021",
+      "id": "day-2021-09-20",
+      "date": "2021-09-20",
+      "label": "Evergrande debt crisis selloff",
+      "category": "markets",
+      "context": "Global equities sell off amid concern about Evergrande\u2019s debt problems.",
+      "contextSources": [
+        "https://www.investing.com/news/economy/analysisinvestors-grappling-with-evergrande-fallout-weigh-risk-of-wider-pain-2621418"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2021-09-24",
+      "date": "2021-09-24",
+      "label": "China's cryptocurrency prohibition",
+      "category": "bitcoin",
+      "context": "China publishes its interagency notice restricting cryptocurrency-related business activities.",
+      "contextSources": [
+        "https://www.pbc.gov.cn/tiaofasi/144941/3581332/4348658/index.html"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2021-11-10",
       "date": "2021-11-10",
-      "label": "2021 ATH $69K",
-      "narration": "November 10, 2021 — Bitcoin hit $69K, the all-time high. Fast blocks at 580s. Moderate mempool at 33K transactions. The spine shows well-filled blocks. Bull market peak. Notice the settlement ring is nearly complete — network performance remains excellent even at ATH prices.",
-      "notes": ["Bitcoin hit $69K all-time high.", "Fast blocks (580s), moderate mempool. Bull market peak."]
+      "label": "2021 bull-market peak",
+      "originalLabel": "2021 ATH $69K",
+      "context": "A November checkpoint at the crest of the 2021 Bitcoin rally.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "cme-flash-crash",
+      "id": "day-2021-11-14",
+      "date": "2021-11-14",
+      "label": "Taproot activation",
+      "context": "Taproot activated at block 709,632.",
+      "contextSources": [
+        "https://mempool.space/block/709632",
+        "https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki"
+      ],
+      "contextStatus": "sourced",
+      "selectionReasons": [
+        "Missing protocol or approval anchor; verify against primary source"
+      ],
+      "category": "bitcoin"
+    },
+    {
+      "id": "day-2021-12-04",
       "date": "2021-12-04",
-      "label": "CME Flash Crash",
-      "narration": "December 4, 2021 — Bitcoin crashes from $57,000 to $42,000 in hours. The proximate triggers: CME December futures expiry, a cascade of leveraged long liquidations exceeding $2.5 billion, and thin weekend liquidity. It is the sharpest single-day drop since Black Thursday. The geometry recovers quickly — the mempool clears as panic sellers complete their exits.",
-      "notes": ["$57K→$42K flash crash: CME expiry + $2.5B leveraged long liquidations.", "Sharpest single-day drop since Black Thursday. Mempool clears after."]
+      "label": "December 2021 selloff",
+      "originalLabel": "CME Flash Crash",
+      "context": "Bitcoin\u2019s daily price falls during the December market selloff.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "ukraine",
+      "id": "day-2022-02-24",
       "date": "2022-02-24",
-      "label": "Ukraine War Begins",
-      "narration": "February 24, 2022 — Russia invaded Ukraine. BTC used for cross-border humanitarian aid. The network is unfazed: 184 EH/s, perfect 600s block intervals, zero congestion. The protocol's neutrality is its superpower.",
-      "notes": ["Russia invaded Ukraine. BTC used for cross-border humanitarian aid.", "Network unfazed — 184 EH/s, perfect block intervals."]
+      "label": "Russia\u2019s full-scale invasion of Ukraine",
+      "originalLabel": "Ukraine War Begins",
+      "context": "Russia launches its full-scale invasion of Ukraine, escalating the conflict that began in 2014.",
+      "contextSources": [
+        "https://www.un.org/sexualviolenceinconflict/wp-content/uploads/2023/03/report/auto-draft/23-03-24-Ukraine-thematic-report-POWs-ENG.pdf"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "war"
     },
     {
-      "id": "pre-luna-baseline",
-      "date": "2022-04-01",
-      "label": "Pre-LUNA Baseline",
-      "narration": "April 1, 2022 — Bitcoin sits at $46,000 and the network is operating normally. The mempool is clear, fees are low, hashrate is strong. In five weeks the Terra ecosystem will collapse in the largest algorithmic stablecoin failure in history. This is the last quiet baseline before the 2022 catastrophe.",
-      "notes": ["Pre-LUNA baseline: BTC at $46K, stable mempool, healthy blocks.", "5 weeks before the Terra/UST death spiral. Last quiet before the storm."]
-    },
-    {
-      "id": "luna-collapse",
+      "id": "day-2022-05-09",
       "date": "2022-05-09",
-      "label": "LUNA/UST Collapse",
-      "narration": "May 9, 2022 — the Terra/LUNA ecosystem begins its death spiral. UST, the algorithmic stablecoin, loses its dollar peg. The LUNA token will be down 99.9% within days. $60 billion in value is destroyed. Bitcoin falls in correlation as leveraged positions unwind across the ecosystem. The blockchain itself is clean — the damage is in the DeFi layer.",
-      "notes": ["Terra/UST death spiral begins. $60B destroyed in days.", "BTC falls in correlation. Bitcoin blockchain itself is unaffected."]
+      "label": "Terra crisis: market selloff",
+      "originalLabel": "LUNA/UST Collapse",
+      "context": "A Bitcoin market checkpoint during the TerraUSD depegging crisis.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "celsius-freeze",
+      "id": "day-2022-06-13",
       "date": "2022-06-13",
-      "label": "Celsius Freezes Withdrawals",
-      "narration": "June 13, 2022 — Celsius Network suspends withdrawals, swaps, and transfers for 1.4 million users. Three Arrows Capital (3AC) is simultaneously revealed to be insolvent. Bitcoin falls below $20,000 for the first time since 2020. The contagion from LUNA is spreading through every overleveraged actor in crypto. The geometry is quiet: the on-chain activity reflects fear-driven inactivity.",
-      "notes": ["Celsius suspends withdrawals; 3AC insolvent. BTC below $20K.", "LUNA contagion spreading. Fear-driven quiet on-chain."]
+      "label": "Celsius freezes withdrawals",
+      "originalLabel": "Celsius Freezes Withdrawals",
+      "context": "Celsius\u2019s June 12 US-evening announcement falls on June 13 UTC.",
+      "contextSources": [
+        "https://www.sec.gov/file/comp-pr2023-133"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "bear-2022",
+      "id": "day-2022-06-15",
+      "date": "2022-06-15",
+      "label": "Fed raises rates by 75 basis points",
+      "category": "economy",
+      "context": "The Federal Reserve raises its target range by 75 basis points.",
+      "contextSources": [
+        "https://www.federalreserve.gov/newsevents/pressreleases/monetary20220615a.htm"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2022-07-13",
       "date": "2022-07-13",
-      "label": "2022 Cycle Bottom",
-      "narration": "July 13, 2022 — Bitcoin touches $17,593, the lowest price since December 2020. The 2022 bear market has erased 75% from the ATH. But hashrate has continued climbing through every collapse — a testament to the long-term orientation of industrial Bitcoin miners. The geometry is sparse and dark: low fees, thin mempool, but blocks arriving faithfully.",
-      "notes": ["Bitcoin bottoms at $17,593 — 75% off 2021 ATH.", "Hashrate still climbing. Industrial miners undeterred by price."]
+      "label": "Celsius files for bankruptcy",
+      "originalLabel": "2022 Cycle Bottom",
+      "context": "Celsius files for Chapter 11 bankruptcy protection.",
+      "contextSources": [
+        "https://www.sec.gov/Archives/edgar/data/2007691/000110465924007325/tm243976-1_1012b.htm"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "eth-merge",
+      "id": "day-2022-09-15",
       "date": "2022-09-15",
-      "label": "Ethereum Merge",
-      "narration": "September 15, 2022 — Ethereum completes its transition from proof-of-work to proof-of-stake. The 'Merge' eliminates Ethereum mining overnight. Bitcoin is now the only major blockchain secured by proof-of-work. Some argue Bitcoin's energy profile becomes more controversial; others argue it becomes more defensible. The geometry of Bitcoin continues unchanged — proof-of-work, one block every 10 minutes.",
-      "notes": ["Ethereum Merge completes. Bitcoin is now the sole major PoW chain.", "PoW vs PoS debate crystallizes. Bitcoin's energy profile becomes more contested."]
+      "label": "Ethereum\u2019s Merge",
+      "originalLabel": "Ethereum Merge",
+      "context": "Ethereum switches from proof of work to proof of stake; this snapshot still measures Bitcoin.",
+      "contextSources": [
+        "https://ethereum.org/roadmap/merge/"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "technology"
     },
     {
-      "id": "ftx",
+      "id": "day-2022-11-11",
       "date": "2022-11-11",
-      "label": "FTX Collapse",
-      "narration": "November 11, 2022 — FTX and Alameda collapsed. Contagion across crypto. But Bitcoin's network: 245 EH/s, normal blocks, health 8.5/10. The mempool has 12K transactions — barely a blip. The spine is calm. Layer 1 is untouchable.",
-      "notes": ["FTX and Alameda collapsed. Contagion spread across crypto.", "Bitcoin network: 245 EH/s, normal blocks. Unfazed."]
+      "label": "FTX files for bankruptcy",
+      "originalLabel": "FTX Collapse",
+      "context": "FTX and affiliated companies file for Chapter 11 protection.",
+      "contextSources": [
+        "https://www.sec.gov/file/sec-complaint-2475"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "bear-year-end-2022",
+      "id": "day-2022-11-30",
+      "date": "2022-11-30",
+      "label": "ChatGPT launches",
+      "category": "ai",
+      "context": "OpenAI releases ChatGPT as a public research preview.",
+      "contextSources": [
+        "https://openai.com/index/chatgpt/"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2022-12-30",
       "date": "2022-12-30",
-      "label": "2022 Bear Year-End",
-      "narration": "December 30, 2022 — year-end. Bitcoin is at $16,500, the lowest closing year in its history. FTX, Celsius, 3AC, Voyager, BlockFi — the CeFi overlay on Bitcoin has collapsed. But the Bitcoin blockchain itself has never had a security incident. Blocks arrive every 10 minutes. Proof of work continues. This is what 'not your keys, not your coins' looks like at scale.",
-      "notes": ["Year-end 2022: BTC at $16,500. Entire CeFi overlay has collapsed.", "Bitcoin blockchain never had a security incident. PoW continues."]
+      "label": "2022 bear-market year-end",
+      "originalLabel": "2022 Bear Year-End",
+      "context": "A year-end checkpoint after the 2022 cryptocurrency drawdown.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "recovery-2023",
+      "id": "day-2023-01-14",
       "date": "2023-01-14",
-      "label": "2023 Recovery",
-      "narration": "January 14, 2023 — bear market ending. BTC climbing from $16K. 290 EH/s — hashrate grew through the entire bear. Only 2,533 mempool transactions. The network has never been healthier or more secure, even as speculators fled.",
-      "notes": ["Bear market ending. BTC climbing from $16K.", "290 EH/s — hashrate grew through the entire bear."]
+      "label": "January 2023 recovery",
+      "originalLabel": "2023 Recovery",
+      "context": "The daily Bitcoin price rebounds during the January recovery.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "svb-usdc",
+      "id": "day-2023-02-06",
+      "date": "2023-02-06",
+      "label": "Turkey and Syria earthquakes",
+      "category": "world",
+      "context": "Major earthquakes strike southern Turkey and northern Syria.",
+      "contextSources": [
+        "https://www.who.int/europe/emergencies/situations/turkiye-and-syria-earthquakes"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2023-03-10",
       "date": "2023-03-10",
-      "label": "SVB + USDC De-peg",
-      "narration": "March 10, 2023 — Silicon Valley Bank collapses; Circle reveals $3.3 billion of USDC reserves are trapped there. USDC briefly de-pegs to $0.88. Bitcoin, with no counterparty, sees a safe-haven narrative take hold. BTC gains 10% while traditional financial infrastructure visibly fractures. The geometry shows a spike in on-chain activity as capital rotates.",
-      "notes": ["SVB collapses; USDC de-pegs to $0.88. BTC +10% as safe haven.", "Bitcoin's counterparty-free design validated against bank failure."]
+      "label": "Silicon Valley Bank closes",
+      "originalLabel": "SVB + USDC De-peg",
+      "context": "Regulators close Silicon Valley Bank and appoint the FDIC as receiver.",
+      "contextSources": [
+        "https://www.fdic.gov/news/press-releases/2023/pr23016.html"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "economy"
     },
     {
-      "id": "blackrock-etf",
+      "id": "day-2023-03-14",
+      "date": "2023-03-14",
+      "label": "GPT-4 launches",
+      "category": "ai",
+      "context": "OpenAI announces GPT-4.",
+      "contextSources": [
+        "https://openai.com/index/gpt-4-research/"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2023-05-25",
+      "date": "2023-05-25",
+      "label": "Nvidia's AI boom rally",
+      "category": "ai",
+      "context": "The trading day after Nvidia\u2019s results and outlook emphasize rapidly growing generative-AI demand.",
+      "contextSources": [
+        "https://investor.nvidia.com/news/press-release-details/2023/NVIDIA-Announces-Financial-Results-for-First-Quarter-Fiscal-2024/default.aspx"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2023-06-15",
       "date": "2023-06-15",
-      "label": "BlackRock ETF Filing",
-      "narration": "June 15, 2023 — BlackRock, the world's largest asset manager with $9 trillion AUM, files for a spot Bitcoin ETF. The application uses the name 'iShares Bitcoin Trust.' Previous applicants have a 0-for-29 record with the SEC; BlackRock has a 575-to-1 approval record. The ETF narrative ignites. BTC rallies 20% in days.",
-      "notes": ["BlackRock files spot BTC ETF. 575-to-1 SEC approval record.", "BTC +20%. ETF narrative ignites. 0-for-29 record about to be broken."]
+      "label": "BlackRock files for a Bitcoin trust",
+      "originalLabel": "BlackRock ETF Filing",
+      "context": "The iShares Bitcoin Trust\u2019s initial S-1 registration is filed with the SEC.",
+      "contextSources": [
+        "https://www.sec.gov/Archives/edgar/data/1980994/0001437749-23-017574-index.html"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "mid-2023-baseline",
-      "date": "2023-09-11",
-      "label": "Mid-2023 Baseline",
-      "narration": "September 11, 2023 — Bitcoin consolidates near $26,000. The mempool is calm, fees are low, hashrate continues setting records. Binance's global market share is declining following regulatory pressure. The network is healthy and undemanding. A useful mid-year baseline between the BlackRock filing and the ETF approval trade.",
-      "notes": ["BTC at $26K. Low fees, healthy blocks. Binance market share declining.", "Mid-year baseline. Network secure and undemanding."]
+      "id": "day-2023-10-07",
+      "date": "2023-10-07",
+      "label": "Hamas attack on Israel",
+      "category": "war",
+      "context": "Hamas and other Palestinian armed groups attack southern Israel, killing civilians and taking hostages.",
+      "contextSources": [
+        "https://www.un.org/unispal/document/coi-report-a-hrc-56-26-27may24/"
+      ],
+      "contextStatus": "sourced historical context"
     },
     {
-      "id": "etf-trade",
+      "id": "day-2023-10-23",
       "date": "2023-10-23",
-      "label": "ETF Trade Heats Up",
-      "narration": "October 23, 2023 — Bitcoin breaks $34,000 on renewed ETF approval speculation and a false report from CoinTelegraph that BlackRock's application had been approved. The retraction barely matters — the market has already decided approval is coming. BTC is up 100% from the 2023 low. The ETF trade is fully priced in momentum.",
-      "notes": ["BTC breaks $34K on ETF speculation. CoinTelegraph false report fires briefly.", "ETF trade fully priced in. Market has decided approval is coming."]
+      "label": "Spot ETF anticipation rally",
+      "originalLabel": "ETF Trade Heats Up",
+      "context": "An October rally checkpoint before the January 2024 spot ETF decision.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "inscriptions",
+      "id": "day-2023-12-16",
       "date": "2023-12-16",
-      "label": "Inscription Surge",
-      "narration": "December 16, 2023 — Ordinals inscriptions flood the network. 346K mempool transactions — congestion matching the 2017 peak. 528 EH/s hashrate. The congestion ring is blazing. But blocks keep coming: the settlement ring holds. New use case, same reliable block production.",
-      "notes": ["Ordinals inscriptions flood the network. 346K mempool.", "528 EH/s. Congestion 4.7 — similar to 2017 peak."]
+      "label": "December 2023 fee surge",
+      "originalLabel": "Inscription Surge",
+      "context": "A high-fee day during the December 2023 activity surge.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=HashRate,TxCnt,FeeTotNtv&frequency=1d&start_time=2023-12-16&end_time=2023-12-16"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "network"
     },
     {
-      "id": "etf-eve",
+      "id": "day-2023-12-27",
       "date": "2023-12-27",
-      "label": "ETF Eve",
-      "narration": "December 27, 2023 — year-end. Bitcoin at $43,000 and the ETF approval is believed to be days away. The mempool remains elevated from the inscription frenzy. The final hours of the pre-ETF era. After January 11, Bitcoin will never be without institutional spot products again.",
-      "notes": ["Year-end: BTC at $43K. ETF approval believed to be 2 weeks away.", "Final year-end before institutional spot ETFs exist. Pre-ETF era ends."]
+      "label": "Awaiting the spot ETF decision",
+      "originalLabel": "ETF Eve",
+      "context": "A late-December checkpoint before the SEC\u2019s January 10 decision.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "etf",
+      "id": "day-2024-01-10",
+      "date": "2024-01-10",
+      "label": "US spot Bitcoin ETF approval",
+      "context": "The SEC approved listing and trading of spot Bitcoin ETP shares.",
+      "contextSources": [
+        "https://www.sec.gov/newsroom/speeches-statements/gensler-statement-spot-bitcoin-011023"
+      ],
+      "contextStatus": "sourced",
+      "selectionReasons": [
+        "Missing protocol or approval anchor; verify against primary source"
+      ],
+      "category": "bitcoin"
+    },
+    {
+      "id": "day-2024-01-11",
       "date": "2024-01-11",
-      "label": "BTC ETF Approved",
-      "narration": "January 11, 2024 — the SEC approved spot Bitcoin ETFs. Institutional era begins. Fast blocks at 499s as miners race. 482 EH/s. The mempool is actually clear — the market celebrated off-chain. Block stress elevated at 1.9/10 from the fast intervals.",
-      "notes": ["SEC approved spot Bitcoin ETFs. Institutional era begins.", "Fast blocks (499s) — miners racing. 482 EH/s."]
+      "label": "US spot Bitcoin ETF trading begins",
+      "originalLabel": "BTC ETF Approved",
+      "context": "Trading began the day after SEC approval.",
+      "contextSources": [
+        "https://www.sec.gov/Archives/edgar/data/1588489/000095017024003719/gbtc_uplist_pr.htm"
+      ],
+      "contextStatus": "sourced",
+      "category": "bitcoin"
     },
     {
-      "id": "etf-momentum",
+      "id": "day-2024-02-14",
       "date": "2024-02-14",
-      "label": "ETF Momentum",
-      "narration": "February 14, 2024 — Bitcoin breaks $52,000 for the first time since 2021. BlackRock's IBIT is accumulating over $1 billion per week. The institutional flywheel is spinning. On-chain settlement is robust, hashrate is climbing, and the halving is 65 days away. The combination of supply shock and structural demand creates one of the most compelling setups in Bitcoin history.",
-      "notes": ["BTC breaks $52K. BlackRock IBIT accumulating $1B+/week.", "Institutional flywheel spinning. Halving 65 days away."]
+      "label": "Post-ETF market expansion",
+      "originalLabel": "ETF Momentum",
+      "context": "A February market checkpoint after US spot Bitcoin ETF trading began.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "ath-2024",
+      "id": "day-2024-03-14",
       "date": "2024-03-14",
-      "label": "2024 ATH $73K",
-      "narration": "March 14, 2024 — new ATH near $73K driven by ETF inflows. 380K mempool transactions — the highest congestion in the entire dataset. Congestion ring maxed out. Fee pressure 2.9/10. Health dips to 6.9. But the spine shows blocks still arriving, still full, still processing transactions.",
-      "notes": ["New ATH ~$73K driven by ETF inflows.", "380K mempool — highest congestion in dataset. Health: 6.9."]
+      "label": "March 2024 rally crest",
+      "originalLabel": "2024 ATH $73K",
+      "context": "A March checkpoint during Bitcoin\u2019s advance beyond the 2021 market highs.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "halving-2024",
+      "id": "day-2024-04-13",
+      "date": "2024-04-13",
+      "label": "Iran attacks Israel directly",
+      "category": "war",
+      "context": "Iran launches a large direct attack on Israel.",
+      "contextSources": [
+        "https://press.un.org/en/2024/sgsm22186.doc.htm"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2024-04-20",
       "date": "2024-04-20",
-      "label": "2024 Halving",
-      "narration": "April 20, 2024 — the 4th halving. Block #840,000. Subsidy drops from 6.25 to 3.125 BTC. The spine shows blocks packed with 4,000-6,000 transactions — Ordinals and Runes driving demand. Slower blocks at 665s. 642 EH/s. A new era of Bitcoin scarcity.",
-      "notes": ["4th halving — subsidy 6.25 → 3.125 BTC. Block 840,000 mined this day.", "642 EH/s. Slower blocks (665s). Mempool cleared."]
+      "label": "Fourth halving",
+      "originalLabel": "2024 Halving",
+      "context": "The subsidy became 3.125 BTC at block 840,000 (UTC date).",
+      "contextSources": [
+        "https://mempool.space/block/840000"
+      ],
+      "contextStatus": "sourced",
+      "category": "bitcoin"
     },
     {
-      "id": "eth-etf-surprise",
+      "id": "day-2024-05-20",
       "date": "2024-05-20",
-      "label": "Ethereum ETF Surprise",
-      "narration": "May 20, 2024 — the SEC unexpectedly approves Ethereum ETF applications, reversing its previously hostile position. Bitcoin ETF holders interpret this as regulatory green-lighting of digital assets broadly. BTC holds near $71,000. The ETF framework that started with Bitcoin is now expanding to other assets — Bitcoin's institutional precedent is the template.",
-      "notes": ["SEC approves Ethereum ETF unexpectedly. BTC steady at $71K.", "Bitcoin's ETF precedent becomes the institutional template."]
+      "label": "May 2024 market rally",
+      "originalLabel": "Ethereum ETF Surprise",
+      "context": "A Bitcoin market checkpoint during the May 2024 rally.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "germany-btc-sales",
+      "id": "day-2024-06-24",
       "date": "2024-06-24",
-      "label": "Germany BTC Sales",
-      "narration": "June 24, 2024 — the German federal government begins selling approximately 50,000 BTC seized from a piracy investigation. Over the following weeks, the government will transfer and sell at market through exchanges, creating sustained selling pressure. BTC falls from $67K to below $60K over the period. It is a reminder that sovereign seizures create long-tail distribution risk.",
-      "notes": ["German government begins selling 50K seized BTC. Sustained price pressure.", "BTC $67K → $60K over selling period. Sovereign seizure = distribution risk."]
+      "label": "German Bitcoin sale period",
+      "originalLabel": "Germany BTC Sales",
+      "context": "A checkpoint during the German authorities\u2019 sale period, June 19\u2013July 12.",
+      "contextSources": [
+        "https://www.medienservice.sachsen.de/medien/news/1077662"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "mtgox-repayments",
+      "id": "day-2024-07-05",
       "date": "2024-07-05",
-      "label": "Mt. Gox Repayments",
-      "narration": "July 5, 2024 — the Mt. Gox trustee begins distributing 141,868 BTC to creditors who have waited ten years. The market prices in significant selling pressure from creditors liquidating their recoveries. BTC trades with increased volatility as repayment addresses move coins to exchanges. The long tail of the 2014 collapse finally resolves on-chain.",
-      "notes": ["Mt. Gox trustee begins distributing 141,868 BTC after 10-year wait.", "Market prices selling pressure. BTC volatile as coins move to exchanges."]
+      "label": "Mt. Gox repayments begin",
+      "originalLabel": "Mt. Gox Repayments",
+      "context": "The rehabilitation trustee begins Bitcoin and Bitcoin Cash repayments to some creditors.",
+      "contextSources": [
+        "https://www.mtgox.com/img/pdf/20240705_01_announcement_en.pdf"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "yen-carry-crash",
+      "id": "day-2024-08-05",
       "date": "2024-08-05",
-      "label": "Yen Carry Unwind",
-      "narration": "August 5, 2024 — the Bank of Japan raises rates, triggering a massive unwinding of yen carry trades. Global risk assets collapse; Japan's Nikkei falls 12.4% in one day, the worst drop since 1987. Bitcoin falls 16% to $49,000 in hours. The liquidation is global and mechanical — not Bitcoin-specific. The geometry shows a sharp spike in mempool activity as stop-losses fire.",
-      "notes": ["BOJ rate hike unwinds global yen carry trade. BTC -16% to $49K.", "Nikkei -12.4% in one day. Mechanical global liquidation, not crypto-specific."]
+      "label": "Global market selloff",
+      "originalLabel": "Yen Carry Unwind",
+      "context": "Bitcoin falls alongside a broad August selloff in global risk assets.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "fed-cut-50",
+      "id": "day-2024-08-16",
+      "date": "2024-08-16",
+      "label": "Gold crosses $2,500",
+      "category": "gold",
+      "context": "Gold trades above US$2,500 per troy ounce.",
+      "contextSources": [
+        "https://goldprice.org/gold-price-today/2024-08-16"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2024-09-18",
       "date": "2024-09-18",
-      "label": "Fed Cuts 50bps",
-      "narration": "September 18, 2024 — the Federal Reserve cuts interest rates by 50 basis points, more than markets expected. Risk assets rally across the board. Bitcoin recovers from the August yen carry crash, climbing back above $60,000. Lower rates reduce the opportunity cost of holding non-yield-bearing assets like Bitcoin. The geometry reflects steady, healthy activity in the recovery.",
-      "notes": ["Fed cuts 50bps — larger than expected. Risk assets rally.", "BTC recovers to $60K. Lower rates reduce opportunity cost of holding BTC."]
+      "label": "Fed cuts rates by 50 basis points",
+      "originalLabel": "Fed Cuts 50bps",
+      "context": "The Federal Reserve announces a half-percentage-point rate cut.",
+      "contextSources": [
+        "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "economy"
     },
     {
-      "id": "election",
+      "id": "day-2024-11-05",
+      "date": "2024-11-05",
+      "label": "US election: Trump returns",
+      "category": "politics",
+      "context": "US presidential election day. Donald Trump wins; results extend into November 6 UTC.",
+      "contextSources": [
+        "https://www.archives.gov/electoral-college/state-officials/so-key-dates"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2024-11-10",
       "date": "2024-11-10",
-      "label": "Post-Election Rally",
-      "narration": "November 10, 2024 — post-election rally toward $90K. Pro-crypto sentiment surges. 243K mempool transactions. 701 EH/s. The network is handling the demand surge while delivering blocks on schedule. Congestion visible but manageable.",
-      "notes": ["US election rally toward $90K. Pro-crypto sentiment.", "243K mempool. 701 EH/s — network handling demand."]
+      "label": "Post-election rally",
+      "originalLabel": "Post-Election Rally",
+      "context": "A Bitcoin market checkpoint following the November 5 US election.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "first-100k",
+      "id": "day-2024-12-05",
       "date": "2024-12-05",
-      "label": "First $100K",
-      "narration": "December 5, 2024 — Bitcoin crosses $100,000 for the first time. Six figures. Fifteen years after Genesis, 14 years after Pizza Day, the network worth $1 trillion hits a price that once seemed impossible. The geometry is dense and glowing — the busiest network since the 2024 ETF launch. Institutional and retail demand coincide at the psychological threshold.",
-      "notes": ["BTC crosses $100K — six-figure milestone. 15 years from genesis.", "$1T market cap threshold. Institutional and retail demand converge."]
+      "label": "Bitcoin crosses $100,000",
+      "originalLabel": "First $100K",
+      "context": "The first $100,000 trading milestone falls on December 5 UTC, December 4 in US time zones.",
+      "contextSources": [
+        "https://www.coinbase.com/institutional/research-insights/research/weekly-market-commentary/weekly-2024-12-06"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "fed-hawkish-dec",
+      "id": "day-2024-12-09",
+      "date": "2024-12-09",
+      "label": "Google unveils Willow quantum chip",
+      "category": "quantum",
+      "context": "Google announces Willow and quantum error-correction progress. This is not a demonstration of cracking Bitcoin keys.",
+      "contextSources": [
+        "https://blog.google/innovation-and-ai/technology/research/google-willow-quantum-chip/"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2024-12-19",
       "date": "2024-12-19",
-      "label": "Fed December Shock",
-      "narration": "December 19, 2024 — the Fed signals fewer rate cuts in 2025 than markets expected. BTC falls from its $108,000 peak to $92,000 in hours. The 'macro sensitivity' of institutional Bitcoin holdings is demonstrated: when the largest allocators adjust risk positioning, Bitcoin moves with them. The geometry shows a spike of panic-selling followed by stabilization.",
-      "notes": ["Fed signals fewer 2025 cuts. BTC falls $108K → $92K in hours.", "Institutional macro sensitivity: Bitcoin moves with risk allocation."]
+      "label": "After the December Fed decision",
+      "originalLabel": "Fed December Shock",
+      "context": "The day after the Federal Reserve\u2019s December 18 policy announcement.",
+      "contextSources": [
+        "https://www.federalreserve.gov/newsevents/pressreleases/monetary20241218a.htm"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "economy"
     },
     {
-      "id": "trump",
+      "id": "day-2025-01-20",
       "date": "2025-01-20",
-      "label": "Trump Inauguration",
-      "narration": "January 20, 2025 — pro-crypto president inaugurated. 719 EH/s, zero congestion, perfect health 8.6/10. The network is calm and extremely secure. The political backdrop is bullish, but the protocol just produces blocks.",
-      "notes": ["Pro-crypto president inaugurated.", "719 EH/s. Network calm and extremely healthy."]
+      "label": "Trump\u2019s second inauguration",
+      "originalLabel": "Trump Inauguration",
+      "context": "Donald Trump is inaugurated for his second presidential term.",
+      "contextSources": [
+        "https://www.whitehouse.gov/remarks/2025/01/the-inaugural-address/"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "politics"
     },
     {
-      "id": "deepseek-shock",
+      "id": "day-2025-01-27",
+      "date": "2025-01-27",
+      "label": "DeepSeek market shock",
+      "category": "ai",
+      "context": "Technology stocks sell off amid attention to DeepSeek\u2019s AI models.",
+      "contextSources": [
+        "https://www.youtube.com/watch?v=7GunO924Ae0"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2025-02-03",
       "date": "2025-02-03",
-      "label": "DeepSeek Shock",
-      "narration": "February 3, 2025 — DeepSeek's open-source AI model shocks markets, raising questions about U.S. AI investment theses. Nvidia falls 17% in one day; global tech equities sell off. Bitcoin, correlated with risk assets in institutional portfolios, drops 10% to $91,000. The geometry shows a sharp mempool spike as stop-losses trigger, followed by rapid recovery.",
-      "notes": ["DeepSeek AI shock: Nvidia -17%, global tech selloff. BTC -10% to $91K.", "Institutional portfolio correlations force BTC lower in tech risk-off."]
+      "label": "US tariff tensions",
+      "originalLabel": "DeepSeek Shock",
+      "context": "A checkpoint following the February 1 US tariff announcements concerning Canada, Mexico and China.",
+      "contextSources": [
+        "https://www.whitehouse.gov/fact-sheets/2025/02/fact-sheet-president-donald-j-trump-imposes-tariffs-on-imports-from-canada-mexico-and-china/"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "economy"
     },
     {
-      "id": "white-house-summit",
+      "id": "day-2025-03-07",
       "date": "2025-03-07",
       "label": "White House Crypto Summit",
-      "narration": "March 7, 2025 — the White House hosts its first Crypto Summit, with the administration formally announcing the Strategic Bitcoin Reserve framework. Bitcoin, Ethereum, Solana, XRP, and Cardano are named as 'digital assets of national strategic interest.' The Bitcoin-specific reserve is a watershed moment for sovereign adoption. Price is near $90,000 and climbing.",
-      "notes": ["White House Crypto Summit. Strategic Bitcoin Reserve formally announced.", "Sovereign adoption at the largest scale in history. BTC near $90K."]
+      "originalLabel": "White House Crypto Summit",
+      "context": "The White House hosts its digital-asset summit.",
+      "contextSources": [
+        "https://www.presidency.ucsb.edu/documents/pool-reports-march-7-2025"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "liberation-day",
+      "id": "day-2025-04-02",
+      "date": "2025-04-02",
+      "label": "US reciprocal tariff announcement",
+      "category": "economy",
+      "context": "The US announces its reciprocal-tariff policy; many measures take effect later.",
+      "contextSources": [
+        "https://www.whitehouse.gov/presidential-actions/2025/04/regulating-imports-with-a-reciprocal-tariff-to-rectify-trade-practices-that-contribute-to-large-and-persistent-annual-united-states-goods-trade-deficits/"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2025-04-07",
       "date": "2025-04-07",
-      "label": "Liberation Day Crash",
-      "narration": "April 7, 2025 — 'Liberation Day' tariff announcements send global markets into freefall. The S&P 500 falls over 4%, and Bitcoin drops 12% to $74,000 as institutional risk-off selling hits leveraged crypto positions. The geometry shows a sharp spike in fee rates as traders rush to move funds. Within days Bitcoin begins recovering as a trade-war hedge narrative takes hold.",
-      "notes": ["Liberation Day tariffs crash global markets. BTC -12% to $74K.", "BTC begins recovering as trade-war hedge narrative emerges."]
+      "label": "Tariff turmoil",
+      "originalLabel": "Liberation Day Crash",
+      "context": "A market checkpoint after the April 2 US tariff announcement.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "pizza-15yr",
+      "id": "day-2025-05-22",
       "date": "2025-05-22",
-      "label": "Pizza Day 15 Years",
-      "narration": "May 22, 2025 — the 15th anniversary of Bitcoin Pizza Day. The same 10,000 BTC that bought two pizzas in 2010 would now be worth over $1 billion. Bitcoin has recovered above $100,000 after the April tariff shock. The geometry is healthy and normal — a fitting baseline for the 15-year journey from $0.004/BTC to six figures.",
-      "notes": ["15th anniversary: 10,000 BTC → $1B+. BTC above $100K again.", "Recovery from Liberation Day. A baseline marking 15 years of Bitcoin."]
+      "label": "Pizza Day\u2019s 15th anniversary",
+      "originalLabel": "Pizza Day 15 Years",
+      "context": "Fifteen years since the reported Bitcoin pizza purchase.",
+      "contextSources": [
+        "https://bitcointalk.org/index.php?topic=137.0"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "correction",
+      "id": "day-2025-06-13",
+      "date": "2025-06-13",
+      "label": "Israel strikes Iran",
+      "category": "war",
+      "context": "Israel launches strikes against targets in Iran.",
+      "contextSources": [
+        "https://press.un.org/en/2025/sc16087.doc.htm"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2025-06-22",
+      "date": "2025-06-22",
+      "label": "US strikes Iranian nuclear sites",
+      "category": "war",
+      "context": "US strikes hit Iranian nuclear sites. The US announcement is dated June 21 locally; the strikes fall on June 22 UTC.",
+      "contextSources": [
+        "https://www.un.org/sg/en/content/sg/statements/2025-06-22/secretary-generals-remarks-the-security-council-threats-international-peace-and-security-delivered"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2025-10-10",
       "date": "2025-10-10",
-      "label": "2025 Correction",
-      "narration": "October 10, 2025 — market correction. Prices declining. But 907 EH/s — all-time high hashrate. Only 8,688 mempool transactions. Health 8.6/10. The spine shows blocks mining normally. The network doesn't care about price. It never has.",
-      "notes": ["Market correction — prices declining.", "907 EH/s all-time high hashrate. Network doesn't care about price."]
+      "label": "October 2025 market correction",
+      "originalLabel": "2025 Correction",
+      "context": "A Bitcoin market checkpoint during the October correction.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "zettahash",
+      "id": "day-2026-01-03",
       "date": "2026-01-03",
-      "label": "First Zettahash",
-      "narration": "January 3, 2026 — on Bitcoin's 17th birthday, the network crosses 1 ZH/s (1,000 EH/s) for the first time. A zettahash per second. The geometry blazes at the apex of its security history. This is what 17 years of proof-of-work accumulation looks like — the most powerful computing network ever assembled.",
-      "notes": ["Network crosses 1 ZH/s (1,000 EH/s) on Bitcoin's 17th birthday.", "Greatest hash security in Bitcoin history. Peak of PoW accumulation."]
+      "label": "Bitcoin\u2019s 17th anniversary",
+      "originalLabel": "First Zettahash",
+      "context": "Seventeenth anniversary of the genesis block.",
+      "contextSources": [
+        "https://mempool.space/block/0"
+      ],
+      "contextStatus": "sourced",
+      "category": "bitcoin"
     },
     {
-      "id": "etf-peak-2026",
+      "id": "day-2026-01-14",
       "date": "2026-01-14",
-      "label": "ETF Peak & Reversal",
-      "narration": "January 14, 2026 — Bitcoin peaks near $97-98K on $1.2 billion in a single day of ETF inflows, the largest since launch. But $100K doesn't break. The reversal is sharp — a textbook momentum failure at a psychological round number. The geometry shows one of the highest-activity days of the year, then a cooling.",
-      "notes": ["BTC peaks ~$97-98K on $1.2B ETF inflows. Fails $100K re-test.", "Sharp reversal at round number. Momentum failure at psychological level."]
+      "label": "January 2026 rally",
+      "originalLabel": "ETF Peak & Reversal",
+      "context": "A January rally checkpoint in the Bitcoin daily reference-price series.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD,CapMrktCurUSD&frequency=1d&start_time=2009-01-03&end_time=2026-10-19&page_size=10000"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "markets"
     },
     {
-      "id": "iran-strike",
+      "id": "day-2026-02-28",
       "date": "2026-02-28",
-      "label": "U.S.-Iran Strike",
-      "narration": "February 28, 2026 — U.S. and Israeli airstrikes target Iranian nuclear facilities. Iran retaliates with regional attacks. Bitcoin falls 8.5% from $72,000 to $63,000 in hours, with $300 million in leveraged long liquidations. It is Bitcoin's first response to direct great-power military confrontation. Within 72 hours, Bitcoin begins recovering as a geopolitical hedge narrative reasserts.",
-      "notes": ["U.S.-Israel strikes Iran. BTC -8.5% ($72K→$63K). $300M liquidated.", "First great-power military confrontation affecting Bitcoin. Recovers in 72h."]
+      "label": "US\u2013Israeli strikes on Iran",
+      "originalLabel": "U.S.-Iran Strike",
+      "context": "The US president announces military operations against Iran.",
+      "contextSources": [
+        "https://millercenter.org/the-presidency/presidential-speeches/february-28-2026-remarks-us-military-operations-against-iran"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "war"
     },
     {
-      "id": "sec-clarity",
+      "id": "day-2026-03-17",
       "date": "2026-03-17",
-      "label": "SEC Regulatory Clarity",
-      "narration": "March 17, 2026 — the SEC issues comprehensive crypto regulatory guidance, approving 91 digital asset ETFs and establishing a clear classification framework. The Fed holds rates at 3.5-3.75%. Markets were priced for a 'buy the news' rally — instead it's a sell. BTC falls 4% as institutional traders lock in gains on the regulatory clarity trade. The geometry is active but measured.",
-      "notes": ["SEC approves 91 crypto ETFs. Fed holds at 3.5-3.75%.", "Expected 'buy the news' instead becomes 'sell the news.' BTC -4%."]
+      "label": "SEC crypto-asset interpretation",
+      "originalLabel": "SEC Regulatory Clarity",
+      "context": "The SEC issues an interpretation of federal securities laws for crypto assets and related transactions.",
+      "contextSources": [
+        "https://www.sec.gov/newsroom/press-releases/2026-30-sec-clarifies-application-federal-securities-laws-crypto-assets"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "bitcoin"
     },
     {
-      "id": "hormuz-btc-toll",
+      "id": "day-2026-04-09",
       "date": "2026-04-09",
-      "label": "Hormuz Bitcoin Toll",
-      "narration": "April 9, 2026 — Iran announces it will accept Bitcoin as payment for Strait of Hormuz transit tolls, estimated at approximately $20 million per day in shipping fees. It is the first time a sovereign nation has demanded Bitcoin for access to a physical commodity chokepoint. The precedent is without parallel — state-level Bitcoin adoption forced by geopolitical leverage, not ideological choice.",
-      "notes": ["Iran demands BTC for Strait of Hormuz transit (~$20M/day in fees).", "First sovereign use of Bitcoin for physical commodity trade settlement."]
+      "label": "Hormuz crypto-toll reports",
+      "originalLabel": "Hormuz Bitcoin Toll",
+      "context": "Reports describe proposed cryptocurrency tolls.",
+      "contextSources": [
+        "https://www.bloomberg.com/news/articles/2026-04-09/iran-s-sanctions-busting-crypto-ambitions-grow-on-toll-payments"
+      ],
+      "contextStatus": "sourced historical context",
+      "category": "war"
+    },
+    {
+      "id": "day-2026-05-09",
+      "date": "2026-05-09",
+      "label": "2026 observation-window fee peak",
+      "category": "network",
+      "context": "The largest CoinMetrics daily fee total in the April 10\u2013October 19, 2026 selection window. The fee ring uses header-day block totals.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=HashRate,TxCnt,FeeTotNtv&frequency=1d&start_time=2026-05-09&end_time=2026-05-09"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2026-10-05",
+      "date": "2026-10-05",
+      "label": "2026 observation-window activity peak",
+      "category": "network",
+      "context": "The largest CoinMetrics daily transaction count and hashrate estimate in the April 10\u2013October 19, 2026 selection window.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=HashRate,TxCnt,FeeTotNtv&frequency=1d&start_time=2026-10-05&end_time=2026-10-05"
+      ],
+      "contextStatus": "sourced historical context"
+    },
+    {
+      "id": "day-2026-10-19",
+      "date": "2026-10-19",
+      "label": "Latest complete comparison day",
+      "category": "reference",
+      "context": "A present-day reference at this release\u2019s cutoff, rather than a claim that this was a major historical event.",
+      "contextSources": [
+        "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=HashRate,TxCnt,FeeTotNtv&frequency=1d&start_time=2026-10-19&end_time=2026-10-19"
+      ],
+      "contextStatus": "sourced historical context"
     }
-  ]
+  ],
+  "selection": {
+    "name": "Bitcoin and world history: 150 dates",
+    "asOf": "2026-10-19",
+    "method": "Curated historical events and market or network turning points, with one latest-day comparison. Selection is editorial, not an objective ranking; dates cannot establish causation.",
+    "previousReleaseCount": 129,
+    "overlap": 103,
+    "categories": {
+      "ai": 5,
+      "bitcoin": 58,
+      "covid": 2,
+      "economy": 13,
+      "gold": 2,
+      "markets": 36,
+      "network": 5,
+      "politics": 8,
+      "quantum": 2,
+      "reference": 1,
+      "technology": 5,
+      "war": 8,
+      "world": 5
+    }
+  }
 }

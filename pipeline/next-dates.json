@@ -1,0 +1,383 @@
+{
+  "asOf": "2026-10-19",
+  "selection": "Curated historical events and market or network turning points, with one latest-day comparison. Selection is editorial, not an objective ranking; dates cannot establish causation.",
+  "status": "Core block and daily metrics fetched; optional transaction cross-check not run.",
+  "dates": [
+    {
+      "date": "2009-03-18",
+      "label": "Fed expands quantitative easing",
+      "category": "economy",
+      "contextSources": [
+        "https://www.federalreserve.gov/newsevents/pressreleases/monetary20090318a.htm"
+      ]
+    },
+    {
+      "date": "2009-06-12",
+      "label": "Iran presidential election",
+      "category": "politics",
+      "contextSources": [
+        "https://en.wikipedia.org/wiki/2009_Iranian_presidential_election"
+      ]
+    },
+    {
+      "date": "2010-05-06",
+      "label": "US Flash Crash",
+      "category": "markets",
+      "contextSources": [
+        "https://www.sec.gov/newsroom/press-releases/2010-81-sec-cftc-release-preliminary-findings-review-may-6-market-events"
+      ]
+    },
+    {
+      "date": "2010-12-17",
+      "label": "Tunisian uprising begins",
+      "category": "world",
+      "contextSources": [
+        "https://digitallibrary.un.org/record/755593/files/A_HRC_23_46_Add.1-AR.pdf"
+      ]
+    },
+    {
+      "date": "2011-03-11",
+      "label": "Tohoku earthquake and Fukushima",
+      "category": "world",
+      "contextSources": [
+        "https://www-pub.iaea.org/mtcd/publications/pdf/pub1710-reportbythedg-web.pdf"
+      ]
+    },
+    {
+      "date": "2011-08-05",
+      "label": "US credit rating downgrade",
+      "category": "economy",
+      "contextSources": [
+        "https://www.prnewswire.com/news-releases/united-states-of-america-long-term-rating-lowered-to-aa-due-to-political-risks-rising-debt-burden-outlook-negative-126870828.html"
+      ]
+    },
+    {
+      "date": "2011-09-06",
+      "label": "Gold's 2011 record",
+      "category": "gold",
+      "contextSources": [
+        "https://www.gold.org/news-and-events/press-releases/record-investment-demand-boosts-global-gold-demand-all-time-high"
+      ]
+    },
+    {
+      "date": "2012-07-26",
+      "label": "Draghi: whatever it takes",
+      "category": "economy",
+      "contextSources": [
+        "https://www.ecb.europa.eu/press/key/date/2012/html/sp120726.mt.html"
+      ]
+    },
+    {
+      "date": "2012-11-06",
+      "label": "Obama reelected",
+      "category": "politics",
+      "contextSources": [
+        "https://www.archives.gov/electoral-college/2012"
+      ]
+    },
+    {
+      "date": "2013-03-25",
+      "label": "Cyprus bank bailout agreement",
+      "category": "economy",
+      "contextSources": [
+        "https://www.consilium.europa.eu/en/press/press-releases/2013/03/25/statement-by-the-eurogroup-president-on-cyprus-25-march-2013/"
+      ]
+    },
+    {
+      "date": "2013-06-06",
+      "label": "Snowden surveillance disclosures",
+      "category": "technology",
+      "contextSources": [
+        "https://www.theguardian.com/world/2013/jun/06/nsa-phone-records-verizon-court-order"
+      ]
+    },
+    {
+      "date": "2014-03-18",
+      "label": "Russia annexes Crimea",
+      "category": "war",
+      "contextSources": [
+        "https://www.un.org/sg/en/content/highlight/2014-03-18.html"
+      ]
+    },
+    {
+      "date": "2014-06-27",
+      "label": "First US Marshals Bitcoin auction",
+      "category": "bitcoin",
+      "contextSources": [
+        "https://www.sec.gov/Archives/edgar/data/1436229/000141588914001925/ex99-1.htm"
+      ]
+    },
+    {
+      "date": "2014-08-08",
+      "label": "Ebola international emergency",
+      "category": "world",
+      "contextSources": [
+        "https://www.who.int/news/item/08-08-2014-statement-on-the-1st-meeting-of-the-ihr-emergency-committee-on-the-2014-ebola-outbreak-in-west-africa"
+      ]
+    },
+    {
+      "date": "2015-01-15",
+      "label": "Swiss franc currency shock",
+      "category": "economy",
+      "contextSources": [
+        "https://www.snb.ch/en/publications/communication/press-releases/2015/pre_20150115"
+      ]
+    },
+    {
+      "date": "2015-08-24",
+      "label": "China's Black Monday",
+      "category": "markets",
+      "contextSources": [
+        "https://www.euronews.com/2015/08/24/china-s-black-monday-a-symptom-of-wider-malaise-in-the-world-s-second-largest"
+      ]
+    },
+    {
+      "date": "2015-11-13",
+      "label": "Paris attacks",
+      "category": "world",
+      "contextSources": [
+        "https://press.un.org/en/2015/sgsm17325.doc.htm"
+      ]
+    },
+    {
+      "date": "2016-03-09",
+      "label": "AlphaGo wins first Lee Sedol game",
+      "category": "ai",
+      "contextSources": [
+        "https://blog.google/innovation-and-ai/products/alphagos-ultimate-challenge/"
+      ]
+    },
+    {
+      "date": "2016-06-17",
+      "label": "The DAO attack",
+      "category": "technology",
+      "contextSources": [
+        "https://blog.ethereum.org/2016/06/17/critical-update-re-dao-vulnerability"
+      ]
+    },
+    {
+      "date": "2016-06-24",
+      "label": "Brexit result",
+      "category": "politics",
+      "contextSources": [
+        "https://www.bankofengland.co.uk/news/2016/june/statement-from-the-governor-of-the-boe-following-the-eu-referendum-result"
+      ]
+    },
+    {
+      "date": "2016-11-08",
+      "label": "US election: Trump wins",
+      "category": "politics",
+      "contextSources": [
+        "https://www.archives.gov/electoral-college/2016"
+      ]
+    },
+    {
+      "date": "2017-05-12",
+      "label": "WannaCry ransomware outbreak",
+      "category": "technology",
+      "contextSources": [
+        "https://www.cisa.gov/sites/default/files/Annual_Reports/NCCIC_Year_in_Review_2017_Final.pdf"
+      ]
+    },
+    {
+      "date": "2017-08-09",
+      "label": "SegWit locks in",
+      "category": "bitcoin",
+      "contextSources": [
+        "https://mempool.space/block/479808"
+      ]
+    },
+    {
+      "date": "2018-12-19",
+      "label": "Fed raises rates amid selloff",
+      "category": "economy",
+      "contextSources": [
+        "https://www.federalreserve.gov/newsevents/pressreleases/monetary20181219a.htm"
+      ]
+    },
+    {
+      "date": "2019-10-23",
+      "label": "Google's quantum supremacy paper",
+      "category": "quantum",
+      "contextSources": [
+        "https://www.nature.com/articles/s41586-019-1666-5"
+      ]
+    },
+    {
+      "date": "2020-01-30",
+      "label": "WHO declares coronavirus emergency",
+      "category": "covid",
+      "contextSources": [
+        "https://www.who.int/europe/health-topics/coronavirus"
+      ]
+    },
+    {
+      "date": "2020-03-11",
+      "label": "WHO characterizes COVID-19 pandemic",
+      "category": "covid",
+      "contextSources": [
+        "https://www.who.int/docs/default-source/coronaviruse/situation-REPORTS/20200311-SITREP-51-COVID-19.PDF"
+      ]
+    },
+    {
+      "date": "2020-03-15",
+      "label": "Fed emergency rate cut and QE",
+      "category": "economy",
+      "contextSources": [
+        "https://www.federalreserve.gov/newsevents/pressreleases/monetary20200315a.htm"
+      ]
+    },
+    {
+      "date": "2020-04-20",
+      "label": "WTI oil futures turn negative",
+      "category": "markets",
+      "contextSources": [
+        "https://www.eia.gov/todayinenergy/detail.php?id=43495"
+      ]
+    },
+    {
+      "date": "2020-11-03",
+      "label": "US election: Biden wins",
+      "category": "politics",
+      "contextSources": [
+        "https://www.archives.gov/electoral-college/2020"
+      ]
+    },
+    {
+      "date": "2021-01-06",
+      "label": "US Capitol attack",
+      "category": "politics",
+      "contextSources": [
+        "https://www.justice.gov/archives/opa/speech/attorney-general-merrick-b-garland-delivers-remarks-first-anniversary-attack-capitol"
+      ]
+    },
+    {
+      "date": "2021-09-20",
+      "label": "Evergrande debt crisis selloff",
+      "category": "markets",
+      "contextSources": [
+        "https://www.investing.com/news/economy/analysisinvestors-grappling-with-evergrande-fallout-weigh-risk-of-wider-pain-2621418"
+      ]
+    },
+    {
+      "date": "2021-09-24",
+      "label": "China's cryptocurrency prohibition",
+      "category": "bitcoin",
+      "contextSources": [
+        "https://www.pbc.gov.cn/tiaofasi/144941/3581332/4348658/index.html"
+      ]
+    },
+    {
+      "date": "2022-06-15",
+      "label": "Fed raises rates by 75 basis points",
+      "category": "economy",
+      "contextSources": [
+        "https://www.federalreserve.gov/newsevents/pressreleases/monetary20220615a.htm"
+      ]
+    },
+    {
+      "date": "2022-11-30",
+      "label": "ChatGPT launches",
+      "category": "ai",
+      "contextSources": [
+        "https://openai.com/index/chatgpt/"
+      ]
+    },
+    {
+      "date": "2023-02-06",
+      "label": "Turkey and Syria earthquakes",
+      "category": "world",
+      "contextSources": [
+        "https://www.who.int/europe/emergencies/situations/turkiye-and-syria-earthquakes"
+      ]
+    },
+    {
+      "date": "2023-03-14",
+      "label": "GPT-4 launches",
+      "category": "ai",
+      "contextSources": [
+        "https://openai.com/index/gpt-4-research/"
+      ]
+    },
+    {
+      "date": "2023-05-25",
+      "label": "Nvidia's AI boom rally",
+      "category": "ai",
+      "contextSources": [
+        "https://investor.nvidia.com/news/press-release-details/2023/NVIDIA-Announces-Financial-Results-for-First-Quarter-Fiscal-2024/default.aspx"
+      ]
+    },
+    {
+      "date": "2023-10-07",
+      "label": "Hamas attack on Israel",
+      "category": "war",
+      "contextSources": [
+        "https://www.un.org/unispal/document/coi-report-a-hrc-56-26-27may24/"
+      ]
+    },
+    {
+      "date": "2024-04-13",
+      "label": "Iran attacks Israel directly",
+      "category": "war",
+      "contextSources": [
+        "https://press.un.org/en/2024/sgsm22186.doc.htm"
+      ]
+    },
+    {
+      "date": "2024-08-16",
+      "label": "Gold crosses $2,500",
+      "category": "gold",
+      "contextSources": [
+        "https://goldprice.org/gold-price-today/2024-08-16"
+      ]
+    },
+    {
+      "date": "2024-11-05",
+      "label": "US election: Trump returns",
+      "category": "politics",
+      "contextSources": [
+        "https://www.archives.gov/electoral-college/state-officials/so-key-dates"
+      ]
+    },
+    {
+      "date": "2024-12-09",
+      "label": "Google unveils Willow quantum chip",
+      "category": "quantum",
+      "contextSources": [
+        "https://blog.google/innovation-and-ai/technology/research/google-willow-quantum-chip/"
+      ]
+    },
+    {
+      "date": "2025-01-27",
+      "label": "DeepSeek market shock",
+      "category": "ai",
+      "contextSources": [
+        "https://www.youtube.com/watch?v=7GunO924Ae0"
+      ]
+    },
+    {
+      "date": "2025-04-02",
+      "label": "US reciprocal tariff announcement",
+      "category": "economy",
+      "contextSources": [
+        "https://www.whitehouse.gov/presidential-actions/2025/04/regulating-imports-with-a-reciprocal-tariff-to-rectify-trade-practices-that-contribute-to-large-and-persistent-annual-united-states-goods-trade-deficits/"
+      ]
+    },
+    {
+      "date": "2025-06-13",
+      "label": "Israel strikes Iran",
+      "category": "war",
+      "contextSources": [
+        "https://press.un.org/en/2025/sc16087.doc.htm"
+      ]
+    },
+    {
+      "date": "2025-06-22",
+      "label": "US strikes Iranian nuclear sites",
+      "category": "war",
+      "contextSources": [
+        "https://www.un.org/sg/en/content/sg/statements/2025-06-22/secretary-generals-remarks-the-security-council-threats-international-peace-and-security-delivered"
+      ]
+    }
+  ]
+}
