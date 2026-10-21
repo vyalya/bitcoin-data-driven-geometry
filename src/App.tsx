@@ -8,7 +8,7 @@ import * as THREE from "three";
 import { resetCameraPose, gridLayout } from "./camera";
 import { setBlockInstances, POINT_HIT_THRESHOLD } from "./geometry";
 import type { FormStyle } from "./geometry";
-import { sameSelection } from "./selection";
+import { sameSelection, inspectSelection } from "./selection";
 import { SnapshotCaption } from "./SnapshotCaption";
 import { normalized, difficultyFill, formatMetric, randomFor } from "./metrics";
 import { staticSnapshots } from "./data/staticSnapshots";
@@ -231,6 +231,8 @@ function App() {
 
   const onClick = useCallback((groupId: string) => {
     const context=hoverCtxRef.current;
+    setPanelsHidden(false);
+    setMobileSheetExpanded(true);
     const release=pinnedGroup===groupId && sameSelection(pinnedCtx,context);
     if(release){
       setPinnedCtx({type:"none"});setPinnedGroup(null);
@@ -270,10 +272,11 @@ function App() {
     hoverCtxRef.current = { type: "none" };
     setActiveGroup(null);
   }, [activeDate]);
-  const displayedCtx = pinnedGroup ? pinnedCtx : hoverCtx;
+  const inspection = inspectSelection(hoverCtx,activeGroup,pinnedCtx,pinnedGroup);
+  const displayedCtx = inspection.context;
 
-  // The group that drives the right panel KPIs — legend hover > pinned > hover
-  const displayGroup = legendHover ?? pinnedGroup ?? activeGroup;
+  // Preview the hovered signal; restore the pinned figures on pointer exit.
+  const displayGroup = legendHover ?? inspection.group;
 
   useEffect(() => {
     if (!playing) return;
@@ -376,6 +379,9 @@ function App() {
   }, [activeIdx]);
 
   const s = effectiveSnapshot;
+  const hoveredSnapshot = view === "grid"
+    ? (cellHoverIdx === null ? null : snapshots[cellHoverIdx])
+    : (activeGroup === null ? null : baseSnapshot);
 
   // Descriptive label for whatever shape is currently being inspected in the
   // detail view. Shown in the mobile bottom-sheet handle so the user can see
@@ -390,7 +396,7 @@ function App() {
 
   return (
     <div className={`hud-shell form-${formStyle} view-${view} ${showNarration?"has-narration":""} ${panelsHidden?"panels-hidden":""}`}>
-      <div className="scene-viewport">
+      <div className="scene-viewport" onPointerLeave={()=>{setCellHoverIdx(null);setActiveGroup(null);}}>
       <Canvas key={`${view}-${resetVersion}`}
         camera={{ position: [0, 0, 22], fov: 42, near: 0.05 }}
         raycaster={{ params: { Mesh:{}, Line:{threshold:0.05}, LOD:{}, Sprite:{}, Points: { threshold: POINT_HIT_THRESHOLD } } }}
@@ -464,9 +470,9 @@ function App() {
         )}
         {view === "detail" && <TrackballControls key={resetVersion} staticMoving={false} dynamicDampingFactor={0.14} noPan={false} noZoom={false} noRotate={false} minDistance={0.8} maxDistance={45} rotateSpeed={1.5} zoomSpeed={1.1} panSpeed={0.65} />}
       </Canvas>
-      {view === "detail" && panelsHidden && snapshotsSettled && (
-        <div className="scene-day-marker" aria-live={playing ? "off" : "polite"}>
-          <SnapshotCaption snapshot={baseSnapshot} variant="detail" />
+      {panelsHidden && snapshotsSettled && hoveredSnapshot && (
+        <div className="scene-day-marker">
+          <SnapshotCaption snapshot={hoveredSnapshot} />
         </div>
       )}
       </div>
@@ -753,7 +759,7 @@ function App() {
             hoverCtx={view === "grid" ? { type: "none" } : displayedCtx}
             blockRecords={blockDetails.date===activeDate?blockDetails.records:[]}
             blockDetailsError={blockDetailsError}
-            pinned={!!pinnedGroup}
+            pinned={inspection.pinned}
             onInspectBlock={(index)=>{
               const block=currentBlocks[index];if(!block)return;
               if(!pinnedGroup)preClickState.current={wasPlaying:playRef.current,wasRotating:rotationRef.current};
@@ -829,8 +835,8 @@ function GuideContent({tab,formStyle,snapshot,count}:{tab:"about"|"legend"|"visu
   </div>;
   if(tab==="visual"){
     const steps=[
-      ["Explore","Start in the labeled Atom grid. Scroll through days; click one to explore. On a phone, tap once to preview, again to open. Show side panels for the timeline, search and figures. Search events, categories, years or ranges such as “war”, “AI” or “2020–2022” (use a hyphen). Play visits curated dates, not consecutive days."],
-      ["Inspect","Select a metric row to highlight its geometry. Hover a tooth for its real block figures. Click or tap to pin; Previous / Next moves between blocks. Click the same tooth or empty space to release. On mobile, expand the bottom sheet to read the figures."],
+      ["Explore","Hover for the day at the lower left; click a shape to explore. In orbit view, click a tooth, ring or dot to open its figures. On phones, tap once to preview, again to open. Show panels for the timeline and search (“war”, “AI”, “2020-2022”). Play visits curated dates."],
+      ["Inspect","With panels open, hover a tooth, ring or dot to preview its figures. Click to pin; hovering another object previews it without losing that pin. Move away to restore it. Previous / Next moves between blocks. Click the pinned object or empty space to release."],
       ["Navigate","In detail, drag to orbit and scroll or pinch to zoom. Use two fingers to pan. In the grid, scroll or swipe through rows. Reset view restores framing. Hide panels keeps Grid, Play and Orbit visible while giving the geometry more room."],
       ["Compare","Both styles use the same measurements. Transactions, fees and hashrate use shared linear scales; difficulty uses a logarithmic scale. Zero and missing data both have no arc; the numeric panel distinguishes them. Event-day differences do not establish cause and effect."],
     ];
@@ -870,9 +876,9 @@ function ContextPanel({snapshot:s,hoverCtx,blocks,blockRecords,blockDetailsError
     <div className="ctx-eyebrow">{s.snapshotTime.slice(0,10)} UTC <span>{s.category ?? "Bitcoin"}</span></div>
     <div className="ctx-title">{s.label}</div>
     {hoverCtx.type==='block' && <BlockInspector block={hoverCtx.block} index={hoverCtx.index} count={blocks.length} record={blockRecords.find(b=>b.height===hoverCtx.block[0])} error={blockDetailsError} pinned={pinned} onInspect={onInspectBlock}/>}
-    <div className="metric-list">{metrics.map(m=><button type="button" key={m.id} className={`metric-row ${selected?.id===m.id?'is-selected':''}`} onClick={()=>onSelect(m.id)} aria-pressed={selected?.id===m.id}>
+    <div className="metric-list">{metrics.map(m=>{const highlighted=selected?.id===m.id || (hoverCtx.type==='block' && (m.id==='blocks'||m.id==='weight'));return <button type="button" key={m.id} className={`metric-row ${highlighted?'is-selected':''}`} onClick={()=>onSelect(m.id)} aria-pressed={highlighted}>
       <span><span className="metric-name">{m.label}</span><span className="metric-shape">{m.shape}</span></span><span className="metric-value">{m.value}</span>
-    </button>)}</div>
+    </button>;})}</div>
     {selected && <div className="metric-explanation"><span className="guide-kicker">{selected.shape}</span><p>{selected.description}</p>{(selected.id==="blocks"||selected.id==="weight")&&blocks.length>0&&<button type="button" className="inspect-blocks" onClick={()=>onInspectBlock(0)}>Inspect individual blocks →</button>}</div>}
 
     {!selected && hoverCtx.type!=='block' && <p className="metric-hint">Select a signal to find its shape.</p>}
@@ -986,9 +992,6 @@ function GridScene({ formStyle, snapshots, hoverIdx, selectedIdx, matchedIndices
   const {size}=useThree();
   const layout=gridLayout(size.width,size.height,matchedIndices?.size ?? snapshots.length);
   const COLS=layout.columns;
-  // The camera can fit vertically on short screens, leaving cells narrower
-  // than width / columns. Use their projected spacing to keep captions apart.
-  const captionWidth=Math.max(72,Math.min(156,3.6*size.height/(2*layout.distance*Math.tan(21*Math.PI/180))-16));
   const phaseOffsets=useMemo(()=>Array.from({length:snapshots.length},(_,i)=>Math.sin(i*1.618)*Math.PI*2),[snapshots.length]);
   const SPACING_X = 3.6; // world units between cells (horizontal)
   const SPACING_Y = 3.2; // world units between cells (vertical)
@@ -1057,9 +1060,6 @@ function GridScene({ formStyle, snapshots, hoverIdx, selectedIdx, matchedIndices
             >
               <MiniSnapshot formStyle={formStyle} snapshot={snap} opacity={dim} highlighted={isHovered || isSelected} legendHover={legendHover} />
             </group>
-            <Html center position={[0, -1.25, 0]} zIndexRange={[1, 0]} style={{ width: captionWidth, pointerEvents: "none" }}>
-              <SnapshotCaption snapshot={snap} variant="grid" highlighted={isHovered || isSelected} />
-            </Html>
           </group>
         );
       })}
@@ -1142,7 +1142,7 @@ function CoreRings({formStyle,snapshot:s,activeGroup,opacity=1,onHover,onClick,o
   return <>{rings.map(r=><group key={r.id} rotation={r.rotation}
     onPointerOver={onHover?e=>{e.stopPropagation();onHover(r.id);onRingHover?.(r.id);}:undefined}
     onPointerOut={onHover?()=>{onHover(null);onRingHover?.(null);}:undefined}
-    onClick={onClick?e=>{e.stopPropagation();onRingHover?.(r.id);onClick(r.id);}:undefined}>
+    onClick={onClick?e=>{e.stopPropagation();if(e.delta>5)return;onRingHover?.(r.id);onClick(r.id);}:undefined}>
     <ArcBand cartoon={formStyle==="atom"} radius={r.radius} thickness={0.065} depth={0.045} startAngle={0} endAngle={2*Math.PI*r.fill} color={formStyle==="atom"?"#F7931A":r.color} emissiveIntensity={activeGroup===r.id?1.15:0.48} opacity={opacity*(activeGroup===r.id?1:0.86)}/>
   </group>)}</>;
 }
@@ -1166,9 +1166,9 @@ function PrimeRadiantScene({ formStyle, snapshot:s, blocks, activeGroup, frozen=
     <pointLight position={[0,3,6]} intensity={5.5} color="#F7931A" distance={22} decay={1.8}/>
     <pointLight position={[6,1,2]} intensity={2} color="#FFCE85" distance={20}/>
     <pointLight position={[-4,-4,-3]} intensity={3} color="#B87206" distance={18}/>
-    <BlockSpine formStyle={formStyle} blocks={blocks} highlighted={activeGroup==="spine"} frozen={frozen} selectedIndex={selectedBlockIndex} onHover={onHover} onClick={onClick} onBlockHover={onBlockHover}/>
+    <BlockSpine formStyle={formStyle} blocks={blocks} highlighted={activeGroup==="spine"} selectedIndex={selectedBlockIndex} onHover={onHover} onClick={onClick} onBlockHover={onBlockHover}/>
     <CoreRings formStyle={formStyle} snapshot={s} activeGroup={activeGroup} onHover={onHover} onClick={onClick} onRingHover={onRingHover}/>
-    <group onPointerOver={e=>{e.stopPropagation();onHover("particles");onRingHover("addresses");}} onPointerOut={()=>{onHover(null);onRingHover(null);}} onClick={e=>{e.stopPropagation();onRingHover("addresses");onClick("particles");}}>
+    <group onPointerOver={e=>{e.stopPropagation();onHover("particles");onRingHover("addresses");}} onPointerOut={()=>{onHover(null);onRingHover(null);}} onClick={e=>{e.stopPropagation();if(e.delta>5)return;onRingHover("addresses");onClick("particles");}}>
       <AddressParticles count={Math.min(Math.floor((s.activeAddresses??0)/s.scales.detailAddressesPerParticle),MAX_PARTICLES)} paused={!rotationEnabled||frozen} highlighted={activeGroup==="particles"}/>
     </group>
   </group>;
@@ -1355,8 +1355,8 @@ function ArcBand({ cartoon=false, radius, thickness, depth, startAngle, endAngle
    PER-BLOCK SPINE — InstancedMesh with real block data
    ═══════════════════════════════════════════════════════ */
 
-function BlockSpine({formStyle,blocks,frozen=false,highlighted=false,selectedIndex=-1,onHover,onClick,onBlockHover}:{
-  formStyle:FormStyle;blocks:BlockTuple[];frozen?:boolean;highlighted?:boolean;selectedIndex?:number;
+function BlockSpine({formStyle,blocks,highlighted=false,selectedIndex=-1,onHover,onClick,onBlockHover}:{
+  formStyle:FormStyle;blocks:BlockTuple[];highlighted?:boolean;selectedIndex?:number;
   onHover:(id:string|null)=>void;onClick:(id:string)=>void;onBlockHover:(block:BlockTuple|null,index:number)=>void;
 }){
   const mesh=useRef<THREE.InstancedMesh>(null),hit=useRef<THREE.InstancedMesh>(null);
@@ -1373,9 +1373,10 @@ function BlockSpine({formStyle,blocks,frozen=false,highlighted=false,selectedInd
     <instancedMesh key={`hit-${blocks.length}`} ref={hit} args={[undefined,undefined,blocks.length]}
       onPointerMove={e=>{
         e.stopPropagation();
-        if(!frozen && e.instanceId!==undefined){onHover("spine");onBlockHover(blocks[e.instanceId],e.instanceId);}
+        onHover("spine");
+        if(e.instanceId!==undefined){onBlockHover(blocks[e.instanceId],e.instanceId);}
       }}
-      onPointerOut={()=>{if(!frozen){onHover(null);onBlockHover(null,0);}}}
+      onPointerOut={()=>{onHover(null);onBlockHover(null,0);}}
       onClick={e=>{
         e.stopPropagation();
         if(e.delta>5||e.instanceId===undefined)return;

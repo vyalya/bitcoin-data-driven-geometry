@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-10-21T05:57:11.270Z",
+  "testsPassed": 25,
+  "initialRender": "Panels hidden; no persistent caption",
+  "utcDatesChecked": 150,
+  "metricHighlightsChecked": 7,
+  "blockHoverHighlights": [
+    "Blocks",
+    "Block weight"
+  ],
+  "ringHoverClickAndDragHandlers": "Passed for all 4 rings in Atom and Classic",
+  "selectionRegression": "Hover previews another object and pointer exit restores the pin",
+  "captionPlacement": "Lower-left overlay, only with hidden panels and an active geometry hover",
+  "browserVisualCheck": "Blocked by saved browser permission denial; server rendering and direct handler/state tests used."
+}

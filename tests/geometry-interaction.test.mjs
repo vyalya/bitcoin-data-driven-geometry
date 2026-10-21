@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BoxGeometry,InstancedMesh,MeshBasicMaterial,Matrix4,Vector3,Quaternion,Raycaster,PerspectiveCamera,Points,BufferGeometry,Float32BufferAttribute,PointsMaterial,DoubleSide} from 'three';
 import {setBlockInstances,toothLength,POINT_HIT_THRESHOLD} from '../src/geometry.ts';
-import {sameSelection} from '../src/selection.ts';
+import {sameSelection,inspectSelection} from '../src/selection.ts';
 import {resetCameraPose,gridLayout} from '../src/camera.ts';
 import {readJSON} from '../pipeline/lib/data.mjs';
 
@@ -45,6 +45,23 @@ test('selecting another tooth switches the pin; only the same tooth toggles off'
   assert.equal(sameSelection({type:'block',block:[1]},{type:'block',block:[2]}),false);
   assert.equal(sameSelection({type:'block',block:[1]},{type:'block',block:[1]}),true);
   assert.equal(sameSelection({type:'blocks'},{type:'block',block:[1]}),false);
+});
+test('hover previews another signal while preserving the clicked selection for pointer exit',()=>{
+  const pin={type:'transactions'},hover={type:'fees-total'};
+  const preview=inspectSelection(hover,'fees-total',pin,'transactions');
+  assert.equal(preview.context,hover);assert.equal(preview.group,'fees-total');assert.equal(preview.pinned,false);
+  const restored=inspectSelection({type:'none'},null,pin,'transactions');
+  assert.equal(restored.context,pin);assert.equal(restored.group,'transactions');assert.equal(restored.pinned,true);
+  const idle=inspectSelection({type:'none'},null,{type:'none'},null);
+  assert.equal(idle.group,null);assert.equal(idle.pinned,false);
+});
+test('a pinned tooth does not stop another tooth or ring being inspected',()=>{
+  const pin={type:'block',block:[420000],index:0},other={type:'block',block:[420001],index:1};
+  const preview=inspectSelection(other,'spine',pin,'spine');
+  assert.equal(preview.context,other);assert.equal(preview.pinned,false);
+  assert.equal(inspectSelection(pin,'spine',pin,'spine').pinned,true);
+  assert.equal(inspectSelection({type:'hashrate'},'hashrate',pin,'spine').group,'hashrate');
+  assert.equal(inspectSelection({type:'none'},null,pin,'spine').context,pin);
 });
 test('camera reset removes accumulated pan, roll, and zoom across repeated view changes',()=>{
   const camera=new PerspectiveCamera(42,1.5,.05,1000);
