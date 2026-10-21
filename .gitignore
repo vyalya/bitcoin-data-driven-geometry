@@ -16,3 +16,11 @@ pipeline/raw/*.csv
 pipeline/generated/
 audit/source-responses/
 *.tmp
+
+# Local credentials and Cloudflare state must never enter Git.
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+.wrangler/
