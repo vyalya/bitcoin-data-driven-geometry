@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run study:scales && tsc -b && vite build",
     "preview": "vite preview",
     "pipeline": "node pipeline/fetch_coinmetrics.mjs && node pipeline/fetch_blockchain.mjs && node pipeline/fetch_blocks.mjs && node pipeline/build_db.mjs && node pipeline/export_json.mjs",
     "pipeline:build-only": "node pipeline/build_db.mjs && node pipeline/export_json.mjs",
@@ -13,7 +13,8 @@
     "test": "node --test tests/*.test.mjs",
     "audit:data": "node pipeline/audit_data.mjs",
     "pipeline:plan": "node pipeline/plan_dates.mjs",
-    "pipeline:blocks": "node pipeline/fetch_blocks.mjs"
+    "pipeline:blocks": "node pipeline/fetch_blocks.mjs",
+    "study:scales": "node pipeline/timechain_scales.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.6",

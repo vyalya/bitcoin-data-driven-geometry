@@ -81,3 +81,28 @@ npm exec -- wrangler pages deploy dist --project-name bitcoin-data-driven-geomet
 ```
 
 Use `node pipeline/verify_deployment.mjs https://DEPLOYMENT.bitcoin-data-driven-geometry.pages.dev` to compare served files to the validated local build. The verification script does not render the page. Deployment receipts and the previous production ID are kept in `audit/deployment.json`. Renew expired login with `npm exec -- wrangler login`; use the browser approval flow rather than pasting credentials into chat.
+
+## Timechain design study
+
+The independent local page at `/timechain.html` explores Bitcoin as an ordered ledger of tangible blocks. Run `npm run dev`, then open [the study](http://localhost:5173/timechain.html). This experiment lives on `codex/timechain-study`; it has not been deployed. The existing Atom/Classic application remains unchanged.
+
+Three arrangements use identical records and scales: **Timechain** is an open spiral, **Ribbon** is a serpentine sequence, and **Tapestry** is a softly curved field. Each tile is one actual block. Hover or click a tile or inscription for its figures, select a signal to inspect its encoding, and compare any of the 150 existing days. Layout changes do not change the data.
+
+| Measurement | Study encoding |
+| --- | --- |
+| Blocks | One tile per block, ordered by height. Thin connectors join consecutive heights only; omitted heights remain unlinked. These links do not independently validate previous-block hashes. |
+| Block weight | Tile height = `0.06 + 0.70 × weight / 4,000,000 WU`. The fixed base preserves visibility. The reference is modern block weight, not an early consensus limit. |
+| Transactions | Ivory inscription length is linear in the block's non-coinbase count, divided by the release maximum of 7,928. |
+| Fees | Copper inscription length = `log1p(block fees in BTC) / log1p(37.62561499 BTC)`. Bar lengths are not additive; daily fees still sum exact integer satoshis. |
+| Difficulty | Inner foundation rail uses the existing `log10(mean difficulty) / log10(release maximum)` scale. |
+| Estimated hashrate | Outer foundation rail uses the existing linear EH/s release scale. |
+| Active addresses | `floor(addresses / 1,000)` stipples, capped at 1,500. These are not people or peer locations. |
+
+The dim foundation rails show full-scale references. Zero or missing values have no filled mark; the inspector distinguishes them. Tile width/depth, layout, spacing, material, light, dot positions and camera motion are presentation choices, not additional measurements. Header UTC dates and CoinMetrics normalized days retain their existing distinction. Header-time differences are not measured mining intervals and can be negative.
+
+### Optional data extensions
+
+1. **Derive meaningful additions from the current records first.** A witness strand can use `baseBytes = (weight - size) / 3` and `extraBytes = size - baseBytes`, following [BIP141](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki). These extra serialization bytes include witness-format overhead; they are not signature counts or adoption percentages. A scheduled-subsidy strand can use block height and Bitcoin Core's integer halving rule, with the [210,000-block mainnet interval](https://github.com/bitcoin/bitcoin/blob/master/src/kernel/chainparams.cpp) and [subsidy implementation](https://github.com/bitcoin/bitcoin/blob/master/src/validation.cpp). Scheduled subsidy is not actual claimed reward, circulating supply or spendable supply; genesis and unclaimed rewards need explicit treatment.
+2. **Retrieve and verify actual headers.** Extend the cached block records with previous-block hash, Merkle root, version, nonce, target bits and median time past through [Esplora's block/header endpoints](https://github.com/Blockstream/esplora/blob/master/API.md). The 22,374 raw 80-byte headers total approximately 1.79 MB before metadata. Match existing hashes, recompute header hashes, check target and predecessor links, and retain request provenance. This would support genuine chain links and exact work; it would not constitute full transaction/consensus replay or measure energy consumption.
+3. **Unfold one real Merkle tree on demand.** Retrieve the selected block's ordered transaction IDs and verify the computed tree root against its header. Preserve Bitcoin's transaction order and odd-leaf handling from the [block reference](https://developer.bitcoin.org/reference/block_chain.html). Lazy loading avoids shipping all 39,806,678 transaction IDs across the selected days—about 2.55 GB of hexadecimal characters alone. A Merkle tree depicts transaction commitment, not a peer or payment-flow network.
+4. **Add distributions only when the design calls for them.** [Bitcoin Core `getblockstats`](https://bitcoincore.org/en/doc/30.0.0/rpc/blockchain/getblockstats/) can provide per-block fee statistics from an appropriately retained node; its fee-rate percentiles are weighted by weight units, not transaction counts. For exact daily transaction bands, follow the existing [BigQuery preparation and ingestion plan](pipeline/README.md#transaction-level-bigquery-data): verify project ID, access, live schema and coverage; dry-run a small pilot; set a maximum billed-byte limit; then reconcile transaction counts and satoshi sums before expanding. No BigQuery query or additional data download has been run for this study.

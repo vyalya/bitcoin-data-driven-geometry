@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-10-23T05:33:23.318433+00:00",
+  "branch": "codex/timechain-study",
+  "scope": "Local experimental form study; production not deployed",
+  "tests": {
+    "passed": 33,
+    "failed": 0
+  },
+  "build": "TypeScript and Vite passed",
+  "data": {
+    "days": 150,
+    "blocks": 22374,
+    "newExternalQueries": 0
+  },
+  "checks": [
+    "all daily transaction and integer-satoshi fee totals reconcile",
+    "shared scale metadata agrees with all published blocks",
+    "all layouts preserve block identity and avoid footprint collisions",
+    "camera fits portrait and desktop viewports and resets control target",
+    "localhost serves timechain.html with its study entry point"
+  ],
+  "browserVisualValidation": "Blocked by saved localhost browser permission; no browser rendering or interaction test claimed",
+  "designPlate": "A separate analytical SVG/PNG projection was inspected; not a browser screenshot",
+  "sha256": {
+    "dist/timechain.html": "265fc2fbeeaf774908d7f0d63e4a9bb7f04a1feb251d75edd37419f680cef64c",
+    "public/data/timechain-scales.json": "2656420773705b6468a22c8b09a052a4972294f8a2ff6694232454c6bf40409c",
+    "dist/assets/timechain-W-7n6oZf.js": "c17548ec1ab66b5a74fe7536ee5678aec1847ee4ec9d1c305c60a2ad98bf316e",
+    "dist/assets/timechain-C5FYucO8.css": "562728f62d549341a692ee3316e5131eacdc60b712812bb6953888b74374f53d"
+  }
+}
