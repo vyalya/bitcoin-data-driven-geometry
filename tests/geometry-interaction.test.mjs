@@ -89,3 +89,33 @@ test('responsive grid stays within its viewport on mobile, tablet, desktop and s
     }
   }
 });
+
+test('transaction and fee bars retain their block identity when switching pins',()=>{
+  for(const type of ['transactions','fees-total']){
+    const first={type,block:[840000,1000000,3999000,1000]};
+    const next={type,block:[840001,1000000,3999000,1000]};
+    assert.equal(sameSelection(first,next),false);
+    assert.equal(sameSelection(first,{type,block:[840000,999999,3998000,999]}),true);
+    assert.equal(sameSelection(first,{type}),false);
+    assert.equal(sameSelection({type},first),false);
+  }
+  assert.equal(sameSelection({type:'transactions',block:[840000]},{type:'fees-total',block:[840000]}),false);
+});
+test('aggregate metrics retain their identity and genesis height is not an aggregate',()=>{
+  for(const type of ['blocks','weight','transactions','fees-total','difficulty','hashrate','addresses']){
+    assert.equal(sameSelection({type},{type}),true);
+    assert.equal(sameSelection({type},{type:'none'}),false);
+  }
+  assert.equal(sameSelection({type:'transactions',block:[0]},{type:'transactions'}),false);
+  assert.equal(sameSelection({type:'transactions',block:[0]},{type:'transactions',block:[0]}),true);
+});
+test('hovering another block’s transaction or fee bar previews its values and restores the pin on exit',()=>{
+  for(const type of ['transactions','fees-total']){
+    const pin={type,block:[840000]},hover={type,block:[840001]};
+    const preview=inspectSelection(hover,type,pin,type);
+    assert.equal(preview.context,hover);assert.equal(preview.pinned,false);
+    assert.equal(inspectSelection(pin,type,pin,type).pinned,true);
+    const restored=inspectSelection({type:'none'},null,pin,type);
+    assert.equal(restored.context,pin);assert.equal(restored.pinned,true);
+  }
+});

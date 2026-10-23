@@ -1,6 +1,7 @@
-// Blocks within the same nucleus are distinct selections, not one toggle.
+// A block, its transactions, and its fees each retain the block's identity.
+// Aggregate metric selections have no height and remain distinct from a block.
 export function sameSelection(a:{type:string;block?:readonly number[]},b:{type:string;block?:readonly number[]}) {
-  return a.type===b.type && (a.type!=='block'||a.block?.[0]===b.block?.[0]);
+  return a.type===b.type && a.block?.[0]===b.block?.[0];
 }
 
 // A hover is a temporary preview. Leaving it restores the pinned figures;

@@ -2,7 +2,7 @@ import { Object3D, Color } from 'three';
 import type { InstancedMesh } from 'three';
 import type { BlockTuple } from './types';
 
-export type FormStyle = 'atom' | 'classic';
+export type FormStyle = 'atom' | 'classic' | 'gear';
 export const POINT_HIT_THRESHOLD = 0.045;
 export const BLOCK_WEIGHT_LIMIT = 4_000_000;
 export const toothLength = (weight:number) => 0.12 + 1.35 * weight / BLOCK_WEIGHT_LIMIT;

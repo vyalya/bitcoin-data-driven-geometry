@@ -1,0 +1,39 @@
+{
+  "validatedAt": "2026-10-23T16:09:10.076Z",
+  "branch": "codex/network-montage",
+  "study": "Connected gear",
+  "tests": {
+    "passed": 50,
+    "failed": 0
+  },
+  "build": "TypeScript and Vite passed",
+  "data": {
+    "days": 150,
+    "blocks": 22374,
+    "additionalProviderQueries": 0
+  },
+  "served": [
+    {
+      "path": "/timechain.html",
+      "status": 200,
+      "bytes": 1014
+    },
+    {
+      "path": "/src/timechain/main.tsx",
+      "status": 200,
+      "bytes": 6330
+    },
+    {
+      "path": "/src/gear/Scene.tsx",
+      "status": 200,
+      "bytes": 44069
+    },
+    {
+      "path": "/data/block-fees.json",
+      "status": 200,
+      "bytes": 339762
+    }
+  ],
+  "visualCheck": "Blocked: browser saved permission denies localhost:5173. HTTP source/data checks are not rendered interaction verification.",
+  "deployment": "Local prototype only"
+}
