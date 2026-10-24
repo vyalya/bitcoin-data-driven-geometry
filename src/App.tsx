@@ -528,9 +528,9 @@ function App({initialFormStyle="gear",initialView="grid",initialDate,initialPane
       {/* ═══ TOP BANNER ═══ */}
       <div className="hud hud-banner" ref={bannerRef}>
         <h1 className="hud-title">Bitcoin <span> / </span> A network in time</h1><p className="hud-edition">{snapshotsSettled ? snapshots.length : "…"} days · seven signals · one evolving form</p><div className="form-switch" role="group" aria-label="Geometry style">{(["gear","atom","classic"] as const).map(style=><button type="button" key={style} aria-pressed={formStyle===style} className={formStyle===style?"active":""} onClick={()=>{clearSelection();updateHoverCtx({type:"none"});setFormStyle(style);}}>{style==="gear"?"Gear":style==="atom"?"Atom":"Classic"}</button>)}</div><div className="view-tools"><button className="reset-view" type="button" title="Reset camera position, rotation and zoom" onClick={()=>{clearSelection();setResetVersion(v=>v+1);}}>↺ Reset view</button>
-        <button className="labels-toggle" type="button" role="switch" aria-checked={labelsVisible} aria-label="Show geometry labels" title={view==="grid"?"Toggle labels for the day you open":labelsVisible?"Hide geometry labels":"Show geometry labels"} onClick={()=>setLabelsVisible(v=>!v)}>
+        {view==="detail"&&<button className="labels-toggle" type="button" role="switch" aria-checked={labelsVisible} aria-label="Show geometry labels" title={labelsVisible?"Hide geometry labels":"Show geometry labels"} onClick={()=>setLabelsVisible(v=>!v)}>
           <span>Labels</span><span className="labels-toggle-track" aria-hidden="true"><span/></span>
-        </button>
+        </button>}
         </div>
       </div>
 
