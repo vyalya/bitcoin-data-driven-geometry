@@ -10,11 +10,14 @@ import { relationshipGroups } from './relationships';
 import { normalized, difficultyFill } from '../metrics';
 import { addressPoint } from './presentation';
 import { hasBlockBars, blockLength } from './model';
+import { signalLabels } from './labels';
+import { SignalLabels } from './SignalLabels';
 
 export const GearDataContext = createContext<GearData | null>(null);
 type Props = {
   snapshot:NetworkSnapshot; blocks?:BlockTuple[]; activeGroup?:string|null;
   selectedBlockIndex?:number; mini?:boolean; opacity?:number;
+  showEndpointLabels?:boolean; showSignalLabels?:boolean;
   onHover?:(id:string|null)=>void; onClick?:(id:string)=>void;
   onBlockHover?:(block:BlockTuple|null,index:number)=>void;
   onRingHover?:(type:string|null)=>void;
@@ -27,7 +30,8 @@ export function GearShape(props:Props) {
   return <GearLoaded {...props} data={data} fees={day.feesSat}/>;
 }
 function GearLoaded({snapshot:s,blocks=s.blocks??[],data,fees,activeGroup=null,selectedBlockIndex=-1,
-  mini=false,opacity=1,onHover,onClick,onBlockHover,onRingHover,onMetricBlockHover}:Props&{data:GearData;fees:(number|null)[]}) {
+  mini=false,opacity=1,showEndpointLabels=true,showSignalLabels=false,onHover,onClick,onBlockHover,onRingHover,onMetricBlockHover}:Props&{data:GearData;fees:(number|null)[]}) {
+  const root=useRef<THREE.Group>(null);
   const core=useMemo(()=>buildGearGeometry(blocks,fees,data.maxNonCoinbase,data.maxBlockFeesSat),[blocks,fees,data]);
   const frame=useMemo(()=>buildFrame(difficultyFill(s.difficulty,s.scales.difficulty),normalized(s.networkHashrateEh,s.scales.hashrateEh)),[s]);
   const toothGeo=useMemo(()=>new RoundedBoxGeometry(1,1,1,mini?1:2,.055),[mini]);
@@ -73,19 +77,17 @@ function GearLoaded({snapshot:s,blocks=s.blocks??[],data,fees,activeGroup=null,s
     for(let i=0;i<count;i++)addressPoint(i).toArray(positions,i*3);
     return positions;
   },[count]);
-  return <group>
+  const annotations=useMemo(()=>showSignalLabels&&!mini?signalLabels(s,blocks,core,count):[],[showSignalLabels,mini,s,blocks,core,count]);
+  return <group ref={root}>
+    {annotations.length>0&&<SignalLabels labels={annotations} root={root}/>}
     {showConnector&&!mini&&<lineSegments geometry={core.rails} raycast={noRaycast}>
       <lineBasicMaterial color="#fff2cb" transparent opacity={opacity*.65}/>
     </lineSegments>}
     <lineSegments geometry={core.links} raycast={noRaycast}><lineBasicMaterial color="#e7a454" transparent opacity={opacity*strength('spine')*.9}/></lineSegments>
-    {!mini&&core.endpoints.map(endpoint=>{
+    {!mini&&showEndpointLabels&&core.endpoints.map(endpoint=>{
       const i=endpoint.index,position=endpoint.position;
       const labelRadius=(1.5+blockLength(blocks[i][2])+.10)/1.5;
       return <group key={endpoint.role}>
-        <mesh position={[position[0],position[1],.13]} rotation={[0,0,Math.PI/4]}
-          onPointerMove={e=>inspect(e,'spine',false,i)} onPointerOut={leave} onClick={e=>inspect(e,'spine',true,i)}>
-          <boxGeometry args={[.045,.045,.025]}/><meshBasicMaterial color={endpoint.role==='end'?'#cf9852':'#f5dfb9'} transparent opacity={opacity}/>
-        </mesh>
         <Html position={[position[0]*labelRadius,position[1]*labelRadius,.15]} style={{pointerEvents:'none'}}>
           <span className={`gear-chain-label gear-chain-${endpoint.role}`}>
             {endpoint.role==='only'?'Only block':endpoint.role==='start'?'Start':'End'} <b>#{endpoint.height.toLocaleString('en-US')}</b>

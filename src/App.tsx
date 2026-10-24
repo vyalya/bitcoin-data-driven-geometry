@@ -40,6 +40,11 @@ function App({initialFormStyle="gear",initialView="grid",initialDate,initialPane
   const [resetVersion, setResetVersion] = useState(0);
   const [panelsHidden,setPanelsHidden]=useState(initialPanelsHidden);
   const [formStyle, setFormStyle] = useState<FormStyle>(initialFormStyle);
+  const [labelsVisible,setLabelsVisible]=useState<boolean>(()=>{
+    try{const saved=JSON.parse(localStorage.getItem('bitcoin-geometry-labels')??'null');return typeof saved?.visible==='boolean'?saved.visible:saved?.signals===true||saved?.endpoints!==false;}
+    catch{return true;}
+  });
+  useEffect(()=>{try{localStorage.setItem('bitcoin-geometry-labels',JSON.stringify({visible:labelsVisible}));}catch{/* Storage is optional. */}},[labelsVisible]);
   const baseSnapshot = snapshots[Math.min(activeIdx, snapshots.length - 1)];
   // False until the JSON load attempt settles (success or fail). Used to
   // avoid flashing the placeholder count before the data lands.
@@ -463,6 +468,8 @@ function App({initialFormStyle="gear",initialView="grid",initialDate,initialPane
         ) : null) : (
           <PrimeRadiantScene key={`${resetVersion}-${formStyle}`}
             formStyle={formStyle}
+            showEndpointLabels={labelsVisible}
+            showSignalLabels={labelsVisible}
             snapshot={s}
             blocks={currentBlocks}
             activeGroup={displayGroup}
@@ -506,7 +513,11 @@ function App({initialFormStyle="gear",initialView="grid",initialDate,initialPane
 
       {/* ═══ TOP BANNER ═══ */}
       <div className="hud hud-banner">
-        <h1 className="hud-title">Bitcoin <span> / </span> A network in time</h1><p className="hud-edition">{snapshotsSettled ? snapshots.length : "…"} days · seven signals · one evolving form</p><div className="form-switch" role="group" aria-label="Geometry style">{(["gear","atom","classic"] as const).map(style=><button type="button" key={style} aria-pressed={formStyle===style} className={formStyle===style?"active":""} onClick={()=>{clearSelection();updateHoverCtx({type:"none"});setFormStyle(style);}}>{style==="gear"?"Gear":style==="atom"?"Atom":"Classic"}</button>)}</div><button className="reset-view" type="button" title="Reset camera position, rotation and zoom" onClick={()=>{clearSelection();setResetVersion(v=>v+1);}}>↺ Reset view</button>
+        <h1 className="hud-title">Bitcoin <span> / </span> A network in time</h1><p className="hud-edition">{snapshotsSettled ? snapshots.length : "…"} days · seven signals · one evolving form</p><div className="form-switch" role="group" aria-label="Geometry style">{(["gear","atom","classic"] as const).map(style=><button type="button" key={style} aria-pressed={formStyle===style} className={formStyle===style?"active":""} onClick={()=>{clearSelection();updateHoverCtx({type:"none"});setFormStyle(style);}}>{style==="gear"?"Gear":style==="atom"?"Atom":"Classic"}</button>)}</div><div className="view-tools"><button className="reset-view" type="button" title="Reset camera position, rotation and zoom" onClick={()=>{clearSelection();setResetVersion(v=>v+1);}}>↺ Reset view</button>
+        {formStyle==="gear"&&<button className="labels-toggle" type="button" role="switch" aria-checked={labelsVisible} aria-label="Show geometry labels" title={view==="grid"?"Toggle labels for the day you open":labelsVisible?"Hide geometry labels":"Show geometry labels"} onClick={()=>setLabelsVisible(v=>!v)}>
+          <span>Labels</span><span className="labels-toggle-track" aria-hidden="true"><span/></span>
+        </button>}
+        </div>
       </div>
 
       {/* ═══ GRID VIEW SUBTITLE ═══ */}
@@ -964,6 +975,7 @@ interface SceneProps {
   onBlockHover: (block: BlockTuple | null, index: number) => void;
   onRingHover: (type: string | null, idx?: number) => void;
   onMetricBlockHover?: (type:"transactions"|"fees-total",block:BlockTuple,index:number)=>void;
+  showEndpointLabels?:boolean; showSignalLabels?:boolean;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1198,7 +1210,7 @@ function coreRingSpecs(s:NetworkSnapshot,style:FormStyle){
   return rings;
 }
 
-function PrimeRadiantScene({ formStyle, snapshot:s, blocks, activeGroup, frozen=false, selectedBlockIndex=-1, rotationEnabled=true, legendView=false, onHover, onClick, onBlockHover, onRingHover, onMetricBlockHover }:SceneProps) {
+function PrimeRadiantScene({ formStyle, snapshot:s, blocks, activeGroup, frozen=false, selectedBlockIndex=-1, rotationEnabled=true, legendView=false, onHover, onClick, onBlockHover, onRingHover, onMetricBlockHover, showEndpointLabels=true, showSignalLabels=false }:SceneProps) {
   const sceneRef=useRef<THREE.Group>(null);
   useFrame((_,delta)=>{if(sceneRef.current && rotationEnabled && !frozen && !legendView)sceneRef.current.rotation.y+=delta*0.08;});
   return <group ref={sceneRef} rotation={[-0.32,0.45,-0.12]} scale={0.85}>
@@ -1210,7 +1222,7 @@ function PrimeRadiantScene({ formStyle, snapshot:s, blocks, activeGroup, frozen=
       <hemisphereLight intensity={1.8} color="#fff2dd" groundColor="#4a3528"/>
       <directionalLight position={[4,6,8]} intensity={2.5} color="#ffead5"/>
       <directionalLight position={[-5,-2,-4]} intensity={1.4} color="#b6c7dc"/>
-      <GearShape snapshot={s} blocks={blocks} activeGroup={activeGroup} selectedBlockIndex={selectedBlockIndex} onHover={onHover} onClick={onClick} onBlockHover={onBlockHover} onRingHover={onRingHover} onMetricBlockHover={onMetricBlockHover}/>
+      <GearShape snapshot={s} blocks={blocks} showEndpointLabels={legendView?false:showEndpointLabels} showSignalLabels={!legendView&&showSignalLabels} activeGroup={activeGroup} selectedBlockIndex={selectedBlockIndex} onHover={onHover} onClick={onClick} onBlockHover={onBlockHover} onRingHover={onRingHover} onMetricBlockHover={onMetricBlockHover}/>
     </>:<>
     <BlockSpine formStyle={formStyle} blocks={blocks} highlighted={activeGroup==="spine"} selectedIndex={selectedBlockIndex} onHover={onHover} onClick={onClick} onBlockHover={onBlockHover}/>
     <CoreRings formStyle={formStyle} snapshot={s} activeGroup={activeGroup} onHover={onHover} onClick={onClick} onRingHover={onRingHover}/>

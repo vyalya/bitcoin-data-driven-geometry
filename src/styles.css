@@ -2073,3 +2073,33 @@ button:focus-visible,a:focus-visible { outline: 2px solid #ffc574; outline-offse
 .gear-chain-end { transform:translate(calc(-100% - 7px),-100%); }
 .gear-chain-only { transform:translate(-50%,-100%); }
 @media(max-width:640px){.gear-chain-label{font-size:8px;padding:2px 4px}}
+
+/* Annotation controls share the compact camera-tools row. */
+.view-tools { display:flex;justify-content:center;align-items:center;gap:10px;margin-top:7px; }
+.view-tools .reset-view { display:inline-block;margin:0;min-height:28px; }
+ .labels-toggle { display:inline-flex;align-items:center;gap:9px;padding:5px 9px;background:#151411b8;border:1px solid #75604440;border-radius:20px;color:#a99d8b;font:inherit;font-size:.64rem;cursor:pointer;min-height:30px; }
+.labels-toggle-track { position:relative;width:25px;height:14px;border-radius:10px;background:#39352f;transition:background .18s; }
+.labels-toggle-track>span { position:absolute;top:3px;left:3px;width:8px;height:8px;border-radius:50%;background:#b2a998;transition:transform .18s,background .18s; }
+.labels-toggle[aria-checked=true] { color:#ecb46e;border-color:#f7931a50; }
+.labels-toggle[aria-checked=true] .labels-toggle-track { background:#f7931a45; }
+.labels-toggle[aria-checked=true] .labels-toggle-track>span { transform:translateX(11px);background:#ffb14d; }
+.labels-toggle:hover { border-color:#d8a15b80; }
+.gear-signal-overlay { overflow:hidden;pointer-events:none; }
+.gear-signal-overlay line { stroke:#ba9a69;stroke-width:.7;opacity:.55; }
+.gear-signal-overlay circle { fill:#dbc097;opacity:.8; }
+.gear-signal-overlay rect { fill:#171717d9;stroke:#ffffff0d;stroke-width:1; }
+.gear-signal-overlay text { fill:#d4c2a5;font:10px ui-monospace,SFMono-Regular,monospace; }
+@media(min-width:821px){.form-gear.view-detail{--scene-top:144px}}
+@media(max-width:640px){.view-tools{display:inline-flex;margin:0 0 0 7px;gap:4px}.view-tools .reset-view{min-height:32px;font-size:10px}.labels-toggle{font-size:10px;min-height:32px}.gear-signal-overlay text{font-size:8px}}
+
+@media(max-width:640px){
+ .form-gear .view-tools{display:flex;margin:3px 0 0;gap:8px}
+ .form-gear .hud-left-panel{top:calc(112px + env(safe-area-inset-top))}
+ .form-gear{--scene-top:calc(234px + env(safe-area-inset-top))}
+ .form-gear.panels-hidden{--scene-top:calc(170px + env(safe-area-inset-top))}
+}
+@media(max-width:640px) and (max-height:600px){
+ .form-gear .hud-left-panel{top:84px}
+ .form-gear{--scene-top:186px}
+ .form-gear.panels-hidden{--scene-top:140px}
+}
