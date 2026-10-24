@@ -1,19 +1,49 @@
 {
   "url": "https://bitcoin-geometry.com",
-  "verifiedAt": "2026-10-21T05:58:21.217Z",
-  "checked": 162,
-  "expected": 162,
+  "verifiedAt": "2026-10-24T02:34:23.604Z",
+  "checked": 171,
+  "expected": 171,
   "errors": [],
   "files": [
     {
-      "file": "assets/index-BVlUMbNl.css",
-      "sha256": "b33a0bbe1e5e6a426442cbb2ae61161bb922f6f578be97c344b419107b0a9f33",
-      "bytes": 45225
+      "file": "assets/App-lJtmyQ8i.js",
+      "sha256": "844a597ecb4cdd33509253702a36bbb2068c7d5ed9d9a4924c0a8265304d8205",
+      "bytes": 167736
     },
     {
-      "file": "assets/index-DbLrzQ9_.js",
-      "sha256": "04ecb1e175fecf78ec2b95b7784dd4f2ffdd9613f7c288098d4f43547776c200",
-      "bytes": 1221754
+      "file": "assets/client-CTJXa_Wh.js",
+      "sha256": "93fec8cde59441b635421f966ecac6fbc79b4b763ad8c4b32c046a1f8450db3b",
+      "bytes": 193268
+    },
+    {
+      "file": "assets/main-Cq-pXjNJ.js",
+      "sha256": "1037d5e7fb99b2c258a66f9a261f2a93a018d67a6d5307b1dc7974205776a8fe",
+      "bytes": 256
+    },
+    {
+      "file": "assets/RoundedBoxGeometry-C2Fj0hSv.js",
+      "sha256": "285b05aa1876adb046dc5e2a03097f6efb23bb7b7db0552a1ccf6c7c3904dc80",
+      "bytes": 886137
+    },
+    {
+      "file": "assets/Study-C5FYucO8.css",
+      "sha256": "562728f62d549341a692ee3316e5131eacdc60b712812bb6953888b74374f53d",
+      "bytes": 10430
+    },
+    {
+      "file": "assets/Study-O8MhH2r7.js",
+      "sha256": "822dae288c44f9026afe699c40bdd560e6fcf53abf15aee37d979ec2a4abc2c4",
+      "bytes": 35336
+    },
+    {
+      "file": "assets/styles-Dwr1jC_E.css",
+      "sha256": "f61ea3e856c4aa3041f77078fd84a4319a3037c194a6c14ecec81394a6cd261a",
+      "bytes": 53999
+    },
+    {
+      "file": "assets/timechain-CCpwZO2t.js",
+      "sha256": "15f9197e1f27432f9e2ac2ed41ce45b25b624a7870fb4d77453f7087a2fb51a8",
+      "bytes": 2276
     },
     {
       "file": "data/.gitkeep",
@@ -771,6 +801,11 @@
       "bytes": 41386
     },
     {
+      "file": "data/block-fees.json",
+      "sha256": "2c5a2f20b7dd6029de7e038fcf337f98dc42d7387d7e041b124505231934ae56",
+      "bytes": 339762
+    },
+    {
       "file": "data/blocks.json",
       "sha256": "0ab2192a81c5272cfce722f84e767f78955c46bc8a0f7da74c55ea5b78f414a7",
       "bytes": 625605
@@ -786,14 +821,19 @@
       "bytes": 493888
     },
     {
+      "file": "data/timechain-scales.json",
+      "sha256": "2656420773705b6468a22c8b09a052a4972294f8a2ff6694232454c6bf40409c",
+      "bytes": 234
+    },
+    {
       "file": "favicon.svg",
       "sha256": "937fe2ffd078e3ed0f766fdca59bdec6b19695691694553f5aa43b8d96202d9c",
       "bytes": 2626
     },
     {
       "file": "index.html",
-      "sha256": "2bab0168b3e3321001671903073f05870dcb66ae11c798a70ea449d7e1663298",
-      "bytes": 2564
+      "sha256": "2d12d54843c762578437a5cd520781ddfe9ecdc887e1c29acffa722cbfd9e8c2",
+      "bytes": 2861
     },
     {
       "file": "llms.txt",
@@ -814,6 +854,11 @@
       "file": "sitemap.xml",
       "sha256": "9ab17b77d12f374811eee00e81d070a327406c817f3a46245c5cac8114c08a3e",
       "bytes": 237
+    },
+    {
+      "file": "timechain.html",
+      "sha256": "9999eb049a83c6609c3d51c4d6eaf415d9babb1d10d49a4c1427248cc96b18f9",
+      "bytes": 843
     }
   ]
 }

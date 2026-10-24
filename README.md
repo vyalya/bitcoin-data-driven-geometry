@@ -86,7 +86,7 @@ Use `node pipeline/verify_deployment.mjs https://DEPLOYMENT.bitcoin-data-driven-
 
 ## Connected gear design study
 
-Run `npm run dev` and open [Connected gear](http://localhost:5173/timechain.html). The study uses the original left timeline, right inspector and full 360-degree Trackball controls, with the quieter panel formatting from the earlier experiment. It opens in the Gear grid with side panels hidden, matching the main entry point. This Gear release is prepared for publication on bitcoin-geometry.com; Atom and Classic remain available.
+Run `npm run dev` and open [Connected gear](http://localhost:5173/timechain.html). The study uses the original left timeline, right inspector and full 360-degree Trackball controls, with the quieter panel formatting from the earlier experiment. It opens in the Gear grid with side panels hidden, matching the main entry point. The Gear release is published on bitcoin-geometry.com; Atom and Classic remain available.
 
 The connected gear brings all seven signals into one form. Flat-ended block teeth follow an open 330-degree path around the central address field, with first/last-height text labels and a fixed 30-degree opening. The opening and marker sizes are layout choices, not additional data. Each block has paired inner transaction and fee bars; filled portions of two polygonal guard rims surround the ledger. Hovering or selecting a block with at least one visible transaction or fee bar reveals a thin connector to those bars. That connector is illustrative, not an additional measurement or observed payment connection.
 
