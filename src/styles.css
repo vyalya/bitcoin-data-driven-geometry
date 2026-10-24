@@ -2103,3 +2103,12 @@ button:focus-visible,a:focus-visible { outline: 2px solid #ffc574; outline-offse
  .hud-shell{--scene-top:186px}
  .hud-shell.panels-hidden{--scene-top:140px}
 }
+
+/* Adjacent-date controls appear with annotations in the same quiet tool row. */
+.snapshot-stepper { display:inline-flex;align-items:center;overflow:hidden;border:1px solid #75604440;border-radius:20px;background:#151411b8; }
+.snapshot-stepper button { display:flex;align-items:center;justify-content:center;width:31px;height:28px;padding:0;border:0;background:transparent;color:#c4aa86;cursor:pointer;transition:color .16s,background .16s; }
+.snapshot-stepper button+button { border-left:1px solid #75604430; }
+.snapshot-stepper button:hover:not(:disabled) { color:#ffb14d;background:#f7931a12; }
+.snapshot-stepper button:disabled { opacity:.25;cursor:default; }
+.snapshot-stepper button:focus-visible { outline-offset:-3px;border-radius:14px; }
+@media(max-width:640px){.snapshot-stepper button{width:34px;height:30px}}

@@ -301,6 +301,15 @@ function App({initialFormStyle="gear",initialView="grid",initialDate,initialPane
     hoverCtxRef.current = { type: "none" };
   }, []);
 
+  const stepDay=(direction:-1|1)=>{
+    if(!snapshotsSettled)return;
+    pendingMetric.current=null;
+    setPlaying(false);
+    if(pinnedGroup)setRotationEnabled(preClickState.current.wasRotating);
+    setPinnedGroup(null);setPinnedCtx({type:"none"});setActiveGroup(null);updateHoverCtx({type:"none"});
+    setActiveIdx(index=>Math.max(0,Math.min(snapshots.length-1,index+direction)));
+  };
+
   useEffect(() => {
     if(pendingMetric.current){
       const metric=pendingMetric.current;pendingMetric.current=null;
@@ -531,6 +540,14 @@ function App({initialFormStyle="gear",initialView="grid",initialDate,initialPane
         {view==="detail"&&<button className="labels-toggle" type="button" role="switch" aria-checked={labelsVisible} aria-label="Show geometry labels" title={labelsVisible?"Hide geometry labels":"Show geometry labels"} onClick={()=>setLabelsVisible(v=>!v)}>
           <span>Labels</span><span className="labels-toggle-track" aria-hidden="true"><span/></span>
         </button>}
+        {view==="detail"&&labelsVisible&&<div className="snapshot-stepper" role="group" aria-label="Navigate historical snapshots">
+          <button type="button" disabled={!snapshotsSettled||activeIdx===0} aria-label="Previous snapshot" title={activeIdx>0?`Previous snapshot · ${snapshots[activeIdx-1].snapshotTime.slice(0,10)}`:"First snapshot"} onClick={()=>stepDay(-1)}>
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m12 5-5 5 5 5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+          <button type="button" disabled={!snapshotsSettled||activeIdx>=snapshots.length-1} aria-label="Next snapshot" title={activeIdx<snapshots.length-1?`Next snapshot · ${snapshots[activeIdx+1].snapshotTime.slice(0,10)}`:"Last snapshot"} onClick={()=>stepDay(1)}>
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m8 5 5 5-5 5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+        </div>}
         </div>
       </div>
 
