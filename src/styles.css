@@ -2093,13 +2093,13 @@ button:focus-visible,a:focus-visible { outline: 2px solid #ffc574; outline-offse
 @media(max-width:640px){.view-tools{display:inline-flex;margin:0 0 0 7px;gap:4px}.view-tools .reset-view{min-height:32px;font-size:10px}.labels-toggle{font-size:10px;min-height:32px}.gear-signal-overlay text{font-size:8px}}
 
 @media(max-width:640px){
- .form-gear .view-tools{display:flex;margin:3px 0 0;gap:8px}
- .form-gear .hud-left-panel{top:calc(112px + env(safe-area-inset-top))}
- .form-gear{--scene-top:calc(234px + env(safe-area-inset-top))}
- .form-gear.panels-hidden{--scene-top:calc(170px + env(safe-area-inset-top))}
+ .hud-shell .view-tools{display:flex;margin:3px 0 0;gap:8px}
+ .hud-shell .hud-left-panel{top:calc(112px + env(safe-area-inset-top))}
+ .hud-shell{--scene-top:calc(234px + env(safe-area-inset-top))}
+ .hud-shell.panels-hidden{--scene-top:calc(170px + env(safe-area-inset-top))}
 }
 @media(max-width:640px) and (max-height:600px){
- .form-gear .hud-left-panel{top:84px}
- .form-gear{--scene-top:186px}
- .form-gear.panels-hidden{--scene-top:140px}
+ .hud-shell .hud-left-panel{top:84px}
+ .hud-shell{--scene-top:186px}
+ .hud-shell.panels-hidden{--scene-top:140px}
 }

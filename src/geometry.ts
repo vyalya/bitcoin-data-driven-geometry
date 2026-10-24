@@ -13,19 +13,8 @@ export function setBlockInstances(mesh:InstancedMesh, blocks:BlockTuple[], style
   const dummy=new Object3D(), color=new Color();
   mesh.count=blocks.length;
   blocks.forEach((block,i)=>{
-    const length=toothLength(block[2]), radius=.3+length/2;
-    const width=hitTarget?.075:i===selected?.065:.025;
-    if(style==='atom'){
-      const y=1-2*(i+.5)/blocks.length, r=Math.sqrt(1-y*y), azimuth=i*Math.PI*(3-Math.sqrt(5));
-      dummy.position.set(Math.cos(azimuth)*r*radius,y*radius,Math.sin(azimuth)*r*radius);
-    }else{
-      const angle=i/blocks.length*Math.PI*2;
-      dummy.position.set(Math.cos(angle)*radius,Math.sin(angle)*radius,0);
-    }
-    dummy.lookAt(0,0,0);
-    dummy.scale.set(width,width,length);
-    dummy.updateMatrix();
-    mesh.setMatrixAt(i,dummy.matrix);
+    const matrix=blockMatrix(block,i,blocks.length,style,hitTarget,i===selected,dummy);
+    mesh.setMatrixAt(i,matrix);
     if(!hitTarget)mesh.setColorAt(i,color.set(i===selected?'#FFF1D8':'#F7931A'));
   });
   mesh.instanceMatrix.needsUpdate=true;
@@ -33,4 +22,21 @@ export function setBlockInstances(mesh:InstancedMesh, blocks:BlockTuple[], style
   // Three caches instance bounds; recompute after dates or layout change.
   mesh.computeBoundingSphere();
   mesh.computeBoundingBox();
+}
+
+/** Shared drawn transform for block meshes and their annotation endpoints. */
+export function blockMatrix(block:BlockTuple,i:number,count:number,style:FormStyle,hitTarget=false,selected=false,dummy=new Object3D()) {
+    const length=toothLength(block[2]), radius=.3+length/2;
+    const width=hitTarget ? .075 : selected ? .065 : .025;
+    if(style==='atom'){
+      const y=1-2*(i+.5)/count, r=Math.sqrt(1-y*y), azimuth=i*Math.PI*(3-Math.sqrt(5));
+      dummy.position.set(Math.cos(azimuth)*r*radius,y*radius,Math.sin(azimuth)*r*radius);
+    }else{
+      const angle=i/count*Math.PI*2;
+      dummy.position.set(Math.cos(angle)*radius,Math.sin(angle)*radius,0);
+    }
+    dummy.lookAt(0,0,0);
+    dummy.scale.set(width,width,length);
+    dummy.updateMatrix();
+  return dummy.matrix;
 }

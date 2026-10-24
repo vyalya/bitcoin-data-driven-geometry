@@ -22,6 +22,9 @@ import { loadGearData } from "./gear/data";
 import type { GearData } from "./gear/data";
 import { gearShapes, gearDescriptions, gearLegendDefinitions, gearRelations } from "./gear/copy";
 import { relationshipGroups } from "./gear/relationships";
+import { coreRingSpecs } from "./rings";
+import { legacySignalLabels, legacyEndpoints } from "./legacyLabels";
+import { SignalLabels } from "./gear/SignalLabels";
 
 /* ═══════════════════════════════════════════════════════
    APP SHELL
@@ -479,8 +482,8 @@ function App({initialFormStyle="gear",initialView="grid",initialDate,initialPane
         ) : null) : (
           <PrimeRadiantScene key={`${resetVersion}-${formStyle}`}
             formStyle={formStyle}
-            showEndpointLabels={labelsVisible&&!panelsHidden}
-            showSignalLabels={labelsVisible&&!panelsHidden}
+            showEndpointLabels={labelsVisible}
+            showSignalLabels={labelsVisible}
             snapshot={s}
             blocks={currentBlocks}
             activeGroup={displayGroup}
@@ -525,9 +528,9 @@ function App({initialFormStyle="gear",initialView="grid",initialDate,initialPane
       {/* ═══ TOP BANNER ═══ */}
       <div className="hud hud-banner" ref={bannerRef}>
         <h1 className="hud-title">Bitcoin <span> / </span> A network in time</h1><p className="hud-edition">{snapshotsSettled ? snapshots.length : "…"} days · seven signals · one evolving form</p><div className="form-switch" role="group" aria-label="Geometry style">{(["gear","atom","classic"] as const).map(style=><button type="button" key={style} aria-pressed={formStyle===style} className={formStyle===style?"active":""} onClick={()=>{clearSelection();updateHoverCtx({type:"none"});setFormStyle(style);}}>{style==="gear"?"Gear":style==="atom"?"Atom":"Classic"}</button>)}</div><div className="view-tools"><button className="reset-view" type="button" title="Reset camera position, rotation and zoom" onClick={()=>{clearSelection();setResetVersion(v=>v+1);}}>↺ Reset view</button>
-        {formStyle==="gear"&&!panelsHidden&&<button className="labels-toggle" type="button" role="switch" aria-checked={labelsVisible} aria-label="Show geometry labels" title={view==="grid"?"Toggle labels for the day you open":labelsVisible?"Hide geometry labels":"Show geometry labels"} onClick={()=>setLabelsVisible(v=>!v)}>
+        <button className="labels-toggle" type="button" role="switch" aria-checked={labelsVisible} aria-label="Show geometry labels" title={view==="grid"?"Toggle labels for the day you open":labelsVisible?"Hide geometry labels":"Show geometry labels"} onClick={()=>setLabelsVisible(v=>!v)}>
           <span>Labels</span><span className="labels-toggle-track" aria-hidden="true"><span/></span>
-        </button>}
+        </button>
         </div>
       </div>
 
@@ -1210,19 +1213,13 @@ function CoreRings({formStyle,snapshot:s,activeGroup,opacity=1,onHover,onClick,o
   </group>)}</>;
 }
 
-function coreRingSpecs(s:NetworkSnapshot,style:FormStyle){
-  const rings: {id:string;radius:number;fill:number;color:string;rotation:[number,number,number]}[] = [
-    {id:"transactions",radius:2,fill:normalized(s.transactionCount,s.scales.dailyTransactions),color:"#FFC873",rotation:[0,0,0]},
-    {id:"fees-total",radius:2.5,fill:normalized(s.totalFeesBtc,s.scales.feesBtc),color:"#F7931A",rotation:[0,0,0]},
-    {id:"difficulty",radius:3,fill:difficultyFill(s.difficulty,s.scales.difficulty),color:"#D9A441",rotation:[Math.PI/2,0,0]},
-    {id:"hashrate",radius:3.5,fill:normalized(s.networkHashrateEh,s.scales.hashrateEh),color:"#FFE0A3",rotation:[0,Math.PI/2,0]},
-  ];
-  if(style==="atom")rings.forEach((r,i)=>r.rotation=([[0.3,0.2,0],[1.05,0.6,0.55],[-0.85,0.55,-0.65],[0.2,1.2,-0.3]] as [number,number,number][])[i]);
-  return rings;
-}
 
 function PrimeRadiantScene({ formStyle, snapshot:s, blocks, activeGroup, frozen=false, selectedBlockIndex=-1, rotationEnabled=true, legendView=false, onHover, onClick, onBlockHover, onRingHover, onMetricBlockHover, showEndpointLabels=true, showSignalLabels=false }:SceneProps) {
   const sceneRef=useRef<THREE.Group>(null);
+  const addressAnchor=useRef(new THREE.Vector3());
+  const addressCount=Math.min(Math.floor((s.activeAddresses??0)/s.scales.detailAddressesPerParticle),MAX_PARTICLES);
+  const annotations=useMemo(()=>formStyle!=="gear"&&showSignalLabels&&!legendView?legacySignalLabels(s,blocks,formStyle,addressCount,addressAnchor.current):[],[formStyle,showSignalLabels,legendView,s,blocks,addressCount]);
+  const endpoints=useMemo(()=>formStyle!=="gear"&&showEndpointLabels&&!legendView?legacyEndpoints(blocks,formStyle):[],[formStyle,showEndpointLabels,legendView,blocks]);
   useFrame((_,delta)=>{if(sceneRef.current && rotationEnabled && !frozen && !legendView)sceneRef.current.rotation.y+=delta*0.08;});
   return <group ref={sceneRef} rotation={[-0.32,0.45,-0.12]} scale={0.85}>
     <ambientLight intensity={0.18}/>
@@ -1235,10 +1232,14 @@ function PrimeRadiantScene({ formStyle, snapshot:s, blocks, activeGroup, frozen=
       <directionalLight position={[-5,-2,-4]} intensity={1.4} color="#b6c7dc"/>
       <GearShape snapshot={s} blocks={blocks} showEndpointLabels={legendView?false:showEndpointLabels} showSignalLabels={!legendView&&showSignalLabels} activeGroup={activeGroup} selectedBlockIndex={selectedBlockIndex} onHover={onHover} onClick={onClick} onBlockHover={onBlockHover} onRingHover={onRingHover} onMetricBlockHover={onMetricBlockHover}/>
     </>:<>
+    {annotations.length>0&&<SignalLabels labels={annotations} root={sceneRef}/>}
+    {endpoints.map(endpoint=><Html key={endpoint.role} position={endpoint.position} style={{pointerEvents:'none'}}>
+      <span className={`gear-chain-label gear-chain-${endpoint.role}`}>{endpoint.role==='only'?'Only block':endpoint.role==='start'?'Start':'End'} <b>#{endpoint.height.toLocaleString('en-US')}</b></span>
+    </Html>)}
     <BlockSpine formStyle={formStyle} blocks={blocks} highlighted={activeGroup==="spine"} selectedIndex={selectedBlockIndex} onHover={onHover} onClick={onClick} onBlockHover={onBlockHover}/>
     <CoreRings formStyle={formStyle} snapshot={s} activeGroup={activeGroup} onHover={onHover} onClick={onClick} onRingHover={onRingHover}/>
     <group onPointerOver={e=>{e.stopPropagation();onHover("particles");onRingHover("addresses");}} onPointerOut={()=>{onHover(null);onRingHover(null);}} onClick={e=>{e.stopPropagation();if(e.delta>5)return;onRingHover("addresses");onClick("particles");}}>
-      <AddressParticles count={Math.min(Math.floor((s.activeAddresses??0)/s.scales.detailAddressesPerParticle),MAX_PARTICLES)} paused={!rotationEnabled||frozen} highlighted={activeGroup==="particles"}/>
+      <AddressParticles count={addressCount} labelAnchor={addressAnchor.current} paused={!rotationEnabled||frozen} highlighted={activeGroup==="particles"}/>
     </group>
     </>}
   </group>;
@@ -1303,7 +1304,7 @@ function LegendIllustration({formStyle,snapshot:s}:{formStyle:FormStyle;snapshot
 
 const MAX_PARTICLES = 1500;
 
-function AddressParticles({ count, paused = false, highlighted = false }: { count: number; paused?: boolean; highlighted?:boolean }) {
+function AddressParticles({ count, paused = false, highlighted = false, labelAnchor }: { count: number; paused?: boolean; highlighted?:boolean; labelAnchor?:THREE.Vector3 }) {
   const pointsRef = useRef<THREE.Points>(null);
   const dataRef = useRef<{ angles: Float32Array; speeds: Float32Array; radii: Float32Array; yOffsets: Float32Array; yDrift: Float32Array } | null>(null);
 
@@ -1349,6 +1350,7 @@ function AddressParticles({ count, paused = false, highlighted = false }: { coun
       (pos.array as Float32Array)[i * 3 + 2] = Math.sin(angles[i]) * rr;
 
     }
+    if(labelAnchor)labelAnchor.fromBufferAttribute(pos,Math.min(10,count-1));
     pos.needsUpdate = true;
     pointsRef.current.geometry.setDrawRange(0, count);
   });
