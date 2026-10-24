@@ -40,6 +40,17 @@ function App({initialFormStyle="gear",initialView="grid",initialDate,initialPane
   const [resetVersion, setResetVersion] = useState(0);
   const [panelsHidden,setPanelsHidden]=useState(initialPanelsHidden);
   const [formStyle, setFormStyle] = useState<FormStyle>(initialFormStyle);
+  const bannerRef=useRef<HTMLDivElement>(null);
+  const [headerClearance,setHeaderClearance]=useState(0);
+  useLayoutEffect(()=>{
+    const banner=bannerRef.current;if(!banner)return;
+    let disposed=false;
+    const measure=()=>{if(!disposed)setHeaderClearance(Math.ceil(banner.getBoundingClientRect().bottom)+12);};
+    const observer=new ResizeObserver(measure);
+    observer.observe(banner);window.addEventListener('resize',measure);measure();
+    void document.fonts?.ready.then(measure);
+    return ()=>{disposed=true;observer.disconnect();window.removeEventListener('resize',measure);};
+  },[formStyle,panelsHidden]);
   const [labelsVisible,setLabelsVisible]=useState<boolean>(()=>{
     try{const saved=JSON.parse(localStorage.getItem('bitcoin-geometry-labels')??'null');return typeof saved?.visible==='boolean'?saved.visible:saved?.signals===true||saved?.endpoints!==false;}
     catch{return true;}
@@ -425,7 +436,7 @@ function App({initialFormStyle="gear",initialView="grid",initialDate,initialPane
   return (
     <GearDataContext.Provider value={gearData}>
     <div className={`hud-shell form-${formStyle} view-${view} ${showNarration?"has-narration":""} ${panelsHidden?"panels-hidden":""}`}>
-      <div className="scene-viewport" onPointerLeave={()=>{setCellHoverIdx(null);setActiveGroup(null);}}>
+      <div className="scene-viewport" style={{top:`max(var(--scene-top), ${headerClearance}px)`}} onPointerLeave={()=>{setCellHoverIdx(null);setActiveGroup(null);}}>
       <Canvas key={`${view}-${resetVersion}`}
         camera={{ position: [0, 0, 22], fov: 42, near: 0.05 }}
         raycaster={{ params: { Mesh:{}, Line:{threshold:0.05}, LOD:{}, Sprite:{}, Points: { threshold: POINT_HIT_THRESHOLD } } }}
@@ -468,8 +479,8 @@ function App({initialFormStyle="gear",initialView="grid",initialDate,initialPane
         ) : null) : (
           <PrimeRadiantScene key={`${resetVersion}-${formStyle}`}
             formStyle={formStyle}
-            showEndpointLabels={labelsVisible}
-            showSignalLabels={labelsVisible}
+            showEndpointLabels={labelsVisible&&!panelsHidden}
+            showSignalLabels={labelsVisible&&!panelsHidden}
             snapshot={s}
             blocks={currentBlocks}
             activeGroup={displayGroup}
@@ -512,9 +523,9 @@ function App({initialFormStyle="gear",initialView="grid",initialDate,initialPane
       {formStyle !== "classic" && <div className="space-atmosphere" aria-hidden="true"/>}
 
       {/* ═══ TOP BANNER ═══ */}
-      <div className="hud hud-banner">
+      <div className="hud hud-banner" ref={bannerRef}>
         <h1 className="hud-title">Bitcoin <span> / </span> A network in time</h1><p className="hud-edition">{snapshotsSettled ? snapshots.length : "…"} days · seven signals · one evolving form</p><div className="form-switch" role="group" aria-label="Geometry style">{(["gear","atom","classic"] as const).map(style=><button type="button" key={style} aria-pressed={formStyle===style} className={formStyle===style?"active":""} onClick={()=>{clearSelection();updateHoverCtx({type:"none"});setFormStyle(style);}}>{style==="gear"?"Gear":style==="atom"?"Atom":"Classic"}</button>)}</div><div className="view-tools"><button className="reset-view" type="button" title="Reset camera position, rotation and zoom" onClick={()=>{clearSelection();setResetVersion(v=>v+1);}}>↺ Reset view</button>
-        {formStyle==="gear"&&<button className="labels-toggle" type="button" role="switch" aria-checked={labelsVisible} aria-label="Show geometry labels" title={view==="grid"?"Toggle labels for the day you open":labelsVisible?"Hide geometry labels":"Show geometry labels"} onClick={()=>setLabelsVisible(v=>!v)}>
+        {formStyle==="gear"&&!panelsHidden&&<button className="labels-toggle" type="button" role="switch" aria-checked={labelsVisible} aria-label="Show geometry labels" title={view==="grid"?"Toggle labels for the day you open":labelsVisible?"Hide geometry labels":"Show geometry labels"} onClick={()=>setLabelsVisible(v=>!v)}>
           <span>Labels</span><span className="labels-toggle-track" aria-hidden="true"><span/></span>
         </button>}
         </div>
