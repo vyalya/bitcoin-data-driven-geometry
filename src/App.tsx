@@ -540,7 +540,7 @@ function App({initialFormStyle="gear",initialView="grid",initialDate,initialPane
         {view==="detail"&&<button className="labels-toggle" type="button" role="switch" aria-checked={labelsVisible} aria-label="Show geometry labels" title={labelsVisible?"Hide geometry labels":"Show geometry labels"} onClick={()=>setLabelsVisible(v=>!v)}>
           <span>Labels</span><span className="labels-toggle-track" aria-hidden="true"><span/></span>
         </button>}
-        {view==="detail"&&labelsVisible&&<div className="snapshot-stepper" role="group" aria-label="Navigate historical snapshots">
+        {view==="detail"&&<div className="snapshot-stepper" role="group" aria-label="Navigate historical snapshots">
           <button type="button" disabled={!snapshotsSettled||activeIdx===0} aria-label="Previous snapshot" title={activeIdx>0?`Previous snapshot · ${snapshots[activeIdx-1].snapshotTime.slice(0,10)}`:"First snapshot"} onClick={()=>stepDay(-1)}>
             <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m12 5-5 5 5 5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
