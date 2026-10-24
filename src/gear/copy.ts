@@ -1,4 +1,4 @@
-// The connected gear keeps quantities separate from supporting structure.
+// The connected gear keeps measurements separate from illustrative relationships.
 // Highlighted connections explain protocol roles, not observed payment flows.
 export const gearShapes: Record<string, string> = {
   blocks: 'Linked gear teeth',
@@ -13,11 +13,11 @@ export const gearShapes: Record<string, string> = {
 export const gearDescriptions: Record<string, string> = {
   blocks: 'One flat-ended tooth per block, arranged clockwise by height around the day’s full circle. The chain track joins consecutive heights only, leaving gaps and the last-to-first join open. Tooth directions are layout, not measurements or verified hash links.',
   weight: 'Tooth length = 0.12 visibility base + 0.75 × weight / 4,000,000 WU, extending from radius 1.5. Width follows tooth spacing. The modern 4 MWU reference compares all eras; it is not an early block limit.',
-  transactions: 'Each block’s inner spoke carries an ivory bar: length = 0.58 × non-coinbase transactions / 7,928, the release maximum. Zero transactions leave the bar empty. The neighboring copper bar shows fees for that same block.',
-  'fees-total': 'Each spoke’s copper bar shows its block’s fees: length = 0.58 × log1p(BTC) / log1p(37.62561499), the release maximum. Zero or missing fees leave it empty. The panel sums exact satoshis; logarithmic bar lengths are not additive.',
-  difficulty: 'The inner guard rim fills by log10(mean block difficulty) / log10(release maximum). Difficulty 1 has no fill. Its 64-sided outline and dark backing are fixed references, not additional data or a security score.',
-  hashrate: 'The outer guard rim fills by estimated daily EH/s / release maximum. Its 64-sided outline is fixed; missing estimates leave it unfilled. Hashrate is inferred from difficulty and block production, not directly observed miner activity.',
-  addresses: 'The central field shows one dot per 1,000 active addresses in detail or 8,000 in the grid, rounded down; caps 1,500 / 180. Positions are illustrative. Addresses are not people or peers, and supporting rails are not payment links.',
+  transactions: 'Each block has an inner ivory bar: length = 0.58 × non-coinbase transactions / 7,928, the release maximum. Zero transactions leave the bar empty. The neighboring copper bar shows fees for that same block.',
+  'fees-total': 'Each block’s neighboring copper bar shows its fees: length = 0.58 × log1p(BTC) / log1p(37.62561499), the release maximum. Zero or missing fees leave it empty. The panel sums exact satoshis; logarithmic bar lengths are not additive.',
+  difficulty: 'The inner guard rim fills by log10(mean block difficulty) / log10(release maximum). Difficulty 1 has no fill. Only the filled portion of its 64-sided path is drawn; it is not a security score.',
+  hashrate: 'The outer guard rim fills by estimated daily EH/s / release maximum. Only the filled portion of its 64-sided path is drawn; missing estimates leave no rim. Hashrate is inferred from difficulty and block production, not directly observed miner activity.',
+  addresses: 'The central field shows one dot per 1,000 active addresses in detail or 8,000 in the grid, rounded down; caps 1,500 / 180. Positions are illustrative. Addresses are not people or peers. A connector shown on block hover or selection illustrates a relationship, not a payment link.',
 };
 
 export const gearLegendDefinitions: [string, string][] = [
@@ -33,7 +33,7 @@ export const gearLegendDefinitions: [string, string][] = [
 export const gearRelations: Record<string, { title: string; text: string }> = {
   blocks: {
     title: 'A connected ledger',
-    text: 'Each block contains transactions and follows the ledger by height. Its spoke carries transaction and fee bars. The guard rims evoke the proof of work that makes rewriting this history costly.',
+    text: 'Each block contains transactions and follows the ledger by height. Its paired inner bars show transactions and fees. Hovering or selecting a block reveals a thin illustrative connector. The guard rims evoke the proof of work that makes rewriting this history costly.',
   },
   weight: {
     title: 'Capacity inside each block',
@@ -53,10 +53,10 @@ export const gearRelations: Record<string, { title: string; text: string }> = {
   },
   hashrate: {
     title: 'Work protecting history',
-    text: 'Estimated hashrate describes computing effort, inferred from difficulty and block production. Proof of work makes rewriting history costly; full nodes still check that blocks obey Bitcoin’s rules. The supporting frame is illustrative.',
+    text: 'Estimated hashrate describes computing effort, inferred from difficulty and block production. Proof of work makes rewriting history costly; full nodes still check that blocks obey Bitcoin’s rules. The connector shown on block hover or selection is illustrative.',
   },
   addresses: {
     title: 'Activity within the ledger',
-    text: 'Active addresses participate in ledger changes. One person can use many addresses, and one address can serve many people. The central field gives daily context; its positions and structural connections do not map users or payments.',
+    text: 'Active addresses participate in ledger changes. One person can use many addresses, and one address can serve many people. The central field gives daily context; its positions and the hover connector do not map users or payments.',
   },
 };

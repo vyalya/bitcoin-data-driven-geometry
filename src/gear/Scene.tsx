@@ -29,7 +29,7 @@ function GearLoaded({snapshot:s,blocks=s.blocks??[],data,fees,activeGroup=null,s
   const core=useMemo(()=>buildGearGeometry(blocks,fees,data.maxNonCoinbase,data.maxBlockFeesSat),[blocks,fees,data]);
   const frame=useMemo(()=>buildFrame(difficultyFill(s.difficulty,s.scales.difficulty),normalized(s.networkHashrateEh,s.scales.hashrateEh)),[s]);
   const toothGeo=useMemo(()=>new RoundedBoxGeometry(1,1,1,mini?1:2,.055),[mini]);
-  const body=useRef<THREE.InstancedMesh>(null),tx=useRef<THREE.InstancedMesh>(null),fee=useRef<THREE.InstancedMesh>(null),support=useRef<THREE.InstancedMesh>(null),rails=useRef<THREE.InstancedMesh>(null);
+  const body=useRef<THREE.InstancedMesh>(null),tx=useRef<THREE.InstancedMesh>(null),fee=useRef<THREE.InstancedMesh>(null);
   const related=relationshipGroups(activeGroup);
   const strength=(id:string)=>!activeGroup||activeGroup===id?1:related.includes(id)?.88:.22;
   useEffect(()=>()=>{core.rails.dispose();core.links.dispose();},[core]);
@@ -46,24 +46,9 @@ function GearLoaded({snapshot:s,blocks=s.blocks??[],data,fees,activeGroup=null,s
       if(mesh!.instanceColor)mesh!.instanceColor.needsUpdate=true;
       mesh!.computeBoundingSphere();
     });
-    if(rails.current){
-      core.railMatrices.forEach((m,i)=>{rails.current!.setMatrixAt(i,m);rails.current!.setColorAt(i,new THREE.Color(i===selectedBlockIndex?'#dba45c':'#464037'));});
-      rails.current.instanceMatrix.needsUpdate=true;
-      if(rails.current.instanceColor)rails.current.instanceColor.needsUpdate=true;
-      rails.current.computeBoundingSphere();
-    }
-    const traceColors=new Float32Array(core.rails.getAttribute('position').count*3);
-    for(let i=0;i<blocks.length;i++){
-      const color=new THREE.Color(i===selectedBlockIndex?'#fff2cb':'#70604d');
-      color.toArray(traceColors,i*6);color.toArray(traceColors,i*6+3);
-    }
-    core.rails.setAttribute('color',new THREE.BufferAttribute(traceColors,3));
+    // Show just the inspected block's connection; no persistent spoke scaffold.
+    core.rails.setDrawRange(selectedBlockIndex>=0?selectedBlockIndex*2:0,selectedBlockIndex>=0?2:0);
   },[core,selectedBlockIndex]);
-  useLayoutEffect(()=>{
-    if(!support.current)return;
-    frame.supportMatrices.forEach((m,i)=>support.current!.setMatrixAt(i,m));
-    support.current.instanceMatrix.needsUpdate=true;support.current.computeBoundingSphere();
-  },[frame]);
   const leave=()=>{onHover?.(null);onRingHover?.(null);};
   const inspect=(e:ThreeEvent<PointerEvent|MouseEvent>,id:'spine'|'transactions'|'fees-total',click=false)=>{
     e.stopPropagation();if(click&&e.delta>5)return;
@@ -85,19 +70,9 @@ function GearLoaded({snapshot:s,blocks=s.blocks??[],data,fees,activeGroup=null,s
     return positions;
   },[count]);
   return <group>
-    {/* Graphite structure joins all data-bearing pieces. It encodes no quantity. */}
-    <instancedMesh ref={support} args={[undefined,undefined,frame.supportMatrices.length]} raycast={noRaycast}>
-      <boxGeometry args={[1,1,1]}/><meshStandardMaterial color="#5b5144" roughness={.7} metalness={.15} transparent opacity={opacity*.65}/>
-    </instancedMesh>
-    <mesh geometry={frame.difficultyBacking} raycast={noRaycast}><meshStandardMaterial color="#3d3831" roughness={.8} transparent opacity={opacity*.75}/></mesh>
-    <mesh geometry={frame.hashrateBacking} raycast={noRaycast}><meshStandardMaterial color="#3d3831" roughness={.8} transparent opacity={opacity*.75}/></mesh>
-    <mesh rotation={[Math.PI/2,0,0]} position={[0,0,-.03]} raycast={noRaycast}>
-      <cylinderGeometry args={[.75,.75,.24,mini?32:64]}/><meshStandardMaterial color="#292722" metalness={.15} roughness={.7} transparent opacity={opacity}/>
-    </mesh>
-    <instancedMesh key={`rails${blocks.length}`} ref={rails} args={[undefined,undefined,blocks.length]} raycast={noRaycast}>
-      <boxGeometry args={[1,1,1]}/><meshStandardMaterial color="white" metalness={.1} roughness={.85} transparent opacity={opacity*.8}/>
-    </instancedMesh>
-    <lineSegments geometry={core.rails} raycast={noRaycast}><lineBasicMaterial vertexColors transparent opacity={opacity*.65}/></lineSegments>
+    {selectedBlockIndex>=0&&!mini&&<lineSegments geometry={core.rails} raycast={noRaycast}>
+      <lineBasicMaterial color="#fff2cb" transparent opacity={opacity*.65}/>
+    </lineSegments>}
     <lineSegments geometry={core.links} raycast={noRaycast}><lineBasicMaterial color="#e7a454" transparent opacity={opacity*strength('spine')*.9}/></lineSegments>
     <instancedMesh key={`body${blocks.length}`} ref={body} args={[toothGeo,undefined,blocks.length]} raycast={mini?noRaycast:undefined} {...events('spine')}>
       <meshStandardMaterial color="white" emissive="#ee8b24" emissiveIntensity={activeGroup==='spine'?.16:.055} metalness={.13} roughness={.58} transparent={opacity*strength('spine')<1} opacity={opacity*strength('spine')}/>

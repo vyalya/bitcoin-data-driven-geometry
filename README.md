@@ -86,7 +86,7 @@ Use `node pipeline/verify_deployment.mjs https://DEPLOYMENT.bitcoin-data-driven-
 
 Run `npm run dev` and open [Connected gear](http://localhost:5173/timechain.html). The study uses the original left timeline, right inspector and full 360-degree Trackball controls, with the quieter panel formatting from the earlier experiment. It starts on the fourth-halving date, 2024-04-20, in detail view with panels open. Work is on `codex/network-montage` and has not been deployed; Atom and Classic remain available.
 
-The connected gear brings all seven signals into one structure. Flat-ended block teeth surround a central address field. Each block has an inner spoke with paired transaction and fee bars; two polygonal guard rims surround the ledger. Fixed dark backings, eight radial supports and individual block rails physically join the hub, ledger and rims. These supports explain relationships within the protocol; their dimensions and counts encode no additional quantities, miners or observed payment connections.
+The connected gear brings all seven signals into one form. Flat-ended block teeth surround a central address field. Each block has paired inner transaction and fee bars; filled portions of two polygonal guard rims surround the ledger. Hovering or selecting a block reveals one thin connector to explain its relationship to the surrounding structure. That connector is illustrative, not an additional measurement or observed payment connection.
 
 | Measurement | Connected gear encoding |
 | --- | --- |
@@ -98,7 +98,7 @@ The connected gear brings all seven signals into one structure. Flat-ended block
 | Estimated hashrate | Single outer 64-sided guard rim: filled fraction = daily EH/s / release maximum. Missing estimates have no filled portion. |
 | Active addresses | Central dots: `floor(addresses / 1,000)` in detail or `/ 8,000` in the grid, capped at 1,500 / 180. Positions are deterministic layout, not people, peer locations or payment topology. |
 
-Zero or missing measurements have no filled bar or rim; the numeric inspector distinguishes them. Small positive values can be imperceptible. Dark full-rim backings and empty spoke rails remain visible as fixed references. Panel rows retain daily totals, while hovering or selecting a block, transaction bar or fee bar reveals that particular block’s figures. Selecting a component highlights related components and explains their role.
+Zero or missing measurements have no filled bar or rim; the numeric inspector distinguishes them. Small positive values can be imperceptible. Empty spoke rails, rim backings, fixed radial supports and the dark hub disk are omitted. Filled measurements and their scales are unchanged. Panel rows retain daily totals, while hovering or selecting a block, transaction bar or fee bar reveals that particular block’s figures. Selecting a component highlights related components and explains their role.
 
 The guard rims evoke proof of work making ledger history costly to rewrite. They are not independent security scores: estimated hashrate is inferred from difficulty and block production. Fees contribute to mining incentives alongside the block subsidy. Address activity is daily context, not an inferred set of address-to-block edges. Full nodes independently validate blocks; the visualization does not measure that validation or attack probability.
 
