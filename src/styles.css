@@ -2066,3 +2066,10 @@ button:focus-visible,a:focus-visible { outline: 2px solid #ffc574; outline-offse
   font-weight: 400;
   letter-spacing: .015em;
 }
+
+/* Small endpoint captions explain the open block sequence. */
+.gear-chain-label { display:block; width:max-content; color:#b9a486; font:9px/1.4 ui-monospace,SFMono-Regular,monospace; letter-spacing:.02em; white-space:nowrap; padding:3px 5px; border-radius:3px; background:#171717b8; transform:translate(7px,-100%); }
+.gear-chain-label b { font-weight:400; color:#e6ccaa; }
+.gear-chain-end { transform:translate(calc(-100% - 7px),-100%); }
+.gear-chain-only { transform:translate(-50%,-100%); }
+@media(max-width:640px){.gear-chain-label{font-size:8px;padding:2px 4px}}

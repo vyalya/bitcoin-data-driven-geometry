@@ -11,13 +11,13 @@ export const gearShapes: Record<string, string> = {
 };
 
 export const gearDescriptions: Record<string, string> = {
-  blocks: 'One flat-ended tooth per block, arranged clockwise by height around the day’s full circle. The chain track joins consecutive heights only, leaving gaps and the last-to-first join open. Tooth directions are layout, not measurements or verified hash links.',
+  blocks: 'One flat-ended tooth per block, arranged clockwise by height along an open 330-degree path. Start and end markers identify the day’s first and last blocks. The track joins consecutive heights only, preserving gaps. Tooth directions are layout, not measurements or verified hash links.',
   weight: 'Tooth length = 0.12 visibility base + 0.75 × weight / 4,000,000 WU, extending from radius 1.5. Width follows tooth spacing. The modern 4 MWU reference compares all eras; it is not an early block limit.',
   transactions: 'Each block has an inner ivory bar: length = 0.58 × non-coinbase transactions / 7,928, the release maximum. Zero transactions leave the bar empty. The neighboring copper bar shows fees for that same block.',
   'fees-total': 'Each block’s neighboring copper bar shows its fees: length = 0.58 × log1p(BTC) / log1p(37.62561499), the release maximum. Zero or missing fees leave it empty. The panel sums exact satoshis; logarithmic bar lengths are not additive.',
   difficulty: 'The inner guard rim fills by log10(mean block difficulty) / log10(release maximum). Difficulty 1 has no fill. Only the filled portion of its 64-sided path is drawn; it is not a security score.',
   hashrate: 'The outer guard rim fills by estimated daily EH/s / release maximum. Only the filled portion of its 64-sided path is drawn; missing estimates leave no rim. Hashrate is inferred from difficulty and block production, not directly observed miner activity.',
-  addresses: 'The central field shows one dot per 1,000 active addresses in detail or 8,000 in the grid, rounded down; caps 1,500 / 180. Positions are illustrative. Addresses are not people or peers. A connector shown on block hover or selection illustrates a relationship, not a payment link.',
+  addresses: 'The central field shows one dot per 1,000 active addresses in detail or 8,000 in the grid, rounded down; caps 1,500 / 180. Positions are illustrative. Addresses are not people or peers. A hover connector appears only when the selected block has a visible transaction or fee bar; it illustrates a relationship, not a payment link.',
 };
 
 export const gearLegendDefinitions: [string, string][] = [
@@ -33,7 +33,7 @@ export const gearLegendDefinitions: [string, string][] = [
 export const gearRelations: Record<string, { title: string; text: string }> = {
   blocks: {
     title: 'A connected ledger',
-    text: 'Each block contains transactions and follows the ledger by height. Its paired inner bars show transactions and fees. Hovering or selecting a block reveals a thin illustrative connector. The guard rims evoke the proof of work that makes rewriting this history costly.',
+    text: 'Each block contains transactions and follows the ledger by height. Its paired inner bars show transactions and fees. Hovering or selecting a block with a visible transaction or fee bar reveals its thin connector. The guard rims evoke the proof of work that makes rewriting this history costly.',
   },
   weight: {
     title: 'Capacity inside each block',

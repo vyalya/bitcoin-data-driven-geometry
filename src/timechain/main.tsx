@@ -18,7 +18,7 @@ async function mountStudy() {
   ]);
   root.render(
     <React.StrictMode>
-      <App initialFormStyle="gear" initialView="detail" initialDate="2024-04-20" initialPanelsHidden={false} />
+      <App initialFormStyle="gear" initialView="grid" initialPanelsHidden={true} />
     </React.StrictMode>,
   );
 }

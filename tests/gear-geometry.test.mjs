@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { build } from 'esbuild';
 import { BoxGeometry, InstancedMesh, MeshBasicMaterial, Vector3, Quaternion, Raycaster, DoubleSide } from 'three';
-import { blockPose, blockLength, transactionLength, feeLength, polygonPoint, METRIC_MAX_LENGTH } from '../src/gear/model.ts';
+import { blockPose, blockLength, transactionLength, feeLength, polygonPoint, METRIC_MAX_LENGTH, hasBlockBars, CHAIN_GAP_ANGLE } from '../src/gear/model.ts';
 const compiled = await build({ entryPoints: [new URL('../src/gear/geometry.ts', import.meta.url).pathname], bundle: true, write: false, platform: 'node', format: 'esm' });
 const { buildGearGeometry, buildFrame, bandGeometry } = await import(`data:text/javascript;base64,${Buffer.from(compiled.outputFiles[0].text).toString('base64')}`);
 const read = path => JSON.parse(readFileSync(new URL(`../${path}`, import.meta.url), 'utf8'));
@@ -44,9 +44,10 @@ test('each real gear tooth and paired bars invert to the recorded weight, transa
   }
 });
 
-test('clockwise block order begins at noon and invalid observations never gain nonzero bars', () => {
+test('clockwise block order leaves a clear opening and invalid observations never gain nonzero bars', () => {
   const poses=Array.from({length:4},(_,i)=>blockPose(i,4));
-  [[0,1,0],[1,0,0],[0,-1,0],[-1,0,0]].forEach((normal,i)=>assert.ok(new Vector3(...poses[i].normal).distanceTo(new Vector3(...normal))<1e-12));
+  [75,-35,-145,-255].forEach((degrees,i)=>{const angle=degrees*Math.PI/180;assert.ok(new Vector3(...poses[i].normal).distanceTo(new Vector3(Math.cos(angle),Math.sin(angle),0))<1e-12);});
+  assert.deepEqual(blockPose(0,1).position,[1.5*Math.cos(Math.PI/2),1.5,0]);
   assert.equal(transactionLength(1,maxTransactions),0);assert.equal(feeLength(0,maxFees),0);
   for(const value of [null,undefined,NaN,Infinity,-1,.5]){assert.equal(transactionLength(value,maxTransactions),null);assert.equal(feeLength(value,maxFees),null);}
   assert.equal(transactionLength(0,maxTransactions),null);assert.equal(transactionLength(maxTransactions+2,maxTransactions),null);assert.equal(feeLength(maxFees+1,maxFees),null);
@@ -158,4 +159,36 @@ test('solid rail backings physically join each tooth and both positive data bars
     assert.ok(p.z-scale.z/2<.09);
   }
   dispose(gear);
+});
+
+
+test('empty or unavailable transaction/fee bars never receive a selection spoke',()=>{
+  for(const fee of [0,null,undefined])assert.equal(hasBlockBars(1,fee,maxTransactions,maxFees),false);
+  assert.equal(hasBlockBars(null,null,maxTransactions,maxFees),false);
+  assert.equal(hasBlockBars(2,0,maxTransactions,maxFees),true);
+  assert.equal(hasBlockBars(1,1,maxTransactions,maxFees),true);
+  assert.equal(hasBlockBars(2,null,maxTransactions,maxFees),true);
+  assert.equal(hasBlockBars(maxTransactions+2,maxFees+1,maxTransactions,maxFees),false);
+  for(const [date,blocks] of Object.entries(allBlocks))for(let i=0;i<blocks.length;i++){
+    const gearHasBars=hasBlockBars(blocks[i][3],data.days[date].feesSat[i],maxTransactions,maxFees);
+    assert.equal(gearHasBars,blocks[i][3]>1||(data.days[date].feesSat[i]??0)>0);
+  }
+});
+
+test('start and end identify actual block heights across a fixed open gap at every density',()=>{
+  for(const [date,blocks] of Object.entries(allBlocks)){
+    const gear=buildGearGeometry(blocks,data.days[date].feesSat,maxTransactions,maxFees);
+    const ends=gear.endpoints;
+    if(blocks.length===1){
+      assert.equal(ends.length,1);assert.equal(ends[0].role,'only');assert.equal(ends[0].height,blocks[0][0]);
+      assert.equal(gear.links.getAttribute('position').count,0);
+    }else{
+      assert.deepEqual(ends.map(e=>[e.index,e.height,e.role]),[[0,blocks[0][0],'start'],[blocks.length-1,blocks.at(-1)[0],'end']]);
+      const first=new Vector3(...ends[0].position),last=new Vector3(...ends[1].position);
+      assert.ok(Math.abs(first.distanceTo(last)-3*Math.sin(CHAIN_GAP_ANGLE/2))<1e-12);
+      assert.ok(first.x>0&&last.x<0&&first.y>0&&last.y>0);
+      assert.ok(gear.links.userData.blockPairs.every(([a,b])=>b===a+1&&blocks[b][0]===blocks[a][0]+1));
+    }
+    dispose(gear);
+  }
 });

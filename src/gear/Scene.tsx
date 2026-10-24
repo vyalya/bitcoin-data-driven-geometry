@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useRef, useLayoutEffect, useEffect } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import type { NetworkSnapshot, BlockTuple } from '../types';
@@ -8,6 +9,7 @@ import { buildGearGeometry, buildFrame } from './geometry';
 import { relationshipGroups } from './relationships';
 import { normalized, difficultyFill } from '../metrics';
 import { addressPoint } from './presentation';
+import { hasBlockBars, blockLength } from './model';
 
 export const GearDataContext = createContext<GearData | null>(null);
 type Props = {
@@ -30,6 +32,8 @@ function GearLoaded({snapshot:s,blocks=s.blocks??[],data,fees,activeGroup=null,s
   const frame=useMemo(()=>buildFrame(difficultyFill(s.difficulty,s.scales.difficulty),normalized(s.networkHashrateEh,s.scales.hashrateEh)),[s]);
   const toothGeo=useMemo(()=>new RoundedBoxGeometry(1,1,1,mini?1:2,.055),[mini]);
   const body=useRef<THREE.InstancedMesh>(null),tx=useRef<THREE.InstancedMesh>(null),fee=useRef<THREE.InstancedMesh>(null);
+  const selectedBlock=blocks[selectedBlockIndex];
+  const showConnector=!!selectedBlock&&hasBlockBars(selectedBlock[3],fees[selectedBlockIndex],data.maxNonCoinbase,data.maxBlockFeesSat);
   const related=relationshipGroups(activeGroup);
   const strength=(id:string)=>!activeGroup||activeGroup===id?1:related.includes(id)?.88:.22;
   useEffect(()=>()=>{core.rails.dispose();core.links.dispose();},[core]);
@@ -47,12 +51,12 @@ function GearLoaded({snapshot:s,blocks=s.blocks??[],data,fees,activeGroup=null,s
       mesh!.computeBoundingSphere();
     });
     // Show just the inspected block's connection; no persistent spoke scaffold.
-    core.rails.setDrawRange(selectedBlockIndex>=0?selectedBlockIndex*2:0,selectedBlockIndex>=0?2:0);
-  },[core,selectedBlockIndex]);
+    core.rails.setDrawRange(showConnector?selectedBlockIndex*2:0,showConnector?2:0);
+  },[core,selectedBlockIndex,showConnector]);
   const leave=()=>{onHover?.(null);onRingHover?.(null);};
-  const inspect=(e:ThreeEvent<PointerEvent|MouseEvent>,id:'spine'|'transactions'|'fees-total',click=false)=>{
+  const inspect=(e:ThreeEvent<PointerEvent|MouseEvent>,id:'spine'|'transactions'|'fees-total',click=false,index=e.instanceId)=>{
     e.stopPropagation();if(click&&e.delta>5)return;
-    const i=e.instanceId;if(i===undefined||!blocks[i])return;
+    const i=index;if(i===undefined||!blocks[i])return;
     onHover?.(id);
     if(id==='spine')onBlockHover?.(blocks[i],i);else onMetricBlockHover?.(id,blocks[i],i);
     if(click)onClick?.(id);
@@ -70,10 +74,25 @@ function GearLoaded({snapshot:s,blocks=s.blocks??[],data,fees,activeGroup=null,s
     return positions;
   },[count]);
   return <group>
-    {selectedBlockIndex>=0&&!mini&&<lineSegments geometry={core.rails} raycast={noRaycast}>
+    {showConnector&&!mini&&<lineSegments geometry={core.rails} raycast={noRaycast}>
       <lineBasicMaterial color="#fff2cb" transparent opacity={opacity*.65}/>
     </lineSegments>}
     <lineSegments geometry={core.links} raycast={noRaycast}><lineBasicMaterial color="#e7a454" transparent opacity={opacity*strength('spine')*.9}/></lineSegments>
+    {!mini&&core.endpoints.map(endpoint=>{
+      const i=endpoint.index,position=endpoint.position;
+      const labelRadius=(1.5+blockLength(blocks[i][2])+.10)/1.5;
+      return <group key={endpoint.role}>
+        <mesh position={[position[0],position[1],.13]} rotation={[0,0,Math.PI/4]}
+          onPointerMove={e=>inspect(e,'spine',false,i)} onPointerOut={leave} onClick={e=>inspect(e,'spine',true,i)}>
+          <boxGeometry args={[.045,.045,.025]}/><meshBasicMaterial color={endpoint.role==='end'?'#cf9852':'#f5dfb9'} transparent opacity={opacity}/>
+        </mesh>
+        <Html position={[position[0]*labelRadius,position[1]*labelRadius,.15]} style={{pointerEvents:'none'}}>
+          <span className={`gear-chain-label gear-chain-${endpoint.role}`}>
+            {endpoint.role==='only'?'Only block':endpoint.role==='start'?'Start':'End'} <b>#{endpoint.height.toLocaleString('en-US')}</b>
+          </span>
+        </Html>
+      </group>;
+    })}
     <instancedMesh key={`body${blocks.length}`} ref={body} args={[toothGeo,undefined,blocks.length]} raycast={mini?noRaycast:undefined} {...events('spine')}>
       <meshStandardMaterial color="white" emissive="#ee8b24" emissiveIntensity={activeGroup==='spine'?.16:.055} metalness={.13} roughness={.58} transparent={opacity*strength('spine')<1} opacity={opacity*strength('spine')}/>
     </instancedMesh>

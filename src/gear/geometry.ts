@@ -7,6 +7,7 @@ import {
 export type GearGeometry = {
   bodyMatrices: Matrix4[]; transactionMatrices: Matrix4[]; feeMatrices: Matrix4[]; railMatrices: Matrix4[];
   rails: BufferGeometry; links: BufferGeometry;
+  endpoints: {index:number;height:number;role:"start"|"end"|"only";position:[number,number,number]}[];
 };
 const vectorGeometry = (positions: number[]) => {
   const geometry = new BufferGeometry().setAttribute('position', new Float32BufferAttribute(positions, 3));
@@ -56,7 +57,9 @@ export function buildGearGeometry(blocks: readonly BlockTuple[], feesSat: readon
   const rails = vectorGeometry(railPositions), links = vectorGeometry(linkPositions);
   rails.userData.blockIndices = blocks.map((_, index) => index);
   links.userData.blockPairs = linkPairs;
-  return { bodyMatrices, transactionMatrices, feeMatrices, railMatrices, rails, links };
+  const endpointIndices=count===0?[]:count===1?[0]:[0,count-1];
+  const endpoints=endpointIndices.map(index=>({index,height:blocks[index][0],role:(count===1?'only':index===0?'start':'end') as 'only'|'start'|'end',position:blockPose(index,count).position}));
+  return { bodyMatrices, transactionMatrices, feeMatrices, railMatrices, rails, links, endpoints };
 }
 
 /** Flat-sided extruded annular prefix. Width is radial; fill measures the

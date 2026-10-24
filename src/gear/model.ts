@@ -3,17 +3,19 @@ export const BLOCK_WEIGHT_LIMIT = 4_000_000;
 export const TRANSACTION_BASE_RADIUS = .8;
 export const METRIC_MAX_LENGTH = .58;
 export const POLYGON_SIDES = 64;
+// The fixed opening distinguishes a day’s sequence from a closed loop.
+export const CHAIN_GAP_ANGLE = Math.PI / 6;
 export type GearPose = {
   position: [number, number, number]; normal: [number, number, number];
   tangent: [number, number, number]; angle: number;
 };
 
-/** Clockwise, starting at noon; angular placement expresses height order only. */
+/** Clockwise along an open 330-degree path; positions express height order. */
 export function blockPose(index: number, count: number): GearPose {
   if (!Number.isSafeInteger(count) || count < 1 || !Number.isSafeInteger(index) || index < 0 || index >= count) {
     throw new RangeError('Gear index must identify a block within a positive integer count');
   }
-  const angle = Math.PI / 2 - 2 * Math.PI * index / count;
+  const angle = count===1 ? Math.PI/2 : Math.PI/2-CHAIN_GAP_ANGLE/2-(2*Math.PI-CHAIN_GAP_ANGLE)*index/(count-1);
   const normal: [number, number, number] = [Math.cos(angle), Math.sin(angle), 0];
   return {
     position: [BLOCK_BASE_RADIUS * normal[0], BLOCK_BASE_RADIUS * normal[1], 0],
@@ -45,4 +47,9 @@ export function polygonPoint(radius: number, fraction: number, z = 0): [number, 
   const along = fraction * POLYGON_SIDES, side = Math.min(POLYGON_SIDES - 1, Math.floor(along)), mix = along - side;
   const a = Math.PI / 2 - side * Math.PI * 2 / POLYGON_SIDES, b = a - Math.PI * 2 / POLYGON_SIDES;
   return [radius * (Math.cos(a) * (1 - mix) + Math.cos(b) * mix), radius * (Math.sin(a) * (1 - mix) + Math.sin(b) * mix), z];
+}
+
+/** A selection guide needs at least one visible measured bar. */
+export function hasBlockBars(txCount:number|null|undefined, feesSat:number|null|undefined, maxNonCoinbase:number, maxFeeSat:number):boolean {
+  return (transactionLength(txCount,maxNonCoinbase)??0)>0 || (feeLength(feesSat,maxFeeSat)??0)>0;
 }

@@ -84,9 +84,9 @@ Use `node pipeline/verify_deployment.mjs https://DEPLOYMENT.bitcoin-data-driven-
 
 ## Connected gear design study
 
-Run `npm run dev` and open [Connected gear](http://localhost:5173/timechain.html). The study uses the original left timeline, right inspector and full 360-degree Trackball controls, with the quieter panel formatting from the earlier experiment. It starts on the fourth-halving date, 2024-04-20, in detail view with panels open. Work is on `codex/network-montage` and has not been deployed; Atom and Classic remain available.
+Run `npm run dev` and open [Connected gear](http://localhost:5173/timechain.html). The study uses the original left timeline, right inspector and full 360-degree Trackball controls, with the quieter panel formatting from the earlier experiment. It opens in the Gear grid with side panels hidden, matching the main entry point. Work is on `codex/network-montage` and has not been deployed; Atom and Classic remain available.
 
-The connected gear brings all seven signals into one form. Flat-ended block teeth surround a central address field. Each block has paired inner transaction and fee bars; filled portions of two polygonal guard rims surround the ledger. Hovering or selecting a block reveals one thin connector to explain its relationship to the surrounding structure. That connector is illustrative, not an additional measurement or observed payment connection.
+The connected gear brings all seven signals into one form. Flat-ended block teeth follow an open 330-degree path around the central address field, with first/last-height markers and a fixed 30-degree opening. The opening and marker sizes are layout choices, not additional data. Each block has paired inner transaction and fee bars; filled portions of two polygonal guard rims surround the ledger. Hovering or selecting a block reveals one thin connector to explain its relationship to the surrounding structure. That connector is illustrative, not an additional measurement or observed payment connection.
 
 | Measurement | Connected gear encoding |
 | --- | --- |
