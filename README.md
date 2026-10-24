@@ -1,6 +1,6 @@
 # Bitcoin / A network in time
 
-An interactive sculpture of Bitcoin across **150 curated dates and 22,374 blocks**, from genesis through **2026-10-19 UTC**. Atom and Classic show the same seven measurements in two arrangements.
+An interactive sculpture of Bitcoin across **150 curated dates and 22,374 blocks**, from genesis through **2026-10-19 UTC**. Gear, Atom and Classic show the same seven measurements in three arrangements. Gear is the default opening view.
 
 [Audit report](audit/REPORT.md) · [Pipeline](pipeline/README.md) · [Design notes](audit/UI-UX.md) · [Website](https://bitcoin-geometry.com/)
 
@@ -20,6 +20,8 @@ npm run build
 The browser uses validated static JSON. No runtime database is needed. Missing or inconsistent files produce an explicit error, never substitute measurements.
 
 ## Seven signals
+
+The table below describes Atom and Classic. Gear’s per-block bars, open chain and rim scales are documented in the Connected gear section below.
 
 | Measurement | Geometry | Definition |
 | --- | --- | --- |
@@ -84,7 +86,7 @@ Use `node pipeline/verify_deployment.mjs https://DEPLOYMENT.bitcoin-data-driven-
 
 ## Connected gear design study
 
-Run `npm run dev` and open [Connected gear](http://localhost:5173/timechain.html). The study uses the original left timeline, right inspector and full 360-degree Trackball controls, with the quieter panel formatting from the earlier experiment. It opens in the Gear grid with side panels hidden, matching the main entry point. Work is on `codex/network-montage` and has not been deployed; Atom and Classic remain available.
+Run `npm run dev` and open [Connected gear](http://localhost:5173/timechain.html). The study uses the original left timeline, right inspector and full 360-degree Trackball controls, with the quieter panel formatting from the earlier experiment. It opens in the Gear grid with side panels hidden, matching the main entry point. This Gear release is prepared for publication on bitcoin-geometry.com; Atom and Classic remain available.
 
 The connected gear brings all seven signals into one form. Flat-ended block teeth follow an open 330-degree path around the central address field, with first/last-height text labels and a fixed 30-degree opening. The opening and marker sizes are layout choices, not additional data. Each block has paired inner transaction and fee bars; filled portions of two polygonal guard rims surround the ledger. Hovering or selecting a block with at least one visible transaction or fee bar reveals a thin connector to those bars. That connector is illustrative, not an additional measurement or observed payment connection.
 
